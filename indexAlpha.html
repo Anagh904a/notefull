@@ -1,0 +1,630 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="This is a notes app built by anagh , its completely free" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter&amp;display=swap" rel="stylesheet"/>
+    <title>Notefull - Home</title>
+  
+    <link rel="stylesheet" href="style.css" />
+   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  </head>
+
+
+  <body>
+<!-- Combined Notes and Lists Section -->
+
+<div id="combinedContainer" class="container hidden">
+      
+
+      <div class="top-bar">
+     
+        <i id="sidebarToggle" class="fas fa-bars" onclick="toggleSidebar()"></i>
+     
+      <input
+      type="text"
+      id="searchInput"
+      placeholder="Search your data"
+      oninput="searchNotes()"
+      style="margin-left: 10px; padding: 5px;"
+
+     >
+  
+      </div>
+      
+      
+<div class="sort-container">
+  <select id="sortSelect" onchange="applySortFilter()">
+    <option value="all">All</option>
+    <option value="note">Notes</option>
+    <option value="lists">Lists</option>
+    
+  </select>
+</div>
+
+
+
+      <div id="notesContainer"></div>
+      <div id="listsSection">
+        <div id="listsContainerContent"></div>
+      </div>
+      <div id="noListsMessage" class="hidden">No lists yet.. Add</div>
+      <div id="noNotesMessage" class="hidden">This space is lonely. Add a note!</div>
+ 
+    <button class="fab" onclick="showAddOptions()">
+        <span class="fab-icon">+</span>
+    </button>
+
+    </div>
+
+   
+
+    <div id="ai" class="container hidden">
+      <button class="modal-button" onclick="showSection('settingsSection')">
+        <i class="fas fa-arrow-left back-icon"></i>
+      </button>
+      <h2 id="aiTitle" style="display: flex; align-items: center; gap: 0.5em; font-weight: bold;">
+        <span style="font-size: 1.5em;">🤖</span> AI Features Management
+      </h2>
+      <p>Manage offline AI-powered helpers for your notes. No internet required.</p>
+      <p>For now, these features are always enabled. Checkboxs don't work yet.</p>
+    
+       <div class="toggle-container">
+    <label class="toggle-switch">
+      <input type="checkbox">
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">Enable Note Summarizer</span>
+    
+  </div>
+  </div>
+    <br>
+          <div class="toggle-container">
+    <label class="toggle-switch">
+      <input type="checkbox">
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">Enable Smart Suggestions</span>
+    
+  </div>
+  </div>
+    <br>
+       <div class="toggle-container">
+    <label class="toggle-switch">
+      <input type="checkbox">
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">Enable Spell check</span>
+    
+  </div>
+  </div>
+          <br>
+          <div class="toggle-container">
+    <label class="toggle-switch">
+      <input type="checkbox" id="aiToggle">
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">AI Scanner Warning on Start-up</span>
+      <p style="margin: 0; font-size: 12px; color: gray;">Recommended</p>
+    </div>
+  </div>
+
+          </div>
+     
+   
+    </div>
+    
+   <div id="globalToast" class="toast"></div>
+    <div id="restoreOverlay">
+  <div class="spinner"></div>
+  <p>Restoring backup...</p>
+</div>
+
+  <div id="addItemSection" class="container hidden">
+    <button class="modal-button" onclick="showSection('combinedContainer')">
+        <i class="fas fa-arrow-left back-icon"></i>
+      </button>
+    <div id="itemText">
+      <h2>Create a new item</h2>
+     
+       
+    </div>
+    
+
+    <form class="form">
+      <div class="tab-container">
+        <button type="button" id="note-tab" onclick="switchTab('note')" class="tab-btn data-active">
+          <i class="fas fa-sticky-note"></i> Note
+        </button>
+        <button type="button" id="checklist-tab" onclick="switchTab('checklist')" class="tab-btn">
+          <i class="fas fa-check"></i> Checklist
+        </button>
+      </div>
+
+      <!-- Note Panel -->
+      <div id="addNoteSection" class="section">
+        <div class="form-group">
+          <label for="noteTitle">Title</label>
+          <input type="text" id="noteTitle" placeholder="Enter a title" />
+        </div>
+        <div class="form-group">
+          <label for="noteContent">Content</label>
+          <textarea id="noteContent" placeholder="Your note content here..."></textarea>
+        </div>
+        <div class="footer-bar">
+     <button type="button" id="changePasswordButton" onclick="showNotePassword()">
+      <i class="fas fa-key"></i>
+      <span>Password</span>
+    </button>
+    <button type="button" onclick="saveNote()">
+      <i class="fas fa-save"></i>
+      <span>Save</span>
+    </button>
+   <button type="button" id="undoButton" onclick="undo()">
+        <i class="fas fa-undo"></i>
+        <span>Undo</span>
+      </button>
+
+      <button type="button" id="redoButton" onclick="redo()">
+        <i class="fas fa-redo"></i>
+        <span>Redo</span>
+      </button>
+  </div>
+  <div id="notePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Enter Password</h3>
+            <input type="password" id="notePassword" placeholder="Enter New Password.." style="display: block" />
+            
+            <button type="button" onclick="closeNotePassword()">Save</button>
+        </div>
+    </div>
+      </div>
+
+      <!-- Checklist Panel -->
+      <div id="addListSection" class="section" style="display: none;">
+        <div class="form-group">
+          <label for="checklistTitle">Title</label>
+          <input type="text" id="listTitle" placeholder="Enter checklist title" />
+           <button type="button" onclick="addItemModal()">
+      <i class="fas fa-plus"></i>
+     Add Item
+    </button>
+        </div>
+        <div id="checklistContainer"></div>
+          <!-- Dynamic checklist items -->
+        
+        <div class="footer-bar">
+    <button type="button" onclick="showList()">
+      <i class="fas fa-key"></i>
+      <span>Password</span>
+    </button>
+    <button type="button" onclick="saveList()">
+      <i class="fas fa-save"></i>
+      <span>Save</span>
+    </button>
+    <button type="button" onclick="addItemModal()">
+      <i class="fas fa-plus"></i>
+      <span>Add</span>
+    </button>
+    </div>
+<div id="addItemModal" class="modal hidden">
+  <div class="modal-content">
+       <input id="newItem" type="text" placeholder="Item name..." />
+      <button type="button" onclick="addItem()"><i class="fas fa-plus"></i>Add</button>
+ <button type="button" onclick="closeAddItemModal()"><i class="fas fa-times"></i>Close</button>
+    </div>
+</div>
+  <div id="listPasswordModalr" class="modal hidden">
+  <div class="modal-content">
+      <h3>Enter Password</h3>
+      <input
+        type="password"
+        id="listPassword"
+        placeholder="Enter New Password.."
+       style="display: block;"
+      />
+      
+      <button type="button" onclick="closeListPassword()">Save</button>
+  </div>
+</div>
+    </div>
+    
+  </div>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+    
+
+    <!-- Add Options Modal -->
+    <div id="addOptionsModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>What to add?</h3>
+       
+       <button class="modal-button" id="addNoteButton" onclick="showAddNote()">
+          <i class="fas fa-sticky-note"></i>
+        </button>
+        <button class="modal-button" id="addListButton" onclick="showAddListSection()">
+          <i class="fas fa-list"></i>
+        </button>
+        <button class="modal-button" onclick="closeAddOptions()">
+          <i class="fas fa-times"></i>
+        </button>
+        
+      </div>
+    </div>
+
+    <div id="passwordModal" class="modal hidden">
+      <div class="modal-content">
+          <h3>Enter Password</h3>
+          <input type="password" id="passwordInput" placeholder="Password">
+          <button onclick="verifyPassword()">Go</button>
+          <button onclick="closePasswordModal()">Close</button>
+        </div>
+  </div>
+
+    <!-- Delete Password Modal -->
+    <div id="deletePasswordModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Enter Password</h3>
+        <input
+          type="password"
+          id="deletePasswordInput"
+          placeholder="Password"
+        />
+        <button onclick="deleteVerifyPassword()">Go</button>
+        <button onclick="closeDeletePasswordModal()">Close</button>
+      </div>
+    </div>
+
+   
+
+
+<!-- Sidebar HTML -->
+<div id="sidebar" class="sidebar hide-anim">
+  <div class="sidebar-top">
+    <button class="sidebar-button" onclick="navigateTo('combinedContainer')">
+      <i class="fas fa-home"></i>
+      <span class="label">Home</span>
+    </button>
+    <button class="sidebar-button" onclick="navigateTo('aiSection')">
+      <i class="fas fa-shield-alt"></i>
+      <span class="label">AI Scan</span>
+    </button>
+    <button class="sidebar-button" onclick="navigateTo('calculatorSection')">
+      <i class="fas fa-calculator"></i>
+      <span class="label">Calculator</span>
+    </button>
+<div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Last Synced: Never</div>
+
+  
+  </div>
+
+  <div class="sidebar-bottom">
+    <button class="sidebar-button" onclick="navigateTo('settingsSection')">
+      <i class="fas fa-cog"></i>
+      <span class="label">Settings</span>
+    </button>
+    <button class="sidebar-button" onclick="closeSidebar()">
+    
+      <span class="label"></span>
+    </button>
+  </div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+  
+
+    <div id="settingsSection" class="container hidden">
+      
+    
+      
+      
+      
+        
+    <button class="modal-button" onclick="showSection('combinedContainer')">
+        <i class="fas fa-arrow-left back-icon"></i>
+      </button>
+     <br>
+    <div class="card" onclick="showSection('creditSection')">
+  <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
+  <div class="text-box">
+    <div class="title">Credits</div>
+    <div class="subtitle">Developer</div>
+  </div>
+</div>
+
+<div class="card" onclick="showSection('backupTab')">
+  <div class="icon device"><span class="material-icons">backup</span></div>
+  <div class="text-box">
+    <div class="title">Backup and Import</div>
+    <div class="subtitle">Backup · Import · Input</div>
+  </div>
+</div>
+
+<div class="card" onclick="showSection('ai')">
+  <div class="icon ai"><span class="material-icons">smart_toy</span></div>
+  <div class="text-box">
+    <div class="title">AI</div>
+    <div class="subtitle">Note assist · Note Summarizer · Note Scanner</div>
+  </div>
+</div>
+
+<div class="card" onclick="showSection('ecSection')">
+  <div class="icon modes"><span class="material-icons">security</span></div>
+  <div class="text-box">
+    <div class="title">Data Management</div>
+    <div class="subtitle">Permission Manager · Data security</div>
+  </div>
+</div>
+
+<div class="card" onclick="showSection('pmSection')">
+  <div class="icon sound"><span class="material-icons">lock</span></div>
+  <div class="text-box">
+    <div class="title">Password Management</div>
+    <div class="subtitle">Set New Password · Change Old Password</div>
+  </div>
+</div>
+
+
+    
+      </div>
+    
+    <div id="backupTab" class="container hidden">
+  <!-- Back Button -->
+  <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i> 
+  </button>
+
+  <div class="section-card">
+   
+
+    <!-- 🔒 Backup Notes -->
+   
+     
+      <button class="settings-button" onclick="backupNotes()">
+        💾 Backup Notes
+      </button>
+    
+  
+
+    <!-- 📂 Import Notes -->
+  
+      
+     
+      <button class="settings-button" onclick="prepareImport(event)">
+        ▶️  Import
+      </button>
+  
+    
+
+    <!-- 🌐 Restore from IndexedDB -->
+  
+     
+      <button class="settings-button" onclick="restoreFromIndexedDB()">
+        🔄 Restore Data from Server
+      </button>
+      
+   <span id="dataInd">No Data is Server Storage found.</span>
+  </div>
+</div>
+     
+       <div id="ecSection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i>
+  </button>
+
+  <div class="section-card">
+    <button class="settings-button" onclick="requestBackupFolder()">📁 Grant Storage Access</button>
+    <button class="settings-button" onclick="clearData()">🗑️ Clear All Data</button>
+    <button class="settings-button" onclick="encryptData()">🔐 Encrypt Data</button>
+    <button class="settings-button" onclick="decryptData()">🔓 Decrypt Data</button>
+   <span id="syncStatus">🔄 Sync is OFF</span>
+
+    <div class="toggle-container">
+      <span class="toggle-label">Enable Sync</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="syncToggle" onchange="toggleSync(this)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+
+<div id="pmSection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i>
+  </button>
+
+  <div class="section-card">
+    <p>This master password helps unlock notes/lists if their original password is forgotten.</p>
+
+    <h3>Set Master Password</h3>
+    <input type="password" id="setPasswordInput" placeholder="Enter new master password" class="settings-input">
+    <button class="settings-button" onclick="setMasterPassword()">💾 Save Password</button>
+
+    <h4>Change Master Password</h4>
+    <input type="password" id="oldPassword" placeholder="Current Password" class="settings-input">
+    <input type="password" id="newPassword" placeholder="New Password" class="settings-input">
+    <button class="settings-button" onclick="changeMasterPassword()">🔁 Change Password</button>
+  </div>
+</div>
+
+
+
+    
+     
+        <div id="lockNotesSection" class="container hidden">
+          <button onclick="goBack()">Back</button>
+         <p>Under Planning Phase</p>
+        </div>
+      
+        
+      <div id="creditSection" class="container hidden">
+        <button class="modal-button" onclick="showSection('settingsSection')">
+          <i class="fas fa-arrow-left back-icon"></i>
+        </button>
+          <div class="section-card">
+        <h2>Credits</h2>
+        <p>Developed by Anagh</p>
+        <p>Version: 1.0.0</p>
+       </div>
+          </div>
+      </div>
+      </div>
+    
+    
+  
+    
+
+    
+
+      <div id="aiSection" class="container hidden">
+        <button class="modal-button" onclick="showSection('combinedContainer')">
+        <i class="fas fa-arrow-left back-icon"></i>
+      </button>
+        <h2>AI Scan for Sensitive Data</h2>
+        <P>List Support Coming soon...</P>
+        <div class="scan-container">
+          <div class="scan-circle" id="scanCircle"></div>
+          <p id="scanStatus">Click the button to start scanning...</p>
+        </div>
+        
+        <div class="counters">
+          <p>Total Notes scanned: <span id="notesCount">0</span></p>
+         
+        </div>
+
+        <div class="progress-bar-container">
+  <div id="progressBar" class="progress-bar"></div>
+</div>
+        
+        <button onclick="startAiScan()" id="startScanButton">Start AI Scan</button>
+        <div id="resultsContainer"></div>
+      </div>
+      
+<div class="spinner-container" class="hidden">
+    <!-- Windows 11 Logo -->
+   <div class="logo"></div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+    <div class="cursor" aria-label="Windows 11 cursor animation"></div>
+
+    <!-- Text under cursor -->
+    <div class="message">
+      Recovering your PC...
+    </div>
+  </div>
+    <div id="calculatorSection" class="container hidden">
+      <div class="calculator-header">
+        <h3>Calculator</h3>
+        <button class="btn-close" onclick="closeCalculator()">✖</button>
+      </div>
+
+      <input
+        type="text"
+        id="calc-display"
+        class="display"
+        placeholder="0"
+        readonly
+      />
+
+      <div class="calculator-grid">
+        <button class="btn btn-clear" onclick="clearDisplay()">C</button>
+        <button class="btn btn-operator" onclick="appendValue('/')">÷</button>
+        <button class="btn btn-operator" onclick="appendValue('*')">×</button>
+        <button class="btn btn-operator" onclick="appendValue('-')">−</button>
+
+        <button class="btn btn-number" onclick="appendValue('7')">7</button>
+        <button class="btn btn-number" onclick="appendValue('8')">8</button>
+        <button class="btn btn-number" onclick="appendValue('9')">9</button>
+        <button class="btn btn-operator" onclick="appendValue('+')">+</button>
+
+        <button class="btn btn-number" onclick="appendValue('4')">4</button>
+        <button class="btn btn-number" onclick="appendValue('5')">5</button>
+        <button class="btn btn-number" onclick="appendValue('6')">6</button>
+        <button class="btn btn-equal" onclick="calculate()" rowspan="2">
+          =
+        </button>
+
+        <button class="btn btn-number" onclick="appendValue('1')">1</button>
+        <button class="btn btn-number" onclick="appendValue('2')">2</button>
+        <button class="btn btn-number" onclick="appendValue('3')">3</button>
+
+        <button class="btn btn-zero" onclick="appendValue('0')">0</button>
+        <button class="btn btn-number" onclick="appendValue('.')">.</button>
+      </div>
+    </div>
+
+   
+    <!-- List Password Modal -->
+    <div id="listPasswordModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Enter Password</h3>
+        <input type="password" id="listPasswordInput" placeholder="Password" />
+        <button onclick="verifyListPassword()">Go</button>
+        <button onclick="closeListPasswordModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Delete List Password Modal -->
+    <div id="deleteListPasswordModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Enter Password</h3>
+        <input
+          type="password"
+          id="deleteListPasswordInput"
+          placeholder="Password"
+        />
+        <button onclick="deleteListVerifyPassword()">Go</button>
+        <button onclick="closeDeleteListPasswordModal()">Close</button>
+      </div>
+    </div>
+
+   <!-- Modal to show scan results -->
+<!-- TOAST HTML -->
+<div id="aiToast" class="toast">
+  <div class="toast-content">
+    <strong>Auto AI scan completed!</strong>
+    <span>Please check the results.</span>
+  </div>
+</div>
+
+   
+
+   
+    
+    
+    
+
+   
+
+   
+ <script src="storage.js"></script>
+
+    <script src="script.js"></script>
+     
+   </body>
+</html>

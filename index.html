@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Notes App Onboarding</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .animated-gradient {
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen flex items-center justify-center px-6 sm:px-12 animated-gradient" style="background-image: linear-gradient(135deg, #FFE3B3, #8B5CF6, #1E1E3F);">
+      <div class="max-w-2xl w-full space-y-10 text-white text-center">
+
+        <!-- Step 0: Landing -->
+        <div id="step0" class="transition-opacity duration-500">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight text-black dark:text-white">
+            Your Thoughts, To-Dos, and Ideas – <br />
+            <span class="text-white">All in One Beautiful Place.</span>
+          </h1>
+          <button onclick="nextStep(1)" class="mt-8 bg-[#0B0B1B] text-white text-sm font-medium rounded-full px-6 py-2 hover:bg-[#1a1a2e] transition flex items-center justify-center mx-auto gap-2">
+            Get Started
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Step 1: Terms -->
+        <div id="step1" class="hidden transition-opacity duration-500">
+          <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">Terms & Conditions</h2>
+          <p class="text-sm text-gray-100 mb-6">
+            1. All your data is securely stored <strong>only on your device</strong>.<br />
+            2. Notes are never uploaded unless you explicitly export them.<br />
+            3. This app works offline and respects your privacy.<br />
+          </p>
+          <button onclick="nextStep(2)" class="bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
+            Agree & Continue
+          </button>
+        </div>
+
+        <!-- Step 2: Name Input -->
+        <div id="step2" class="hidden transition-opacity duration-500">
+          <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">What should we call you?</h2>
+          <input type="text" id="userName" placeholder="Enter your name" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black" />
+          <button onclick="saveName()" class="mt-4 bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
+            Continue
+          </button>
+        </div>
+
+        <div id="step3" class="hidden transition-opacity duration-500">
+  <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">Secure Your Notes</h2>
+
+  <input type="email" id="signupEmail" placeholder="Email" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black mb-2" />
+  <input type="password" id="signupPassword" placeholder="Password" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black mb-2" />
+  <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black mb-4" />
+
+  <button onclick="handleSignUp()" class="bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
+    Sign Up & Continue
+  </button>
+
+  <p id="signupError" class="text-red-300 mt-2 text-sm"></p>
+</div>
+        
+        <div id="step4" class="hidden transition-opacity duration-500">
+  <h2 class="text-3xl font-bold text-purple-200 mb-4">You're All Set!</h2>
+  <p class="text-md text-white mb-6">Welcome, <span id="displayName"></span> 👋<br />Start organizing your thoughts beautifully.</p>
+  <img src="https://cdn-icons-png.flaticon.com/512/3039/3039385.png" alt="Success Icon" class="w-20 h-20 mx-auto mb-6 animate-bounce" />
+  <button onclick="goToApp()" class="mt-4 bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
+    Go to My Notes
+  </button>
+</div>
+        
+      </div>
+    </div>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+  } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCAnKRiTCTQkCV7T5-pSJdr20ctvy1XzTY",
+    authDomain: "notes-81cd8.firebaseapp.com",
+    projectId: "notes-81cd8",
+    storageBucket: "notes-81cd8.appspot.com",
+    messagingSenderId: "93954393984",
+    appId: "1:93954393984:web:f39d129b6e4bacd1796365",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  window.handleSignUp = () => {
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
+    const confirmPassword = document.getElementById("signupConfirmPassword").value;
+    const errorElement = document.getElementById("signupError");
+
+    if (!email || !password || !confirmPassword) {
+      errorElement.textContent = "All fields are required.";
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      errorElement.textContent = "Passwords do not match.";
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        // Redirect to indexAlpha after signup
+        nextStep(4);
+        document.getElementById('step3').style.display = 'none';
+      })
+      .catch((error) => {
+        errorElement.textContent = error.message;
+      });
+  };
+</script>
+<script>
+  if (localStorage.getItem("onboardingComplete") === "true") {
+    window.location.href = "indexAlpha.html";
+  }
+</script>
+    <script>
+      
+      function nextStep(step) {
+        for (let i = 0; i <= 2; i++) {
+          const el = document.getElementById("step" + i);
+          if (el) el.classList.add("hidden");
+        }
+        const next = document.getElementById("step" + step);
+        if (next) next.classList.remove("hidden");
+        
+      }
+
+      function saveName() {
+        const name = document.getElementById("userName").value.trim();
+        if (name === "") {
+          alert("Please enter a name.");
+          return;
+        } else {
+        nextStep(3);
+        }
+         localStorage.setItem("userName", name);
+         localStorage.setItem("onboardingComplete", "true"); // ✅ Flag setup as done
+      }
+
+      function setDisplay() {
+        const name = localStorage.getItem("userName");
+        if (name) document.getElementById("displayName").textContent = name;
+        }
+
+         function goToApp() {
+          window.location.href = "indexAlpha.html";
+          }
+    </script>
+  </body>
+</html>
