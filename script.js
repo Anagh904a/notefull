@@ -665,9 +665,7 @@ window.addEventListener('DOMContentLoaded', () => {
  checkbox.addEventListener('change', () => {
   button.disabled = !checkbox.checked;
 
-  if (!checkbox.checked ) {
-    showToast("Check the box to proceed");
-  }
+ 
 });
 
     button.addEventListener('click', () => {
