@@ -40,123 +40,12 @@ function enterSelectionMode(index) {
 let backupDirHandle = null;
 
 // Prompt once and store basic reference
-async function requestBackupFolder() {
-  try {
-    backupDirHandle = await window.showDirectoryPicker();
-    // Store a flag only (cannot store actual handle directly)
-    localStorage.setItem("backupGranted", "true");
-    alert("Folder access granted.");
-  } catch (err) {
-    alert("Storage access denied! Your data may get lost in case of app/browser update.");
-  }
-}
+
 
 // Restore backup folder handle (user must re-select)
-async function getSavedFolderHandle() {
-  if (backupDirHandle) return backupDirHandle;
 
-  const allowed = localStorage.getItem("backupGranted");
-  if (!allowed) return null;
 
-  try {
-    // Ask again, since no persistent handle storage
-    backupDirHandle = await window.showDirectoryPicker();
-    return backupDirHandle;
-  } catch {
-    return null;
-  }
-}
 
-// Get file handle
-async function getBackupFileHandle() {
-  const folderHandle = await getSavedFolderHandle();
-  if (!folderHandle) return null;
-
-  try {
-    return await folderHandle.getFileHandle("backup_data.json", { create: false });
-  } catch {
-    return null;
-  }
-}
-
-// Restore data from backup_data.json
-async function restoreBackup() {
-  const folderHandle = await getSavedFolderHandle();
-  if (!folderHandle) {
-    alert("Could not access your backup folder.");
-    return;
-  }
-
-  try {
-    const fileHandle = await folderHandle.getFileHandle("backup_data.json");
-    const file = await fileHandle.getFile();
-    const content = await file.text();
-    const data = JSON.parse(content);
-
-    if (data.notes) {
-      localStorage.setItem("notes", JSON.stringify(data.notes));
-    }
-    if (data.lists) {
-      localStorage.setItem("lists", JSON.stringify(data.lists));
-    }
-
-    alert("Backup restored successfully!");
-    location.reload();
-  } catch (err) {
-    console.error("Restore failed:", err);
-    alert("Failed to restore backup.");
-  }
-}
-
-// Ask for folder and create empty backup file
-async function askForBackupFolder() {
-  try {
-    const folderHandle = await window.showDirectoryPicker();
-    localStorage.setItem("backupGranted", "true");
-    backupDirHandle = folderHandle;
-
-    const fileHandle = await folderHandle.getFileHandle("backup_data.json", { create: true });
-    const writable = await fileHandle.createWritable();
-    await writable.write(JSON.stringify({ notes: [], lists: [] }));
-    await writable.close();
-
-    alert("Backup folder linked!");
-  } catch (err) {
-    alert("Storage permission denied. Backup will be unavailable.");
-  }
-}
-
-// ✅ Auto-restore if no notes/lists
-document.addEventListener("DOMContentLoaded", function () {
-  const notes = JSON.parse(localStorage.getItem("notes") || "[]");
-  const lists = JSON.parse(localStorage.getItem("lists") || "[]");
-
-  if (notes.length === 0 && lists.length === 0 && db) {
-    const tx = db.transaction(["notes", "lists"], "readonly");
-
-    const notesStore = tx.objectStore("notes").getAll();
-    const listsStore = tx.objectStore("lists").getAll();
-
-    notesStore.onsuccess = () => {
-      listsStore.onsuccess = () => {
-        const notesData = notesStore.result || [];
-        const listsData = listsStore.result || [];
-
-        if (notesData.length > 0 || listsData.length > 0) {
-          const confirmRecovery = confirm("We found server backup. Shall we proceed to start recovering in case you lost it?");
-          if (confirmRecovery) {
-            // 🔁 Call your recovery function here
-           restoreFromIndexedDB(); // <-- replace this with your function
-          }
-        }
-      };
-    };
-
-    tx.onerror = () => {
-      console.warn("Error accessing IndexedDB while checking for backup.");
-    };
-  }
-});
 
 
 
@@ -389,14 +278,7 @@ function showSelectionActions() {
   document.getElementById("selectionBar").classList.remove("hidden");
 }
 
-window.addEventListener("load", () => {
-  const seen = localStorage.getItem("notesAppOnboarded");
-  const overlay = document.getElementById("onboardingOverlay");
 
-  if (!seen && overlay) {
-    overlay.style.display = "flex";
-  }
-});
 
 function applySortFilter() {
   const sortValue = document.getElementById("sortSelect").value;
@@ -663,54 +545,6 @@ function closeDeleteListPasswordModal() {
 
 
 
-function updateDataStats() {
-  const noteCount = document.getElementById("noteCount");
-  const listCount = document.getElementById("listCount");
-
-  // Count the number of notes and lists
-  noteCount.textContent = notes.length; // Update the note count
-  listCount.textContent = lists.length; // Update the list count
-}
-
-async function autoBackupToFile() {
-  if (!backupDirHandle) {
-    console.warn("No backup folder selected.");
-    return;
-  }
-
-  try {
-    // Create or replace the backup file
-    const fileHandle = await backupDirHandle.getFileHandle("backup_data.json", { create: true });
-    const writable = await fileHandle.createWritable();
-
-    await writable.write(JSON.stringify({ notes, lists }));
-    await writable.close();
-
-    console.log("Backup updated successfully.");
-  } catch (err) {
-    console.error("Auto-backup failed:", err);
-  }
-}
-
-function prepareImport(event) {
-alert("This feature is under development and does not work yet. Please use backend features to restore your notes.");
-}
-
-
-
-
-function importNotes() {
-  const fileInput = document.getElementById("importFile");
-  if (!fileInput.files.length) {
-    showToast("No file selected!");
-    return;
-  }
-
-  localStorage.setItem("notes", JSON.stringify(notes));
-  displayNotes();
-  showToast("Notes imported successfully!");
-}
-
 
 
 
@@ -823,12 +657,35 @@ function searchNotes() {
 
 
 // Function to display filtered notes and lists
+window.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('modal');
+    const checkbox = document.getElementById('agreeCheck');
+    const button = document.getElementById('closeModal');
 
+ checkbox.addEventListener('change', () => {
+  button.disabled = !checkbox.checked;
+
+  if (!checkbox.checked ) {
+    showToast("Check the box to proceed");
+  }
+});
+
+    button.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  });
 
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   sidebar.classList.toggle("show");
 }
+
+document.addEventListener('click', function(event) {
+   const sidebar = document.getElementById("sidebar");
+  if (!sidebar.contains(event.target)) {
+  sidebar.classList.add("hidden");
+  }
+});
 
 // Function to close the list password modal
 function toggleFeatureSection(sectionId) {
@@ -1818,7 +1675,7 @@ if (!result) {
 
             // Done restoring
             overlay.style.display = "none";
-            showToast("Notes and Lists restored from server!");
+            showToast("Notes and Lists restored from Secondry Storage!");
           }
         };
       }
@@ -1965,8 +1822,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const dataInd = document.getElementById("dataInd");
     if (dataInd) {
       dataInd.innerText = syncToggle.checked
-        ? "📡 Data found in server"
-        : "No Data in Server Storage found.";
+        ? "📡 Data found in Secondry Storage"
+        : "No Data in Secondry Storage Storage found.";
     }
   }
 });
