@@ -83,6 +83,19 @@
         display: none;
       }
 
+
+
+      .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
       /* Hide modal with fade-out animation */
 
       .delete-button {
@@ -171,7 +184,7 @@
     border-radius: 50%; /* Fully rounded buttons */
     width: 56px; /* Increased width */
     height: 56px; /* Increased height */
-  
+  text-align: center;
     align-items: center; /* Center icon vertically */
     justify-content: center; /* Center icon horizontally */
     font-size: 24px; /* Icon size */
@@ -229,7 +242,7 @@ font-weight: bolder;
         /* White text */
         border-radius: 20px;
         /* Rounded corners */
-        
+        text-align: center;
         /* Smooth transition for hover effect */
       }
 
@@ -1172,6 +1185,7 @@ border: 2px solid #000;
       i {
         margin-right: 8px;
         /* Space between icon and text */
+        text-align: center;
       }
 
       .scan-circle {
@@ -1504,6 +1518,7 @@ border: 2px solid black;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   flex: 1 1 calc(33% - 2rem); /* Three across by default */
+  min-width: 200px;
 }
 
 @media (max-width: 768px) {
@@ -2315,7 +2330,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: auto; /* Adjust width based on content */
+    width: 200px; /* Adjust width based on content */
     background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
     color: #ffffff;
     padding: 0.5rem 1.2rem;
