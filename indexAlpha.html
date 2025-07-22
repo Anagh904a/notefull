@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -291,7 +290,20 @@
       </div>
     </div>
 
+   <div class="modal " id="modal">
+  <div class="modal-content">
+    <h2>Welcome to Notes App!</h2>
+    <p class="important" style="color: red;">This is an ALPHA TESTING VERSION. It is not recommended to save important data.</p>
+    <p>For the meantime, you can use an alternative app, but you are free to explore and test out the app and report bugs to me.</p>
+
+    <label for="agreeCheck">I agree</label>
+      <input type="checkbox" id="agreeCheck">
+      
    
+
+    <button id="closeModal" disabled>Continue</button>
+  </div>
+</div>
 
 
 <!-- Sidebar HTML -->
@@ -307,7 +319,7 @@
     </button>
     <button class="sidebar-button" onclick="navigateTo('calculatorSection')">
       <i class="fas fa-calculator"></i>
-      <span class="label">Calculator</span>
+      <span class="label">Calc</span>
     </button>
 <div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Last Synced: Never</div>
 
@@ -379,11 +391,13 @@
   </div>
 </div>
 
-<div class="card" onclick="showSection('pmSection')">
-  <div class="icon sound"><span class="material-icons">lock</span></div>
+<div class="card" onclick="showSection('cSection')">
+<div class="icon modes">
+  <span class="material-icons">mail</span>
+</div>
   <div class="text-box">
-    <div class="title">Password Management</div>
-    <div class="subtitle">Set New Password · Change Old Password</div>
+    <div class="title">Bug Report</div>
+    <div class="subtitle">Bug Report</div>
   </div>
 </div>
 
@@ -423,10 +437,10 @@
   
      
       <button class="settings-button" onclick="restoreFromIndexedDB()">
-        🔄 Restore Data from Server
+        🔄 Restore Data from Secondry Storage
       </button>
       
-   <span id="dataInd">No Data is Server Storage found.</span>
+   <span id="dataInd">No Data is Secondry Storage Storage found.</span>
   </div>
 </div>
      
@@ -452,34 +466,25 @@
   </div>
 </div>
 
-
-<div id="pmSection" class="container hidden">
+<div id="cSection" class="container hidden">
   <button class="modal-button" onclick="showSection('settingsSection')">
     <i class="fas fa-arrow-left back-icon"></i>
   </button>
-
+ 
   <div class="section-card">
-    <p>This master password helps unlock notes/lists if their original password is forgotten.</p>
+    <p>Email ID</p>
+    <br>
 
-    <h3>Set Master Password</h3>
-    <input type="password" id="setPasswordInput" placeholder="Enter new master password" class="settings-input">
-    <button class="settings-button" onclick="setMasterPassword()">💾 Save Password</button>
-
-    <h4>Change Master Password</h4>
-    <input type="password" id="oldPassword" placeholder="Current Password" class="settings-input">
-    <input type="password" id="newPassword" placeholder="New Password" class="settings-input">
-    <button class="settings-button" onclick="changeMasterPassword()">🔁 Change Password</button>
-  </div>
+    <p>mastiwithanagh@gmail.com</p>
+   </div>
 </div>
+
 
 
 
     
      
-        <div id="lockNotesSection" class="container hidden">
-          <button onclick="goBack()">Back</button>
-         <p>Under Planning Phase</p>
-        </div>
+      
       
         
       <div id="creditSection" class="container hidden">
@@ -489,7 +494,7 @@
           <div class="section-card">
         <h2>Credits</h2>
         <p>Developed by Anagh</p>
-        <p>Version: 1.0.0</p>
+        <p>Version: 4.2.1</p>
        </div>
           </div>
       </div>
