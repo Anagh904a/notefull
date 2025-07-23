@@ -614,7 +614,7 @@ function displayFilteredNotesAndLists(filteredNotes, filteredLists) {
             <span class="note-date">${formattedDate}</span>
             ${noteAIbutton}
             ${noteAIbtn}
-            <button class="delete-btn" onclick="deleteNote(${index}); event.stopPropagation();">Delete</button>
+            <button class="delete-btn" onclick="deleteNote(${index}); event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
         </div>
         `;
         container.appendChild(noteDiv);
@@ -1145,7 +1145,7 @@ function displayNotes() {
   <span class="note-date">${formattedDate}</span>
  ${noteAIbutton}
   ${noteAIbtn}
-  <button class="delete-btn" onclick="deleteNote(${index}); event.stopPropagation();">Delete</button>
+  <button class="delete-btn" onclick="deleteNote(${index}); event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
 
 
   </div>
@@ -1717,11 +1717,13 @@ checklistContainer.innerHTML = "";
 currentItems.forEach((item, index) => {
 const itemDiv = document.createElement("div");
 itemDiv.innerHTML = `
+
 <div class="checklist-item">
   <input type="checkbox" id="item-${index}" ${item.checked ? "checked" : ""} onchange="toggleCheck(${index})">
   <label for="item-${index}">${item.name}</label>
-  <button onclick="removeItem(${index})">Remove</button>
+  <button onclick="removeItem(${index})"><i class="fas fa-trash"></i> Remove</button>
 </div>
+
 `;
 checklistContainer.appendChild(itemDiv);
 });
@@ -1762,7 +1764,7 @@ function displayLists() {
     ${loclIndicator}
     </div>
   <span class="list-date">${formattedDate}</span>
-   <button class="delete-btn" onclick="deleteList(${index}); event.stopPropagation();">Delete</button>
+   <button class="delete-btn" onclick="deleteList(${index}); event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
   </div>
   `;
     container.appendChild(listDiv);
