@@ -320,28 +320,34 @@ font-weight: bolder;
         /* Ensure consistent font for password input */
       }
 
+     
       .checklist-item {
-        background-color: transparent;
-        /* Orange background */
-        padding: 10px;
-        /* Padding inside the item */
-        border: 1px solid black;
-        border-radius: 5px;
-        /* Rounded corners */
-        margin: 5px 0;
-        /* Space between items */
-        display: flex;
-        /* Flexbox for alignment */
-        align-items: center;
-        /* Center items vertically */
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        /* Subtle shadow for depth */
-      }
+  background: rgba(255, 255, 255, 0.1); /* translucent white */
+  backdrop-filter: blur(8px); /* glass blur effect */
+  -webkit-backdrop-filter: blur(8px); /* Safari support */
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle white border */
+  border-radius: 12px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
 
-      .checklist-item input[type="checkbox"] {
-        margin-right: 10px;
-        /* Space between checkbox and label */
-      }
+.checklist-item:hover {
+ 
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.checklist-item input[type="checkbox"] {
+  margin-right: 14px;
+  width: 18px;
+  height: 18px;
+  accent-color: #ff9800; /* bright orange checkbox */
+  cursor: pointer;
+}
 
       .checklist-item button {
         margin-left: auto;
@@ -639,13 +645,13 @@ font-weight: bolder;
 
       /* Number Buttons */
       .btn-number {
-        background: #e0e0e0;
+        background: #ffffff;
         color: #333;
       }
 
       .btn-number:hover {
         background: #d5d5d5;
-        transform: scale(1.05);
+       
       }
 
       /* Operator Buttons */
@@ -705,7 +711,7 @@ font-weight: bolder;
 
       /* Zero Button (Big Zero) */
       .btn-zero {
-        background: #e0e0e0;
+        background: #ffffff;
         grid-column: span 2;
         font-size: 22px;
         color: #333;
@@ -713,7 +719,7 @@ font-weight: bolder;
 
       .btn-zero:hover {
         background: #d5d5d5;
-        transform: scale(1.05);
+     
       }
 
       .list-date {
@@ -931,6 +937,7 @@ font-family: 'Inter', sans-serif;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s ease;
+  text-align: left;
 }
 
 .settings-button:hover {
@@ -1519,6 +1526,8 @@ border: 2px solid black;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   flex: 1 1 calc(33% - 2rem); /* Three across by default */
   min-width: 200px;
+  justify-content: center;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
