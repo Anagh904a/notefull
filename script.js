@@ -17,22 +17,25 @@ let notesDirectoryHandle = null;
 
 
 
-function setupLongPress(element, index) {
-  element.addEventListener("mousedown", (e) => {
-    holdTimer = setTimeout(() => {
-      enterSelectionMode(index);
-    }, 500);
-  });
+function handleBack() {
+  // 1. Close modals if any are open
+  if (!document.getElementById("addOptionsModal").classList.contains("hidden")) {
+    closeAddOptions();
+    return;
+  }
 
-  element.addEventListener("mouseup", () => clearTimeout(holdTimer));
-  element.addEventListener("mouseleave", () => clearTimeout(holdTimer));
-}
+  // 2. Check for note editing section
+  if (!document.getElementById("addItemSection").classList.contains("hidden")) {
+    saveNote(); // Custom function you write to close it
+    return;
+  }
 
-function enterSelectionMode(index) {
-  selectionMode = true;
-  selectedNotes = [index];
- displayNotes();
-  showSelectionActions();
+
+
+  // 4. If none of the above, maybe confirm exit
+  if (confirm("Do you want to exit the app?")) {
+    window.history.back(); // Or use Kodular block to close screen
+  }
 }
 
 
