@@ -197,12 +197,13 @@
         <div class="form-group">
           <label for="checklistTitle">Title</label>
           <input type="text" id="listTitle" placeholder="Enter checklist title" />
-           <button type="button" onclick="addItemModal()">
+           
+        </div>
+        <div id="checklistContainer"></div>
+        <button type="button" onclick="addItemModal()">
       <i class="fas fa-plus"></i>
      Add Item
     </button>
-        </div>
-        <div id="checklistContainer"></div>
           <!-- Dynamic checklist items -->
         
         <div class="footer-bar">
@@ -367,6 +368,16 @@
   </div>
 </div>
 
+<div class="card" onclick="showSection('privacySection')">
+  <div class="icon privacy">
+    <span class="material-icons">privacy_tip</span>
+  </div>
+  <div class="text-box">
+    <div class="title">Privacy</div>
+    <div class="subtitle">Policy · Permissions Manager · Session Management</div>
+  </div>
+</div>
+
 <div class="card" onclick="showSection('backupTab')">
   <div class="icon device"><span class="material-icons">backup</span></div>
   <div class="text-box">
@@ -479,11 +490,35 @@
    </div>
 </div>
 
+<div id="privacySection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i>
+  </button>
+
+  <div class="section-card">
+    <h2>Our Privacy Policy</h2>
+    <a href="https://docs.google.com/document/d/1cAsN4hexlf5bXj6hRMURkGX9vYadIkCA9axixYQjswY/edit?addon_store&tab=t.0#heading=h.4o4shqu4d9pj">VIEW</a>
+  </div>
 
 
+ <div class="section-card">
+  <h2>Permission Manager</h2>
+  <h3>Given Permission</h3>
+  <p>None</p>
+ </div>
 
+ <div class="section-card">
+  <h2>Data Privacy</h2>
+  <h3>These People Can See My Data</h3>
+<div class="toggle-container">
+  Current Session
+</div>
+<p>Great! No one else can access your data!</p>
+<p>Score: 100/100</p>
+
+ </div>
     
-     
+     </div>
       
       
         
@@ -543,9 +578,12 @@
     </div>
   </div>
     <div id="calculatorSection" class="container hidden">
+      <button class="modal-button" onclick="showSection('combinedContainer')">
+        <i class="fas fa-arrow-left back-icon"></i>
+      </button>
       <div class="calculator-header">
         <h3>Calculator</h3>
-        <button class="btn-close" onclick="closeCalculator()">✖</button>
+        
       </div>
 
       <input
