@@ -4,5 +4,5 @@
   "orientation": "portrait",
   "description": "A notes-taking app",
   "start_url": "https://ts-note.netlify.app/indexalpha",
-  "display": "standlone"
+  "display": "standalone"
 }
