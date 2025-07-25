@@ -1,9 +1,8 @@
 {
   "name": "Notefull",
-  "theme_color": "#000000",
-  "background_color": "#000000",
   "short_name": "Notefull",
-    "orientation": "portrait"
-
-  
+  "orientation": "portrait",
+  "description": "A notes-taking app",
+  "start_url": "https://ts-note.netlify.app/indexalpha",
+  "display": "standlone"
 }
