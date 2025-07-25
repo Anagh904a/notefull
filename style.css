@@ -191,6 +191,45 @@
     cursor: pointer; /* Pointer cursor on hover */
     transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
 }
+
+.modal-btn {
+  background: linear-gradient(135deg, #89f7fe, #66a6ff);
+    color: #000000; /* Black icon color */
+    border: 2px solid #000000; /* Black border */
+    border-radius: 10px; /* Fully rounded buttons */
+   
+    height: 45px; /* Increased height */
+  text-align: center;
+    align-items: center; /* Center icon vertically */
+    justify-content: center; /* Center icon horizontally */
+    font-size: 18px; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+}
+
+.modal-btn-close {
+  background: linear-gradient(135deg, #f89494, #d80000);
+    color: #000000; /* Black icon color */
+    border: 2px solid #000000; /* Black border */
+    border-radius: 10px; /* Fully rounded buttons */
+   
+    height: 45px; /* Increased height */
+  text-align: center;
+    align-items: center; /* Center icon vertically */
+    justify-content: center; /* Center icon horizontally */
+    font-size: 18px; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+}
+
+.modal-btn:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+
+.modal-btn-close:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
 /* Modal Button Hover Effect */
 .modal-button:hover {
     background: #f0f0f0; /* Light gray background on hover */
@@ -1568,7 +1607,7 @@ border: 2px solid black;
 }
 
 .delete-btn {
-  background: #ff3b3b;
+   background: linear-gradient(135deg, #f89494, #d80000);
   color: #fff;
   border: none;
   
