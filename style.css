@@ -1,4 +1,5 @@
 
+
       .button:disabled {
         background-color: #888;
         /* Greyed out button */
@@ -77,7 +78,56 @@
         color: white;
       }
 
-     
+      .info-box {
+    display: flex;
+    align-items: flex-start;
+    background-color: #f1f3f4;
+    color: #202124;
+    padding: 14px 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(60,64,67,0.15);
+    max-width: 500px;
+    margin-top: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .info-icon {
+    background-color: #1a73e8;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    margin-right: 12px;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .info-text {
+    font-size: 15px;
+  }
+
+  #infoContainer {
+    display: none;
+  }
+
+            .modal-content2 {
+             animation: fadeIn 0.3s ease forwards;
+        color: white;
+        color: rgb(0, 0, 0);
+        padding: 20px;
+        border-radius: 15px;
+        width: 350px;
+        background-color: white;
+      
+      }
+
+     .modal-content button {
+width: 98%;
+     }
 
       #deletePasswordModal {
         display: none;
@@ -328,12 +378,12 @@ font-weight: bolder;
       }
 
       .close-button {
-        background: #ff4c4c;
+         background: linear-gradient(135deg, #f89494, #d80000);
         /* Red background for close button */
       }
 
       .close-button:hover {
-        background: #ff1c1c;
+        background: #aa1b1b;
         /* Darker red on hover */
       }
 
@@ -391,16 +441,16 @@ font-weight: bolder;
       .checklist-item button {
         margin-left: auto;
         /* Push the button to the right */
-        background: red;
+       background: linear-gradient(135deg, #f89494, #d80000);
         /* Darker orange for the button */
         
         /* Pointer cursor on hover */
-        transition: background-color 0.3s;
+       
         /* Smooth transition for hover effect */
       }
 
       .checklist-item button:hover {
-        background-color: #ff6347;
+        background: #ce4027;
         /* Lighter orange on hover */
       }
 
@@ -411,7 +461,9 @@ font-weight: bolder;
         margin: 20px 0;
       }
 
-
+#sidebar-divider {
+  width: 98%;
+}
 
 /* Spin animation */
 
@@ -517,7 +569,7 @@ font-weight: bolder;
       border: none;
       cursor: pointer;
       transition: 0.2s;
-       
+       color: #a7a7a7;
          
     }
 
@@ -563,6 +615,7 @@ font-weight: bolder;
       border-radius: 6px;
       font-size: 1rem;
       box-sizing: border-box;
+      
     }
 
     .form-group textarea {
@@ -581,7 +634,8 @@ font-weight: bolder;
       border-top: 1px solid #e5e7eb;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-     
+     align-items: center;
+     text-align: center;
       margin: 0 auto;
       text-align: center;
       font-weight: 500;
@@ -595,6 +649,9 @@ font-weight: bolder;
       padding: 10px 0;
       cursor: pointer;
       transition: 0.2s;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
     }
 
     .footer-bar i {
@@ -602,16 +659,25 @@ font-weight: bolder;
       font-size: 1.125rem;
       margin-bottom: 4px;
       color: #6b7280;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
     }
 
     .footer-bar span {
       font-size: 0.75rem;
       color: #6b7280;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
     }
 
     .footer-bar button:hover i,
     .footer-bar button:hover span {
       color: #2563eb;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
     }
 
 
@@ -625,141 +691,7 @@ font-weight: bolder;
       /* Base Container */
 
       /* Header */
-      .calculator-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .calculator-header h3 {
-        font-size: 20px;
-        color: #333;
-        margin: 0;
-      }
-
-      .btn-close {
-        background: none;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
-        color: #888;
-        transition: color 0.3s;
-      }
-
-      .btn-close:hover {
-        color: #ff4d4d;
-      }
-
-      /* Display */
-      .display {
-        width: 95%;
-        height: 60px;
-        font-size: 28px;
-        text-align: right;
-        padding: 10px 15px;
-        margin-bottom: 20px;
-        border: none;
-        border-radius: 15px;
-
-        color: #333;
-      }
-
-      /* Grid layout */
-      .calculator-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        grid-gap: 10px;
-      }
-
-      /* Buttons base */
-      .btn {
-        height: 60px;
-        font-size: 22px;
-        border: none;
-        border-radius: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.3s, transform 0.2s;
-      }
-
-      /* Number Buttons */
-      .btn-number {
-        background: #ffffff;
-        color: #333;
-      }
-
-      .btn-number:hover {
-        background: #d5d5d5;
-       
-      }
-
-      /* Operator Buttons */
-      .btn-operator {
-        background: #ffd966;
-        color: #333;
-      }
-
-      .success-msg {
-  color: green;
-  margin: 10px 0;
-  font-weight: bold;
-  padding: 6px;
-}
-
-.alert-msg {
-  color: #c0392b;
-  background: #ffe9e9;
-  border-left: 5px solid red;
-  padding: 6px;
-  margin-bottom: 4px;
-  font-family: "Arial", sans-serif;
-  border-radius: 4px;
-}
-
-
-
-
-
-      .btn-operator:hover {
-        background: #ffcd3c;
-        transform: scale(1.05);
-      }
-
-      /* Clear Button */
-      .btn-clear {
-        background: #f28b82;
-        color: white;
-      }
-
-      .btn-clear:hover {
-        background: #e57373;
-        transform: scale(1.05);
-      }
-
-      /* Equal Button */
-      .btn-equal {
-        background: #4caf50;
-        color: white;
-        grid-row: span 2;
-      }
-
-      .btn-equal:hover {
-        background: #45a049;
-        transform: scale(1.05);
-      }
-
-      /* Zero Button (Big Zero) */
-      .btn-zero {
-        background: #ffffff;
-        grid-column: span 2;
-        font-size: 22px;
-        color: #333;
-      }
-
-      .btn-zero:hover {
-        background: #d5d5d5;
      
-      }
 
       .list-date {
         display: block;
@@ -775,6 +707,7 @@ font-weight: bolder;
       #undoButton,
       #redoButton {
           transition: all 0.3s ease;
+          color: red;
         /* Smooth transition for hover effects */
       }
 
@@ -784,6 +717,8 @@ font-weight: bolder;
        
         /* Light background on hover */
         color: #ffffff;
+        background: transparent;
+
        
       }
 
@@ -792,6 +727,7 @@ font-weight: bolder;
       #redoButton:disabled {
         color: #757575;
        cursor: not-allowed;
+       
         /* Shows not-allowed cursor */
       }
 
@@ -1614,11 +1550,11 @@ border: 2px solid black;
   font-size: 14px;
   
   cursor: pointer;
-  transition: background 0.2s ease;
+ 
 }
 
 .delete-btn:hover {
-  background: #d92121;
+  background: #971212;
 }
 
 .note .icon {
@@ -2403,3 +2339,30 @@ textarea {
 }
 
  
+.full-update-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.loading-circle {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #ccc;
+  border-top: 6px solid #333;
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
