@@ -1,4 +1,5 @@
 
+
 //part 1 of total code
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
 let editingNoteIndex = null;
@@ -55,42 +56,9 @@ let backupDirHandle = null;
 
 
 document.addEventListener("DOMContentLoaded", function () {
-  const toggle = document.getElementById("aiToggle");
-
-  // 🔒 Load saved settings or default to enabled = true
-  let scannerSettings = JSON.parse(localStorage.getItem("aiScannerSettings")) || {
-    enabled: true,
-    lastScan: null
-  };
-
-  // ✅ Force default to true if `enabled` is undefined or null
-  if (scannerSettings.enabled === undefined || scannerSettings.enabled === null) {
-    scannerSettings.enabled = true;
-    localStorage.setItem("aiScannerSettings", JSON.stringify(scannerSettings));
-  }
-
-  // Set toggle position on page
-  toggle.checked = scannerSettings.enabled;
-
-  // 🚀 Run AI scan if enabled
-  if (scannerSettings.enabled) {
+  
     startAiScan();
-    scannerSettings.lastScan = new Date().toISOString();
-    localStorage.setItem("aiScannerSettings", JSON.stringify(scannerSettings));
-
     
-  }
-
-  // 🔁 Listen for user toggle changes
-  toggle.addEventListener("change", function () {
-    scannerSettings.enabled = toggle.checked;
-    localStorage.setItem("aiScannerSettings", JSON.stringify(scannerSettings));
-
-    if (toggle.checked) {
-      startAiScan();
-     
-    }
-  });
 });
 
 
@@ -514,9 +482,7 @@ function showNotePassword() {
   document.getElementById("notePasswordModal").style.display = "flex";
 }
 
-function closeNotePassword() {
-  document.getElementById("notePasswordModal").style.display = "none";
-}
+
 
 function showList() {
   document.getElementById("listPasswordModalr").style.display = "flex";
@@ -662,14 +628,12 @@ function searchNotes() {
 // Function to display filtered notes and lists
 window.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal');
-    const checkbox = document.getElementById('agreeCheck');
+    
     const button = document.getElementById('closeModal');
 
- checkbox.addEventListener('change', () => {
-  button.disabled = !checkbox.checked;
 
  
-});
+
 
     button.addEventListener('click', () => {
       modal.style.display = 'none';
@@ -689,27 +653,10 @@ document.addEventListener('click', function(event) {
 });
 
 // Function to close the list password modal
-function toggleFeatureSection(sectionId) {
-  const sections = [
-    "privacyInfoSection",
-    "calculatorSection",
-    "notificationPanel",
-  ]; // Add all feature section IDs here
-  sections.forEach((section) => {
-    const element = document.getElementById(section);
-    if (section === sectionId) {
-      element.classList.toggle("hidden"); // Toggle the selected section
-    } else {
-      element.classList.add("hidden"); // Hide other sections
-    }
-  });
-}
+
 
 // Function to close a specific feature section
-function closeFeatureSection(sectionId) {
-  const element = document.getElementById(sectionId);
-  element.classList.add("hidden"); // Hide the specified section
-}
+
 
 
 function showListPassword() {
@@ -737,33 +684,9 @@ function verifyListPassword() {
   }
 }
 
-function closeCalculator() {
-  document.getElementById("calculatorSection").classList.add("hidden")
-  ;
-  showSection('combinedContainer');
-}
 
-function appendValue(value) {
-  const display = document.getElementById("calc-display");
-  if (display.value === "0" || display.value === "Error") {
-    display.value = value;
-  } else {
-    display.value += value;
-  }
-}
 
-function calculate() {
-  const display = document.getElementById("calc-display");
-  try {
-    display.value = eval(display.value);
-  } catch {
-    display.value = "Error";
-  }
-}
 
-function clearDisplay() {
-  document.getElementById("calc-display").value = "0";
-}
 
 // Function to show alert when a feature is not implemented
 function showAlert(feature) {
@@ -892,7 +815,7 @@ function showAddNote() {
     document.getElementById("noteTitle").value = ""; // Clear the title input
     
   }
-  closeAddOptions(); // Close the add options modal
+  document.getElementById('addOptionsModal').classList.add("hidden");
     const itemText = document.getElementById("itemText");
 
   itemText.querySelector("h2").textContent = "Create a new item";
@@ -1002,12 +925,22 @@ function saveNote() {
   displayNotes();
   showSection('combinedContainer');
   document.getElementById("notePasswordModal").classList.add("hidden");
-
+document.getElementById("infoContainer").style.display = "none";
   // Reset editing state
   editingNoteIndex = null;
 }
 
+function closeNotePassword() {
+   showInfo("You have unsaved changes.");
+  document.getElementById("notePasswordModal").style.display = "none";
+ 
+}
 
+function showInfo(message) {
+    const infoBox = document.getElementById('infoContainer');
+    document.getElementById('infoText').textContent = message;
+    infoBox.style.display = 'flex';
+  }
 function syncNoteToIndexedDB(note) {
   if (!db) return;
   const syncState = localStorage.getItem("syncEnabled");
@@ -1260,7 +1193,7 @@ async function handleSummarizeButtonClick(buttonElement) {
     const contentToSummarize = buttonElement.getAttribute('data-note-content'); 
             
     if (contentToSummarize) {
-        showToast("Summarizing this note...", 0); // Show loading
+        showToast("Summarizing this note..."); // Show loading
         const summarizedText = await summarizeNoteWithAI(contentToSummarize); // Pass the note's content
         showToast("AI is doing it's job!", 1); // Hide loading
         
@@ -1343,6 +1276,7 @@ function showNoteContent(note) {
     (n) => n.title === note.title && n.content === note.content
   );
   closeAddOptions();
+  switchTab('note');
 }
 
 // Modify the deleteNote function to include password verification
@@ -1379,13 +1313,11 @@ function closeAddListSection() {
 
 // Function to show the add options modal
 function showAddOptions() {
-  document.getElementById('addOptionsModal');
-  document.getElementById('addOptionsModal').style.display = 'flex';
+  document.getElementById('addOptionsModal').classList.toggle("hidden");
 }
 
 function closeAddOptions() {
-  document.getElementById('addOptionsModal');
-  document.getElementById('addOptionsModal').style.display = 'none';
+  
 }
 
 // Function to open a list and pre-fill the add list section
@@ -1418,7 +1350,7 @@ switchTab('checklist'); // Switch to the add list tab
     displayChecklist(); // Clear the checklist display
   }
 
-  closeAddOptions(); // Close any open options
+ document.getElementById('addOptionsModal').classList.add("hidden");
     const itemText = document.getElementById("itemText");
 
   itemText.querySelector("h2").textContent = "Create a new item";
@@ -1525,6 +1457,7 @@ function openList(index) {
     document.getElementById("listPassword").value = list.password;
   }
   const itemText = document.getElementById("itemText");
+  switchTab('checklist');
 
   // Change the heading and paragraph
   itemText.querySelector("h2").textContent = "Manage your item";
@@ -1832,9 +1765,64 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+function showError() {
+  showToast("Failed to connect to model")
+}
 
+function showError2() {
+  showToast("Failed to configure")
+  alert("This is an message from Notefull security system: Due to some errors on API side, the AI toggle will be always enabled. Mantaining your secure experience")
+}
 
+const VERSION = "v1.2"; // Simulate new version
 
+function openAntithreat() {
+showSection('antithreatSection');
+
+  const lastUpdated = localStorage.getItem("lastUpdated");
+  const version = localStorage.getItem("version") || "v1.0";
+
+  document.getElementById("lastUpdated").textContent = lastUpdated || "Never";
+  document.getElementById("currentVersion").textContent = version;
+
+  const now = Date.now();
+  const threeDays = 3 * 24 * 60 * 60 * 1000;
+  if (!lastUpdated || now - parseInt(lastUpdated) > threeDays) {
+    document.getElementById("updateButton").classList.remove("hidden");
+  } else {
+    document.getElementById("updateButton").classList.add("hidden");
+  }
+}
+
+function startUpdateProcess() {
+  // Show the update modal
+  document.getElementById('updateModal').style.display = 'flex';
+
+  // After 75% of the duration (90 sec), show a toast
+  setTimeout(() => {
+    showToast("Installing Updates...");
+  }, 90000); // 75% of 2 minutes
+
+  // After 100% duration (2 min), hide modal & update localStorage
+  setTimeout(() => {
+    document.getElementById('updateModal').style.display = 'none';
+
+    // Store update time and version
+    const now = new Date();
+    localStorage.setItem("lastUpdate", now.toISOString());
+    localStorage.setItem("appVersion", "v1.0.1"); // Change version if needed
+
+    showToast("Update Installed Successfully!");
+    updateLastUpdatedText();
+  }, 120000); // Full 2 minutes
+}
+
+function updateLastUpdatedText() {
+  const last = localStorage.getItem("lastUpdate");
+  if (last) {
+    document.getElementById("lastUpdated").innerText = "Last Updated: " + new Date(last).toLocaleString();
+  }
+}
 
 // Function to cancel adding a list
 
