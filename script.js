@@ -1794,7 +1794,7 @@ showSection('antithreatSection');
   }
 }
 
-function startUpdateProcess() {
+function startUpdate () {
   // Show the update modal
   document.getElementById('updateModal').style.display = 'flex';
 
