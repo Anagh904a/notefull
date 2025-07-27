@@ -1794,35 +1794,89 @@ showSection('antithreatSection');
   }
 }
 
-function startUpdate () {
-  // Show the update modal
-  document.getElementById('updateModal').style.display = 'flex';
 
-  // After 75% of the duration (90 sec), show a toast
-  setTimeout(() => {
-    showToast("Installing Updates...");
-  }, 90000); // 75% of 2 minutes
 
-  // After 100% duration (2 min), hide modal & update localStorage
-  setTimeout(() => {
-    document.getElementById('updateModal').style.display = 'none';
+function openAntithreat() {
+showSection('antithreatSection');
 
-    // Store update time and version
-    const now = new Date();
-    localStorage.setItem("lastUpdate", now.toISOString());
-    localStorage.setItem("appVersion", "v1.0.1"); // Change version if needed
+  const lastUpdated = localStorage.getItem("lastUpdated");
+  const version = localStorage.getItem("version") || "v1.0";
 
-    showToast("Update Installed Successfully!");
-    updateLastUpdatedText();
-  }, 120000); // Full 2 minutes
-}
+  document.getElementById("lastUpdated").textContent = lastUpdated || "Never";
+  document.getElementById("currentVersion").textContent = version;
 
-function updateLastUpdatedText() {
-  const last = localStorage.getItem("lastUpdate");
-  if (last) {
-    document.getElementById("lastUpdated").innerText = "Last Updated: " + new Date(last).toLocaleString();
+  const now = Date.now();
+  const threeDays = 3 * 24 * 60 * 60 * 1000;
+  if (!lastUpdated || now - parseInt(lastUpdated) > threeDays) {
+    document.getElementById("updateButton").classList.remove("hidden");
+  } else {
+    document.getElementById("updateButton").classList.add("hidden");
   }
 }
+
+function startUpdate() {
+  document.getElementById("updateModal").style.display = "flex";
+  document.getElementById("updateButton").disabled = true;
+  
+
+  
+const statusEl = document.getElementById("updateStatus");
+statusEl.textContent = "Preparing updates...";
+
+// After 10 seconds: change status
+setTimeout(() => {
+  statusEl.textContent = "Downloading update...";
+}, 10000); // 10 sec
+
+// After 1 min 30 sec: change again
+setTimeout(() => {
+  statusEl.textContent = "Installing update...";
+}, 90000); // 1 min 30 sec
+
+// After full update (2 mins): finalize
+setTimeout(() => {
+  // Get current version and auto-increment
+  let currentVersion = localStorage.getItem("version") || "1.0";
+  let nextVersion = getNextVersion(currentVersion);
+  localStorage.setItem("version", nextVersion);
+
+  // Update timestamp
+  const now = Date.now();
+  localStorage.setItem("lastUpdated", now);
+
+  document.getElementById("updateModal").style.display = "none";
+  openAntithreat(); // Refresh display with new version info
+}, 120000); // 2 min
+
+alert("Database Updated Succesfully! Now we will run a quick scan to make sure everything is working fine.");
+startAiScan();
+}
+
+function getNextVersion(version) {
+  let parts = version.replace("v", "").split(".");
+  let major = parseInt(parts[0]);
+  let minor = parseInt(parts[1]);
+
+  minor++;
+  if (minor >= 10) {
+    minor = 0;
+    major++;
+  }
+
+  return `v${major}.${minor}`;
+}
+
+window.onload = function () {
+  const lastUpdated = localStorage.getItem("lastUpdated");
+  const now = Date.now();
+  const threeDays = 3 * 24 * 60 * 60 * 1000;
+
+  if (!lastUpdated || now - parseInt(lastUpdated) > threeDays) {
+    showToast("AntiThreat Update Available!")
+  } else {
+  return;
+  }
+};
 
 // Function to cancel adding a list
 
