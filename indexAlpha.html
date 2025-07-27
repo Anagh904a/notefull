@@ -1,9 +1,11 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width">
 
     <meta name="description" content="This is a notes app built by anagh , its completely free" />
     <link
@@ -24,6 +26,7 @@
   <body>
 <!-- Combined Notes and Lists Section -->
 
+
 <div id="combinedContainer" class="container hidden">
       
 
@@ -36,7 +39,7 @@
       id="searchInput"
       placeholder="Search your data"
       oninput="searchNotes()"
-      style="margin-left: 10px; padding: 5px;"
+      style="margin-left: 10px; padding: 5px; font-size: medium;"
 
      >
   
@@ -77,11 +80,12 @@
         <span style="font-size: 1.5em;">🤖</span> AI Features Management
       </h2>
       <p>Manage offline AI-powered helpers for your notes. No internet required.</p>
-      <p>For now, these features are always enabled. Checkboxs don't work yet.</p>
+    <p style="color: red; font-size: larger;">Failed to connect to model, please try again later. </p>
+    <p style="color: green; font-size: larger;">Succesfully Connected to AI scanner Model!</p>
     
        <div class="toggle-container">
     <label class="toggle-switch">
-      <input type="checkbox">
+      <input type="checkbox" onchange="showError()">
       <span class="slider"></span>
     </label>
     <div>
@@ -92,7 +96,7 @@
     <br>
           <div class="toggle-container">
     <label class="toggle-switch">
-      <input type="checkbox">
+      <input type="checkbox" onchange="showError()">
       <span class="slider"></span>
     </label>
     <div>
@@ -103,7 +107,7 @@
     <br>
        <div class="toggle-container">
     <label class="toggle-switch">
-      <input type="checkbox">
+      <input type="checkbox" onchange="showError()">
       <span class="slider"></span>
     </label>
     <div>
@@ -114,7 +118,7 @@
           <br>
           <div class="toggle-container">
     <label class="toggle-switch">
-      <input type="checkbox" id="aiToggle">
+      <input type="checkbox" onchange="showError2()" checked>
       <span class="slider"></span>
     </label>
     <div>
@@ -143,7 +147,12 @@
      
        
     </div>
-    
+    <div id="infoContainer">
+  <div class="info-box">
+    <div class="info-icon">i</div>
+    <div class="info-text" id="infoText">Default message</div>
+  </div>
+</div>
 
     <form class="form">
       <div class="tab-container">
@@ -157,7 +166,9 @@
 
       <!-- Note Panel -->
       <div id="addNoteSection" class="section">
+                  
         <div class="form-group">
+
           <label for="noteTitle">Title</label>
           <input type="text" id="noteTitle" placeholder="Enter a title" />
         </div>
@@ -189,7 +200,7 @@
             <h3>Enter Password</h3>
             <input type="password" id="notePassword" placeholder="Enter New Password.." style="display: block" />
             
-            <button type="button" onclick="closeNotePassword()">Save</button>
+            <button type="button" onclick="closeNotePassword()">Close</button>
         </div>
     </div>
       </div>
@@ -226,7 +237,7 @@
   <div class="modal-content">
        <input id="newItem" type="text" placeholder="Item name..." />
       <button type="button" onclick="addItem()"><i class="fas fa-plus"></i>Add</button>
- <button type="button" onclick="closeAddItemModal()"><i class="fas fa-times"></i>Close</button>
+ <button type="button" class="modal-close-btn" onclick="closeAddItemModal()"><i class="fas fa-times"></i>Close</button>
     </div>
 </div>
   <div id="listPasswordModalr" class="modal hidden">
@@ -239,7 +250,7 @@
        style="display: block;"
       />
       
-      <button type="button" onclick="closeListPassword()">Save</button>
+      <button type="button" onclick="closeListPassword()">Close</button>
   </div>
 </div>
     </div>
@@ -254,7 +265,7 @@
 
     <!-- Add Options Modal -->
     <div id="addOptionsModal" class="modal hidden">
-      <div class="modal-content">
+      <div class="modal-content2">
         <h3>What to add?</h3>
        
        <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
@@ -263,10 +274,7 @@
         <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
           <i class="fas fa-list"></i> Lists
         </button>
-        <button class="modal-btn-close" onclick="closeAddOptions()">
-          <i class="fas fa-times"></i> Close
-        </button>
-        
+       
       </div>
     </div>
 
@@ -274,7 +282,8 @@
       <div class="modal-content">
           <h3>Enter Password</h3>
           <input type="password" id="passwordInput" placeholder="Password">
-          <button onclick="verifyPassword()">Go</button>
+          <button onclick="verifyPassword()">Go <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
+ </button>
           <button onclick="closePasswordModal()">Close</button>
         </div>
   </div>
@@ -288,7 +297,8 @@
           id="deletePasswordInput"
           placeholder="Password"
         />
-        <button onclick="deleteVerifyPassword()">Go</button>
+        <button onclick="deleteVerifyPassword()">Go <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
+</button>
         <button onclick="closeDeletePasswordModal()">Close</button>
       </div>
     </div>
@@ -299,12 +309,12 @@
     <p class="important" style="color: red;">This is an ALPHA TESTING VERSION. It is not recommended to save important data.</p>
     <p>For the meantime, you can use an alternative app, but you are free to explore and test out the app and report bugs to me.</p>
 
-    <label for="agreeCheck">I agree</label>
-      <input type="checkbox" id="agreeCheck">
+    
       
    
 
-    <button id="closeModal" disabled>Continue</button>
+    <button id="closeModal">Continue <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
+</button>
   </div>
 </div>
 
@@ -320,15 +330,12 @@
       <i class="fas fa-shield-alt"></i>
       <span class="label">AI Scan</span>
     </button>
-    <button class="sidebar-button" onclick="navigateTo('calculatorSection')">
-      <i class="fas fa-calculator"></i>
-      <span class="label">Calc</span>
-    </button>
+   
 <div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Last Synced: Never</div>
 
-  
-  </div>
 
+  </div>
+<hr id="sidebar-divider">
   <div class="sidebar-bottom">
     <button class="sidebar-button" onclick="navigateTo('settingsSection')">
       <i class="fas fa-cog"></i>
@@ -367,6 +374,14 @@
   <div class="text-box">
     <div class="title">Credits</div>
     <div class="subtitle">Developer</div>
+  </div>
+</div>
+
+<div class="card" onclick="openAntithreat()">
+  <div class="icon wifi"><span class="material-icons">shield</span></div>
+  <div class="text-box">
+    <div class="title">Antithreat Management</div>
+    <div class="subtitle">Database Update • Info</div>
   </div>
 </div>
 
@@ -450,13 +465,44 @@
   
      
       <button class="settings-button" onclick="restoreFromIndexedDB()">
-        🔄 Restore Data from Secondry Storage
+        🔄 Restore Data from Secondary Storage
       </button>
       
-   <span id="dataInd">No Data is Secondry Storage Storage found.</span>
+   <span id="dataInd">No Data in Secondary Storage Storage found.</span>
   </div>
 </div>
      
+<div id="updateModal" style="
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: white;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+">
+  <div>
+    <div class="loader" style="margin-bottom: 20px;">
+      ⏳ Updating...
+    </div>
+    <div>Preparing your update...</div>
+  </div>
+</div>
+
+<div id="antithreatSection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i> 
+  </button>
+   <div class="section-card">
+  <h2>Antithreat Management</h2>
+  <p>Last Updated: <span id="lastUpdated"></span></p>
+  <p>Version: <span id="currentVersion"></span></p>
+  <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
+</div>
+</div>
+
        <div id="ecSection" class="container hidden">
   <button class="modal-button" onclick="showSection('settingsSection')">
     <i class="fas fa-arrow-left back-icon"></i>
@@ -505,18 +551,20 @@
 
  <div class="section-card">
   <h2>Permission Manager</h2>
-  <h3>Given Permission</h3>
-  <p>None</p>
+  <h3>Given Permission to notefull</h3>
+<P>-Reading Saved Data</P>
+<p>-System security api</p>
+<p>-Install updates in notefull</p>
+<p>-Notifications</p>
  </div>
 
  <div class="section-card">
   <h2>Data Privacy</h2>
-  <h3>These People Can See My Data</h3>
+  <h3>Sessions</h3>
 <div class="toggle-container">
   Current Session
 </div>
-<p>Great! No one else can access your data!</p>
-<p>Score: 100/100</p>
+
 
  </div>
     
@@ -579,49 +627,7 @@
       Recovering your PC...
     </div>
   </div>
-    <div id="calculatorSection" class="container hidden">
-      <button class="modal-button" onclick="showSection('combinedContainer')">
-        <i class="fas fa-arrow-left back-icon"></i>
-      </button>
-      <div class="calculator-header">
-        <h3>Calculator</h3>
-        
-      </div>
-
-      <input
-        type="text"
-        id="calc-display"
-        class="display"
-        placeholder="0"
-        readonly
-      />
-
-      <div class="calculator-grid">
-        <button class="btn btn-clear" onclick="clearDisplay()">C</button>
-        <button class="btn btn-operator" onclick="appendValue('/')">÷</button>
-        <button class="btn btn-operator" onclick="appendValue('*')">×</button>
-        <button class="btn btn-operator" onclick="appendValue('-')">−</button>
-
-        <button class="btn btn-number" onclick="appendValue('7')">7</button>
-        <button class="btn btn-number" onclick="appendValue('8')">8</button>
-        <button class="btn btn-number" onclick="appendValue('9')">9</button>
-        <button class="btn btn-operator" onclick="appendValue('+')">+</button>
-
-        <button class="btn btn-number" onclick="appendValue('4')">4</button>
-        <button class="btn btn-number" onclick="appendValue('5')">5</button>
-        <button class="btn btn-number" onclick="appendValue('6')">6</button>
-        <button class="btn btn-equal" onclick="calculate()" rowspan="2">
-          =
-        </button>
-
-        <button class="btn btn-number" onclick="appendValue('1')">1</button>
-        <button class="btn btn-number" onclick="appendValue('2')">2</button>
-        <button class="btn btn-number" onclick="appendValue('3')">3</button>
-
-        <button class="btn btn-zero" onclick="appendValue('0')">0</button>
-        <button class="btn btn-number" onclick="appendValue('.')">.</button>
-      </div>
-    </div>
+   
 
    
     <!-- List Password Modal -->
@@ -668,13 +674,7 @@
 
    
  <script src="storage.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js');
-    });
-  }
-</script>
+
     <script src="script.js"></script>
      
    </body>
