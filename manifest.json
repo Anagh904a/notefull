@@ -3,14 +3,15 @@
   "short_name": "Notefull",
   "orientation": "portrait",
   "description": "A notes-taking app",
-  "start_url": "https://ts-note.netlify.app/indexalpha",
+  "start_url": "/indexalpha",
   "display": "standalone",
-"icons": [
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
     {
       "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png"
-     
     }
   ]
 }
