@@ -3,7 +3,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width">
 
     <meta name="description" content="This is a notes app built by anagh , its completely free" />
@@ -71,63 +72,6 @@
 
    
 
-    <div id="ai" class="container hidden">
-      <button class="modal-button" onclick="showSection('settingsSection')">
-        <i class="fas fa-arrow-left back-icon"></i>
-      </button>
-      <h2 id="aiTitle" style="display: flex; align-items: center; gap: 0.5em; font-weight: bold;">
-        <span style="font-size: 1.5em;">🤖</span> AI Features Management
-      </h2>
-      <p>Manage offline AI-powered helpers for your notes. No internet required.</p>
-    <p style="color: red; font-size: larger;">Failed to connect to model, please try again later. </p>
-   
-    
-       <div class="toggle-container">
-    <label class="toggle-switch">
-      <input type="checkbox" onchange="showError()">
-      <span class="slider"></span>
-    </label>
-    <div>
-      <span class="toggle-label">Enable Note Summarizer</span>
-    
-  </div>
-  </div>
-    <br>
-          <div class="toggle-container">
-    <label class="toggle-switch">
-      <input type="checkbox" onchange="showError()">
-      <span class="slider"></span>
-    </label>
-    <div>
-      <span class="toggle-label">Enable Smart Suggestions</span>
-    
-  </div>
-  </div>
-    <br>
-       <div class="toggle-container">
-    <label class="toggle-switch">
-      <input type="checkbox" onchange="showError()">
-      <span class="slider"></span>
-    </label>
-    <div>
-      <span class="toggle-label">Enable Spell check</span>
-    
-  </div>
-  </div>
-          <br>
-          <div class="toggle-container">
-    <label class="toggle-switch">
-      <input type="checkbox" onchange="showError2()" checked>
-      <span class="slider"></span>
-    </label>
-    <div>
-      <span class="toggle-label">Auto AI data analyzer</span>
-      <p style="margin: 0; font-size: 12px; color: gray;">Recommended</p>
-      <p>Only Enable this if you don't have any senstive data stored.</p>
-    </div>
-  </div>
-
-          </div>
      
    
     </div>
@@ -147,12 +91,7 @@
      
        
     </div>
-    <div id="infoContainer">
-  <div class="info-box">
-    <div class="info-icon">i</div>
-    <div class="info-text" id="infoText">Default message</div>
-  </div>
-</div>
+    
 
     <form class="form">
       <div class="tab-container">
@@ -269,10 +208,10 @@
         <h3>What to add?</h3>
        
        <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
-          <i class="fas fa-sticky-note"></i> Notes
+          <i class="fas fa-sticky-note"></i> Note
         </button>
         <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
-          <i class="fas fa-list"></i> Lists
+          <i class="fas fa-list"></i> List
         </button>
        
       </div>
@@ -305,9 +244,9 @@
 
    <div class="modal " id="modal">
   <div class="modal-content">
-    <h2>Welcome to Notes App!</h2>
-    <p class="important" style="color: red;">This is an ALPHA TESTING VERSION. It is not recommended to save important data.</p>
-    <p>For the meantime, you can use an alternative app, but you are free to explore and test out the app and report bugs to me.</p>
+    <h2>Welcome to Notefull!</h2>
+    <p class="important" style="color: rgb(255, 166, 0);">This is an BETA TESTING VERSION. It is not recommended to save very important data.</p>
+    <p>Whats's New<br>-Fixed and polished entire app <br>-Sidebar Revamped <br> -Many more chanages!</p>
 
     
       
@@ -321,29 +260,36 @@
 
 <!-- Sidebar HTML -->
 <div id="sidebar" class="sidebar hide-anim">
+  
+    
   <div class="sidebar-top">
+    <label class="brand-l">
+    <img class="brand" src="icon.png"> <div class="brand-t">Notefull</div>
+    </label>
+    <br>
     <button class="sidebar-button" onclick="navigateTo('combinedContainer')">
       <i class="fas fa-home"></i>
       <span class="label">Home</span>
     </button>
     <button class="sidebar-button" onclick="navigateTo('aiSection')">
       <i class="fas fa-shield-alt"></i>
-      <span class="label">AI Scan</span>
+      <span class="label">Scan</span>
+    </button>
+    <button class="sidebar-button" onclick="navigateTo('settingsSection')">
+      <i class="fas fa-cog"></i>
+      <span class="label">Settings</span>
     </button>
    
 <div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Last Synced: Never</div>
 
 
   </div>
-<hr id="sidebar-divider">
-  <div class="sidebar-bottom">
-    <button class="sidebar-button" onclick="navigateTo('settingsSection')">
-      <i class="fas fa-cog"></i>
-      <span class="label">Settings</span>
-    </button>
+
+  
+    
     <button class="sidebar-button" onclick="closeSidebar()">
     
-      <span class="label"></span>
+      <span class="label">x</span>
     </button>
   </div>
 </div>
@@ -373,21 +319,23 @@
   <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
   <div class="text-box">
     <div class="title">Credits</div>
-    <div class="subtitle">Developer</div>
+    <div class="subtitle">Developer · About Dev</div>
   </div>
 </div>
 
-<div class="card" onclick="openAntithreat()">
+<div class="card" onclick="showSection('aSection')">
   <div class="icon wifi"><span class="material-icons">shield</span></div>
   <div class="text-box">
-    <div class="title">Antithreat Management</div>
-    <div class="subtitle">Database Update • Info</div>
-  </div>
-</div>
+    <div class="title">Security</div>
+    <div class="subtitle">Defender Settings</div>
+ </div>
+ </div>
+
+
 
 <div class="card" onclick="showSection('privacySection')">
   <div class="icon privacy">
-    <span class="material-icons">privacy_tip</span>
+    <div class="icon privacy"><span class="material-icons">privacy_tip</span></div>
   </div>
   <div class="text-box">
     <div class="title">Privacy</div>
@@ -398,18 +346,12 @@
 <div class="card" onclick="showSection('backupTab')">
   <div class="icon device"><span class="material-icons">backup</span></div>
   <div class="text-box">
-    <div class="title">Backup and Import</div>
-    <div class="subtitle">Backup · Import · Input</div>
+    <div class="title">Secondary Storage</div>
+    <div class="subtitle">Restore · Status · Sync</div>
   </div>
 </div>
 
-<div class="card" onclick="showSection('ai')">
-  <div class="icon ai"><span class="material-icons">smart_toy</span></div>
-  <div class="text-box">
-    <div class="title">AI</div>
-    <div class="subtitle">Note assist · Note Summarizer · Note Scanner</div>
-  </div>
-</div>
+
 
 <div class="card" onclick="showSection('ecSection')">
   <div class="icon modes"><span class="material-icons">security</span></div>
@@ -424,8 +366,18 @@
   <span class="material-icons">mail</span>
 </div>
   <div class="text-box">
-    <div class="title">Bug Report</div>
-    <div class="subtitle">Bug Report</div>
+    <div class="title">Developer Email</div>
+    <div class="subtitle">Bug Report · Feedback · Bugs</div>
+  </div>
+</div>
+
+<div class="card" onclick="openAntithreat()">
+<div class="icon modes">
+  <span class="material-icons">info</span>
+</div>
+  <div class="text-box">
+    <div class="title">About</div>
+    <div class="subtitle">Version · Defender · Updates</div>
   </div>
 </div>
 
@@ -440,67 +392,13 @@
   </button>
 
   <div class="section-card">
-   
 
-    <!-- 🔒 Backup Notes -->
-   
-     
-      <button class="settings-button" onclick="backupNotes()">
-        💾 Backup Notes
-      </button>
-    
-  
-
-    <!-- 📂 Import Notes -->
-  
-      
-     
-      <button class="settings-button" onclick="prepareImport(event)">
-        ▶️  Import
-      </button>
-  
-    
-
-    <!-- 🌐 Restore from IndexedDB -->
-  
-     
+<h2>Secondary Storage Settings</h2>
+<p>Manage your secondary storage which prevents data loss</p><br>
       <button class="settings-button" onclick="restoreFromIndexedDB()">
-        🔄 Restore Data from Secondary Storage
+        🔄 Restore 
       </button>
-      
-   <span id="dataInd">No Data in Secondary Storage Storage found.</span>
-  </div>
-</div>
-     
-<div id="updateModal" class="hidden full-update-modal">
-  <div class="loading-circle"></div>
-  <p>Updating Notefull Security System...</p>
-  <p id="updateStatus">Preparing updates...</p>
-</div>
-
-<div id="antithreatSection" class="container hidden">
-  <button class="modal-button" onclick="showSection('settingsSection')">
-    <i class="fas fa-arrow-left back-icon"></i> 
-  </button>
-   <div class="section-card">
-  <h2>Antithreat Management</h2>
-  <p>Last Updated: <span id="lastUpdated"></span></p>
-  <p>Version: <span id="currentVersion"></span></p>
-  <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
-</div>
-</div>
-
-       <div id="ecSection" class="container hidden">
-  <button class="modal-button" onclick="showSection('settingsSection')">
-    <i class="fas fa-arrow-left back-icon"></i>
-  </button>
-
-  <div class="section-card">
-    <button class="settings-button" onclick="requestBackupFolder()">📁 Grant Storage Access</button>
-    <button class="settings-button" onclick="clearData()">🗑️ Clear All Data</button>
-    <button class="settings-button" onclick="encryptData()">🔐 Encrypt Data</button>
-    <button class="settings-button" onclick="decryptData()">🔓 Decrypt Data</button>
-   <span id="syncStatus">🔄 Sync is OFF</span>
+      <span id="syncStatus">🔄 Sync is OFF</span>
 
     <div class="toggle-container">
       <span class="toggle-label">Enable Sync</span>
@@ -509,6 +407,110 @@
         <span class="toggle-slider"></span>
       </label>
     </div>
+    <br>
+   
+   <br>
+  </div>
+</div>
+     
+<div id="updateModal" class="hidden full-update-modal">
+  <div class="loading-circle"></div>
+  <p>Updating Notefull Defender...</p>
+  <p id="updateStatus">Preparing updates...</p>
+</div>
+
+ <div id="antithreatSection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i> 
+  </button>
+  <div class="section-card" >
+  <h4>App Version: 5.1</h4>
+  </div>
+  <div class="section-card">
+  <h2>Notefull Defender</h2>
+  <p>Protect yourself against threats and vulnerabilities in Notefull</p>
+  <h3>Last Updated On: <span id="lastUpdated"></span></h3>
+  <h3>Defender Version: <span id="currentVersion"></span></h3>
+  <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
+</div>
+<div class="section-card">
+<button onclick="alert('Go to play store page for app updates!')">Update App</button>
+<p>LATEST NOTEFULL NEWS: <br> Storage System under testing! Other UI-Related Updates are almost done! 
+<br> <strong>Progress: 87%</strong>  :Functionality testing is ongoing!</p>
+</div>
+
+  </div>
+
+  <div id="aSection" class="container hidden">
+    <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i> 
+  </button>
+    <div class="section card">
+  
+      <h3 style="color: red;">You cannot change the following settings.</h3>
+  
+  <br>
+  </div>
+ <div class="toggle-container" disabled>
+    <label class="toggle-switch">
+      <input type="checkbox" checked disabled>
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">Real-time protection</span>
+    <br>
+  </div>
+  </div>
+   <div class="toggle-container" disabled>
+    <label class="toggle-switch">
+      <input type="checkbox" checked disabled>
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">Auto-scan for notes</span>
+      </div>
+    </div>
+       <div class="toggle-container" disabled>
+    <label class="toggle-switch">
+      <input type="checkbox" checked disabled>
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">Anti-Threat Protection for Senstive Notes</span>
+   
+  </div>
+  </div>
+
+   <div class="toggle-container" disabled>
+    <label class="toggle-switch">
+      <input type="checkbox" checked disabled>
+      <span class="slider"></span>
+    </label>
+    <div>
+      <span class="toggle-label">Password Encyption for notes and lists</span>
+  
+  </div>
+  </div>
+  </div>
+   
+
+
+    
+
+
+
+       <div id="ecSection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+    <i class="fas fa-arrow-left back-icon"></i>
+  </button>
+
+  <div class="section-card">
+   <h2>Data Management</h2>
+   <p>Manage Your Data</p><br>
+    <button class="settings-button" onclick="clearData()">🗑️ Clear all data</button>
+    <button class="settings-button" onclick="encryptData()">🔐 Encrypt Data</button>
+    <button class="settings-button" onclick="decryptData()">🔓 Decrypt Data</button>
+  
   </div>
 </div>
 
@@ -522,6 +524,7 @@
     <br>
 
     <p>mastiwithanagh@gmail.com</p>
+    <p>Any data related bugs? Report them to this email ID given above:</p>
    </div>
 </div>
 
@@ -537,17 +540,17 @@
 
 
  <div class="section-card">
-  <h2>Permission Manager</h2>
-  <h3>Given Permission to notefull</h3>
-<P>-Reading Saved Data</P>
-<p>-System security api</p>
+  <h2>Permission Manager for Notefull</h2>
+
+<P>-Reading Saved Data of app</P>
 <p>-Install updates in notefull</p>
-<p>-Notifications</p>
+<p>System Permission:<br>WRITE_READ_INTERNET_ACCESS</p>
+<h4>1 system and 2 app permission given to notefull</h4>
  </div>
 
  <div class="section-card">
-  <h2>Data Privacy</h2>
-  <h3>Sessions</h3>
+  <h2>Sessions</h2>
+ 
 <div class="toggle-container">
   Current Session
 </div>
@@ -566,7 +569,7 @@
           <div class="section-card">
         <h2>Credits</h2>
         <p>Developed by <strong>Anagh Manglick</strong></p>
-        <p>Version: 5.0</p>
+      <p>I am a school student developer. Development is my hobby.</p>
        </div>
           </div>
       </div>
@@ -582,7 +585,13 @@
         <button class="modal-button" onclick="showSection('combinedContainer')">
         <i class="fas fa-arrow-left back-icon"></i>
       </button>
-        <h2>Notefull AI Security Scan</h2>
+      <div id="infoContainer2">
+  <div class="info-box">
+    <div class="info-icon">i</div>
+    <div class="info-text" id="infoText">You can safely leave this page while the scan is done</div>
+  </div>
+</div>
+        <h2>Notefull Defender Scan page (Notes)</h2>
         <P>List Support Coming soon...</P>
         <div class="scan-container">
           <div class="scan-circle" id="scanCircle"></div>
@@ -622,7 +631,7 @@
       <div class="modal-content">
         <h3>Enter Password</h3>
         <input type="password" id="listPasswordInput" placeholder="Password" />
-        <button onclick="verifyListPassword()">Go</button>
+        <button onclick="verifyListPassword()">Go <i class="fas fa-arrow-right"></i></button>
         <button onclick="closeListPasswordModal()">Close</button>
       </div>
     </div>
@@ -636,7 +645,7 @@
           id="deleteListPasswordInput"
           placeholder="Password"
         />
-        <button onclick="deleteListVerifyPassword()">Go</button>
+        <button onclick="deleteListVerifyPassword()">Go <i class="fas fa-arrow-right"></i></button>
         <button onclick="closeDeleteListPasswordModal()">Close</button>
       </div>
     </div>
@@ -645,7 +654,7 @@
 <!-- TOAST HTML -->
 <div id="aiToast" class="toast">
   <div class="toast-content">
-    <strong>Notefull Security Scan Completed!</strong>
+    <strong>Notefull Defender Scan Completed!</strong>
     <span>Please check the results.</span>
   </div>
 </div>
