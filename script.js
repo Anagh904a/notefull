@@ -309,13 +309,12 @@ function deleteSelectedNotes() {
 function clearData() {
   if (
     confirm(
-      "Are you sure you want to clear all data? This action cannot be undone."
+      "Are you sure you want to clear all data? This action cannot be undone. You can still backup using secondary storage."
     )
   ) {
     localStorage.removeItem("notes");
     localStorage.removeItem("lists");
-    notes = [];
-    lists = [];
+    
     displayNotes();
     displayLists();
     showToast("All data cleared successfully!");
@@ -323,34 +322,11 @@ function clearData() {
 }
 
 function encryptData() {
-  showToast("Failed! Fatal Error 3XD");
-  
-}
+  ("Your Notes are auto-encrypted while saving");
+  }
 
 function decryptData() {
-  const encryptedNotes = localStorage.getItem("encryptedNotes");
-  const encryptedLists = localStorage.getItem("encryptedLists");
-  showToast(
-    "This feature is buggy and may not work as expected. Use with cuation your old data may be deleted"
-  );
-
-  if (encryptedNotes) {
-    notes = JSON.parse(atob(encryptedNotes)); // Base64 decode the notes
-  } else {
-    notes = [];
-  }
-
-  if (encryptedLists) {
-    lists = JSON.parse(atob(encryptedLists)); // Base64 decode the lists
-  } else {
-    lists = [];
-  }
-
-  localStorage.setItem("notes", JSON.stringify(notes)); // Save decrypted notes back to local storage
-  localStorage.setItem("lists", JSON.stringify(lists)); // Save decrypted lists back to local storage
-  displayNotes();
-  displayLists();
-  showToast("Data decrypted successfully!");
+  alert("Your data can't be dencryted due to security reasons. If you still want to proceed, contact developer")
 }
 
 // Function to toggle button states (enable/disable)
@@ -386,7 +362,11 @@ function startAiScan() {
   const scanCircle = document.getElementById("scanCircle");
   const notesCountElem = document.getElementById("notesCount");
   const progressBar = document.getElementById("progressBar");
-
+  const infoBox = document.getElementById("infoContainer2");
+  
+//Show Info Box
+infoBox.style.display = "flex";
+showInfo("You can safely leave this page while the scan completes.");
   // Reset UI
   resultsContainer.innerHTML = "";
   scanStatus.textContent = "Initializing AI scan...";
@@ -413,7 +393,7 @@ progressBar.style.width = "0";
   const scanInterval = setInterval(() => {
     if (index >= notes.length) {
       clearInterval(scanInterval);
-
+infoBox.style.display = "none";
       const endTime = Date.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
      
@@ -462,6 +442,7 @@ progressBar.style.width = `${((index + 1) / notes.length) * 100}%`;
     }
 
     index++;
+    
   }, 2500); // Scan delay (ms)
  
 }
@@ -490,6 +471,7 @@ function showList() {
 
 function closeListPassword() {
   document.getElementById("listPasswordModalr").style.display = "none";
+  showToast("You have unsaved changes.")
 }
 
 
@@ -533,7 +515,10 @@ function highlightSearchTerm(text, searchTerm) {
 function displayFilteredNotesAndLists(filteredNotes, filteredLists) {
     const container = document.getElementById("notesContainer");
     container.innerHTML = ""; // Clear existing content
-    const noNotesMessage = document.getElementById("noNotesMessage");
+    const listsContainer = document.getElementById("listsContainerContent");
+    listsContainer.innerHTML = "";
+   document.getElementById("noNotesMessage").innerHTML = "No matching notes found.";
+document.getElementById("noListsMessage").innerHTML = "No matching lists found.";
 
     if (filteredNotes.length === 0 && filteredLists.length === 0) {
         noNotesMessage.classList.remove("hidden");
@@ -541,13 +526,22 @@ function displayFilteredNotesAndLists(filteredNotes, filteredLists) {
         noNotesMessage.classList.add("hidden");
     }
 
+    const noListsMessage = document.getElementById("noListsMessage"); // Get
+
+    if (filteredLists.length === 0) {
+noListsMessage.classList.remove("hidden"); // Show the no lists message
+  } else {
+    noListsMessage.classList.add("hidden");
+  }
+
     // Display notes
+    
     filteredNotes.forEach((note, index) => {
         const noteDiv = document.createElement("div");
         const noteDate = new Date(note.date); // Convert the stored date string back to a Date object
         const formattedDate = formatDate(noteDate); // Format the date for display
         const lockIndicator = note.password && note.password !== "" ? ' <i class="fas fa-lock"></i>' : "";
-        
+       
         const noteAIbutton = !note.password || note.password === "" 
         ? `
         <button class="summarize-btn" 
@@ -587,18 +581,26 @@ function displayFilteredNotesAndLists(filteredNotes, filteredLists) {
     });
 
     // Display lists
+      
     filteredLists.forEach((list, index) => {
-        const listDiv = document.createElement("div");
-
+     
+      const listDiv = document.createElement("div");
+const listDate = new Date(list.date); // Convert the stored date string back to a Date object
+    const formattedDate = formatDate(listDate); // Format the date for display
+    const loclIndicator = list.password && list.password !== "" ? ' <i class="fas fa-lock"></i>' : "";
         // Highlight list name with search term
-        const highlightedListName = highlightSearchTerm(list.name, document.getElementById('searchInput').value.toLowerCase());
+        const highlightedListName = highlightSearchTerm(list.title, document.getElementById('searchInput').value.toLowerCase());
 
         listDiv.innerHTML = `
-        <div class="note" onclick="openList(${index})">
-            <h4>${highlightedListName}</h4>
-            <span class="note-date">${list.date || "No date"}</span>
-            <button class="delete-btn" onclick="event.stopPropagation(); deleteList(${index})">Delete</button>
-        </div>
+     <div class="note" onclick="openList(${index})">    
+  <i class="fas fa-list"></i>
+  <div class="note-header">
+     <h4>${highlightedListName}</h4>
+    ${loclIndicator}
+    </div>
+  <span class="list-date">${formattedDate}</span>
+   <button class="delete-btn" onclick="deleteList(${index}); event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
+  </div>
         `;
         container.appendChild(listDiv);
     });
@@ -615,7 +617,7 @@ function searchNotes() {
 
     // Filter lists safely
     const filteredLists = lists.filter(list =>
-        list?.name?.toLowerCase().includes(searchTerm)
+        list?.title?.toLowerCase().includes(searchTerm)
     );
 
     // Display both with highlights
@@ -925,19 +927,19 @@ function saveNote() {
   displayNotes();
   showSection('combinedContainer');
   document.getElementById("notePasswordModal").classList.add("hidden");
-document.getElementById("infoContainer").style.display = "none";
+
   // Reset editing state
   editingNoteIndex = null;
 }
 
 function closeNotePassword() {
-   showInfo("You have unsaved changes.");
+   showToast("You have unsaved changes.");
   document.getElementById("notePasswordModal").style.display = "none";
  
 }
 
 function showInfo(message) {
-    const infoBox = document.getElementById('infoContainer');
+    const infoBox = document.getElementById('infoContainer2');
     document.getElementById('infoText').textContent = message;
     infoBox.style.display = 'flex';
   }
@@ -1037,6 +1039,7 @@ function displayNotes() {
   const container = document.getElementById("notesContainer");
   container.innerHTML = "";
   const noNotesMessage = document.getElementById("noNotesMessage"); // Get the no notes message element
+  document.getElementById("noNotesMessage").innerHTML = "This space is lonely. Add a note!";
   if (notes.length === 0) {
     noNotesMessage.classList.remove("hidden"); // Show the no notes message
   } else {
@@ -1441,12 +1444,14 @@ function updateLastSyncedDisplay() {
 function openList(index) {
   const list = lists[index];
 
+
   // Check if the list has a password
   if (list.password) {
     // Store the index of the list being accessed in the modal
     document.getElementById("listPasswordModal").dataset.listIndex =
       index;
     document.getElementById("listPasswordModal").style.display = "flex";
+    document.getElementById("listPasswordInput").value = "";
   } else {
     // If no password is required, proceed to open the list
     document.getElementById("listTitle").value = list.title;
@@ -1609,7 +1614,7 @@ if (!result) {
 
             // Done restoring
             overlay.style.display = "none";
-            showToast("Notes and Lists restored from Secondry Storage!");
+            showToast("Notes and Lists restored from Secondory Storage!");
           }
         };
       }
@@ -1633,6 +1638,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("syncToggle").checked = false;
   }
 });
+
+
 
 
 // Event listener for closing the password modal with Escape key
@@ -1679,6 +1686,7 @@ function displayLists() {
   const container = document.getElementById("listsContainerContent");
   container.innerHTML = ""; // Clear existing lists
   const noListsMessage = document.getElementById("noListsMessage"); // Get
+  document.getElementById("noListsMessage").innerHTML = "No lists yet.. Add";
   if (lists.length === 0) {
     noListsMessage.classList.remove("hidden"); // Show the no lists message
   } else {
@@ -1689,6 +1697,19 @@ function displayLists() {
     const listDate = new Date(list.date); // Convert the stored date string back to a Date object
     const formattedDate = formatDate(listDate); // Format the date for display
     const loclIndicator = list.password && list.password !== "" ? ' <i class="fas fa-lock"></i>' : "";
+    let progressHTML = "";
+    if (list.items && list.items.length > 0) {
+      const total = list.items.length;
+const checked = list.items.filter(item => item.checked).length;
+const percent = (checked / total) * 100;
+      progressHTML = `
+        <div class="list-progress">
+   <small>${Math.round(percent)}% Completed</small>
+        <progress value="${percent}" max="100" id="list-bar"></progress>
+ </div>
+      `;
+    }
+
     listDiv.innerHTML = `
   <div class="note" onclick="openList(${index})">    
   <i class="fas fa-list"></i>
@@ -1697,11 +1718,19 @@ function displayLists() {
     ${loclIndicator}
     </div>
   <span class="list-date">${formattedDate}</span>
-   <button class="delete-btn" onclick="deleteList(${index}); event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
+  ${progressHTML} 
+  <button class="delete-btn" onclick="deleteList(${index}); event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
   </div>
   `;
     container.appendChild(listDiv);
   });
+}
+
+function updateProgressForCurrentList() {
+  const total = currentItems.length;
+  const checked = currentItems.filter(item => item.checked).length;
+  const percent = Math.round((checked / total) * 100);
+  // update some existing progress bar DOM here
 }
 
 // Function to delete a list
@@ -1755,12 +1784,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
 
-    const dataInd = document.getElementById("dataInd");
-    if (dataInd) {
-      dataInd.innerText = syncToggle.checked
-        ? "📡 Data found in Secondry Storage"
-        : "No Data in Secondry Storage Storage found.";
-    }
+   
   }
 });
 
@@ -1848,8 +1872,12 @@ setTimeout(() => {
   openAntithreat(); // Refresh display with new version info
 }, 120000); // 2 min
 
+setTimeout(() => {
 alert("Database Updated Succesfully! Now we will run a quick scan to make sure everything is working fine.");
 startAiScan();
+}, 120500);
+
+
 }
 
 function getNextVersion(version) {
@@ -1877,6 +1905,8 @@ window.onload = function () {
   return;
   }
 };
+
+
 
 // Function to cancel adding a list
 
