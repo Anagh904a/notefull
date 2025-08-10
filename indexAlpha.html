@@ -273,7 +273,7 @@
     </button>
     <button class="sidebar-button" onclick="navigateTo('aiSection')">
       <i class="fas fa-shield-alt"></i>
-      <span class="label">Scan</span>
+      <span class="label">Quick Scan</span>
     </button>
     <button class="sidebar-button" onclick="navigateTo('settingsSection')">
       <i class="fas fa-cog"></i>
@@ -591,11 +591,10 @@
     <div class="info-text" id="infoText">You can safely leave this page while the scan is done</div>
   </div>
 </div>
-        <h2>Notefull Defender Scan page (Notes)</h2>
-        <P>List Support Coming soon...</P>
+        <h2>Notefull Defender Quick Scan For Notes</h2>
         <div class="scan-container">
           <div class="scan-circle" id="scanCircle"></div>
-          <p id="scanStatus">Click the button to start scanning...</p>
+          <p id="scanStatus" class="toggle-container">Click the button to start scanning...</p>
         </div>
         
         <div class="counters">
@@ -603,26 +602,18 @@
          
         </div>
 
-        <div class="progress-bar-container">
-  <div id="progressBar" class="progress-bar"></div>
-</div>
+     <div class="stat-box red">
+      <p>Threats Found</p>
+      <span id="threatsCount">0</span>
+    </div>
+
+  
         
-        <button onclick="startAiScan()" id="startScanButton">Start AI Scan</button>
+        <button onclick="startAiScan()" id="startScanButton">Start Quick Scan</button>
         <div id="resultsContainer"></div>
       </div>
       
-<div class="spinner-container" class="hidden">
-    <!-- Windows 11 Logo -->
-   <div class="logo"></div>
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-    <div class="cursor" aria-label="Windows 11 cursor animation"></div>
-
-    <!-- Text under cursor -->
-    <div class="message">
-      Recovering your PC...
-    </div>
-  </div>
    
 
    
@@ -654,7 +645,7 @@
 <!-- TOAST HTML -->
 <div id="aiToast" class="toast">
   <div class="toast-content">
-    <strong>Notefull Defender Scan Completed!</strong>
+    <strong>Quick Scan has Completed!</strong>
     <span>Please check the results.</span>
   </div>
 </div>
