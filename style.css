@@ -1255,73 +1255,56 @@ top: 0; left: 0;
   font-weight: bold;
 }
 
-.progress-bar-container {
-  width: 80%;
-  height: 10px;
-  background-color: #ddd;
-  border-radius: 6px;
-  overflow: hidden;
-  margin: 10px auto;
-  border: #000;
- 
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
 }
 
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #4CAF50, #2E7D32);
-  transition: width 0.2s ease;
-border: 2px solid #000;
+.stat-box {
+  background: #f4f4f4;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+  margin: 0 5px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.stat-box span {
+  display: block;
+  font-size: 28px;
+  margin-top: 5px;
+}
+
+.stat-box.green {
+  border-left: 5px solid #4CAF50;
+}
+
+.stat-box.red {
+  border-left: 5px solid #0059ff;
+}
+
+.alert-msg {
+  background: #ffe5e5;
+  color: #d32f2f;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.success-msg {
+  background: #e0ffe0;
+  color: #2e7d32;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
 }
 
 
-      .feature-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
-      }
-
-     
-
-
-      .feature-item {
-        text-align: center;
-        flex: 1 1 200px;
-        /* Flex-grow, flex-shrink, flex-basis */
-        min-width: 150px;
-        /* Minimum width for smaller screens */
-      }
-
-      .feature-button {
-        background: transparent;
-        /* Blue border */
-        border-radius: 5px;
-        padding: 15px;
-        width: 120px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: rgb(0, 0, 0);
-        /* Text color */
-      }
-
-      .feature-button i {
-        font-size: 24px;
-        color: #007bff;
-        /* Blue icon color */
-      }
-
-      .feature-button:hover {
-        background: rgb(143, 143, 143);
-        /* Blue background on hover */
-      }
-
-      .feature-description {
-        margin-top: 5px;
-        color: #777;
-        /* Description text color */
-        font-size: 14px;
-      }
+  
 
       i {
         margin-right: 8px;
@@ -1339,12 +1322,58 @@ border: 2px solid #000;
 }
 
 #startScanButton {
-  display: block;             /* Makes margin auto work */
-  margin: 0 auto;             /* Horizontally centers the button */
-  padding: 10px 20px;         /* Optional: for better spacing */
-  font-size: 16px;            /* Optional: for better text */
-  cursor: pointer;           /* Optional: pointer on hover */
+  display: block;
+  margin: 20px auto;
+  padding: 14px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(90deg, #007bff, #00e5ff);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5);
+  transition: all 0.3s ease;
 }
+
+#startScanButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.7);
+}
+
+#startScanButton:active {
+  transform: scale(0.98);
+}
+
+#startScanButton.scanning {
+  background: linear-gradient(90deg, #ff5722, #ff9800);
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.8);
+}
+
+.severity {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 8px;
+  text-transform: uppercase;
+}
+.severity.high { background-color: red; color: white; }
+.severity.medium { background-color: orange; color: white; }
+
+.protect-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.protect-btn:hover {
+  background-color: #0056b3;
+}
+
 
 
   @keyframes default-spin {
@@ -1360,6 +1389,13 @@ border: 2px solid #000;
   font-weight: bold;
   text-align: center;
   margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background-color: #f2f4f8;
+  border-radius: 10px;
 }
 
 
