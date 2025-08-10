@@ -309,7 +309,7 @@ function deleteSelectedNotes() {
 function clearData() {
   if (
     confirm(
-      "Are you sure you want to clear all data? This action cannot be undone. You can still backup using secondary storage."
+      "Are you sure you want factory reset? This action cannot be undone."
     )
   ) {
     localStorage.removeItem("notes");
@@ -355,27 +355,41 @@ document
 toggleButtons();
 
 
+let isPaused = false;
+let scanInterval;
+let aiMessages = [
+  "Scanning for leaked credentials...",
+  "Checking for sensitive keywords...",
+  "Validating security integrity...",
+  "Analyzing note metadata...",
+  "Cross-referencing suspicious terms..."
+];
+let messageIndex = 0;
 
 function startAiScan() {
   const scanStatus = document.getElementById("scanStatus");
   const resultsContainer = document.getElementById("resultsContainer");
   const scanCircle = document.getElementById("scanCircle");
   const notesCountElem = document.getElementById("notesCount");
-  const progressBar = document.getElementById("progressBar");
   const infoBox = document.getElementById("infoContainer2");
-  
-//Show Info Box
-infoBox.style.display = "flex";
-showInfo("You can safely leave this page while the scan completes.");
+  const threatsCountElem = document.getElementById("threatsCount");
+
+  // Show Info Box
+  infoBox.style.display = "flex";
+  showInfo("You can safely leave this page while the scan completes.");
+
   // Reset UI
   resultsContainer.innerHTML = "";
-  scanStatus.textContent = "Initializing AI scan...";
-  
+  scanStatus.textContent = "Quick scan in progress";
+  threatsCountElem.textContent = "0";
   scanCircle.style.animation = "spin 1s linear infinite";
   scanCircle.style.border = "";
-scanCircle.style.borderTopColor = "rgb(0, 0, 0)";
+  scanCircle.style.borderTopColor = "rgb(0, 0, 0)";
   notesCountElem.textContent = "0";
-progressBar.style.width = "0"; 
+  const startBtn = document.getElementById("startScanButton");
+  startBtn.textContent = "Scanning...";
+  startBtn.classList.add("scanning");
+  startBtn.disabled = true;
 
   const notes = JSON.parse(localStorage.getItem("notes")) || [];
   const sensitiveKeywords = [
@@ -393,59 +407,72 @@ progressBar.style.width = "0";
   const scanInterval = setInterval(() => {
     if (index >= notes.length) {
       clearInterval(scanInterval);
-infoBox.style.display = "none";
+      infoBox.style.display = "none";
       const endTime = Date.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
-     
+      startBtn.textContent = "Start Quick Scan";
+      startBtn.classList.remove("scanning");
+      startBtn.disabled = false;
+
       notesCountElem.textContent = `${notes.length}`;
-       showAiToast();
+      showAiToast();
 
       if (threatsCount === 0) {
         scanCircle.style.borderColor = "#4CAF50";
-      
         scanStatus.textContent = `Scan complete in ${duration}s — No threats found!`;
-        resultsContainer.innerHTML = "<div class='success-msg'>All notes are safe!</div>";
+        resultsContainer.innerHTML = "<div class='success-msg'>✅ All notes are safe!</div>";
       } else {
         scanCircle.style.borderColor = threatsCount === 1 ? "orange" : "red";
-        scanStatus.textContent = `Scan complete in ${duration}s — ${threatsCount} threat${threatsCount > 1 ? "s" : ""} found!`;
-        resultsContainer.innerHTML = foundSensitiveData.join("<br>");
+        scanStatus.textContent = `Scan complete in ${duration}s`;
+        
+        // Add Protect Now button
+        resultsContainer.innerHTML = foundSensitiveData.join("<br>") +
+          `<button class="protect-btn" onclick="redirectProtect()">Protect Now</button>`;
       }
 
       // Auto-scroll to results
       resultsContainer.scrollIntoView({ behavior: "smooth" });
-        scanCircle.style.animation = "none";
+      scanCircle.style.animation = "none";
       return;
-      console.log('AI SCAN CALLED');
     }
 
     const note = notes[index];
-   const currentTitle = note?.title || `Untitled Note`;
-notesCountElem.textContent = `🧠 Scanning: "${currentTitle}"`;
-progressBar.style.width = `${((index + 1) / notes.length) * 100}%`;
-
+    notesCountElem.textContent = index + 1;
 
     if (note && (!note.password || note.password.trim() === "")) {
       const content = (note.content || "").toLowerCase();
       const title = note.title || "Untitled";
 
-      const isSensitive = sensitiveKeywords.some(keyword =>
+      const matchedKeyword = sensitiveKeywords.find(keyword =>
         content.includes(keyword.toLowerCase())
       );
 
-      if (isSensitive && !scannedTitles.has(title)) {
+      if (matchedKeyword && !scannedTitles.has(title)) {
+        // Determine severity
+        let severity = /password|credit card|ssn|bank account/.test(matchedKeyword) ? "High" : "Medium";
+
         foundSensitiveData.push(
-          `<div class="alert-msg">Sensitive data found in: <strong style="color:red;">${title}</strong></div>`
+          `<div class="alert-msg">Sensitive data found in: 
+             <strong style="color:red;">${title}</strong>
+             <span class="severity ${severity.toLowerCase()}">${severity}</span>
+           </div>`
         );
         scannedTitles.add(title);
         threatsCount++;
-      } 
+        threatsCountElem.textContent = threatsCount;
+      }
     }
 
     index++;
-    
-  }, 2500); // Scan delay (ms)
- 
+  }, 100); // Scan delay (ms)
 }
+
+// Redirect to home & alert
+function redirectProtect() {
+  alert("Please add a password to sensitive notes yourself — automatic protection is not available.");
+  
+}
+
 
 
 function showAiToast() {
@@ -927,7 +954,7 @@ function saveNote() {
   displayNotes();
   showSection('combinedContainer');
   document.getElementById("notePasswordModal").classList.add("hidden");
-
+cancelList();
   // Reset editing state
   editingNoteIndex = null;
 }
@@ -1406,6 +1433,7 @@ showSection("combinedContainer");
 editingListIndex = null;
 document.getElementById("listPasswordModalr").classList.add("hidden");
 syncListToIndexedDB(listData);
+cancelNote();
 }
 
 function syncListToIndexedDB(listData) {
@@ -1509,7 +1537,7 @@ const newItemInput = document.getElementById("newItem");
 const newItemValue = newItemInput.value.trim();
 
 if (newItemValue === "") {
-showToast("Item cannot be empty!");
+showToast("Item cannot be empty");
 return;
 }
 
@@ -1522,18 +1550,13 @@ document
   .getElementById("newItem")
   .addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
-      addItem();
+      alert("Please use add button, enter functions are under devlopment!");
     }
   });
 
-// Event listener for switching to note content with Enter key
-document
-  .getElementById("noteTitle")
-  .addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-      document.getElementById("noteContent").focus(); // Switch focus to note content
-    }
-  });
+  
+
+
 
 // Event listener for submitting password with Enter key
 
