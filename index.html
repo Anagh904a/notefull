@@ -6,7 +6,6 @@
     <title>Notes App Onboarding</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="manifest" href="manifest.json">
     <style>
       body {
         font-family: "Poppins", sans-serif;
@@ -144,13 +143,6 @@
         errorElement.textContent = error.message;
       });
   };
-</script>
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js');
-    });
-  }
 </script>
 <script>
   if (localStorage.getItem("onboardingComplete") === "true") {
