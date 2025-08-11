@@ -17,7 +17,7 @@
 
         margin: 0;
         padding: 0;
-        background: linear-gradient(to bottom, #f3f3f3, #cccccc);
+        background: #fff;
 
         display: flex;
         flex-direction: column;
@@ -829,7 +829,7 @@ font-weight: bolder;
   top: 0; left: 0;
   height: 100vh;
   width: 35%; /* Increased width for better spacing */
-  background: linear-gradient(180deg, #d2d2f7, #e6e6e7); /* Darker gradient for a professional look */
+  background: linear-gradient(180deg, #e9fcff, #e6e6e7); /* Darker gradient for a professional look */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1689,9 +1689,9 @@ top: 0; left: 0;
   position: relative;
 border: 2px solid black;
   border-radius: 15px;
-  padding: 16px;
+  padding: 15px;
   margin: 16px 8px;
-  background-color: #fff;
+        background: linear-gradient(to bottom, #ffffff, #f6fffe);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   flex: 1 1 calc(33% - 2rem); /* Three across by default */
@@ -1724,8 +1724,8 @@ border: 2px solid black;
 
 .note h4 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: bolder;
   color: #333;
 }
 
