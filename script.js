@@ -380,7 +380,7 @@ function startAiScan() {
 
   // Reset UI
   resultsContainer.innerHTML = "";
-  scanStatus.textContent = "Quick scan in progress";
+  scanStatus.textContent = "Quick scan in progress... Scanning Notes....";
   threatsCountElem.textContent = "0";
   scanCircle.style.animation = "spin 1s linear infinite";
   scanCircle.style.border = "";
@@ -392,11 +392,16 @@ function startAiScan() {
   startBtn.disabled = true;
 
   const notes = JSON.parse(localStorage.getItem("notes")) || [];
-  const sensitiveKeywords = [
+let sensitiveKeywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "null");
+
+if (!Array.isArray(sensitiveKeywords) || sensitiveKeywords.length === 0) {
+  // Fallback to built-in list
+  sensitiveKeywords = [
     "password", "ssn", "credit card", "bank account", "secret", "pin", "bank",
     "policy", "account", "pass", "id", "aadhaar", "card", "security", "key",
     "token", "license", "confidential", "credentials", "auth", "login"
   ];
+}
 
   let foundSensitiveData = [];
   let scannedTitles = new Set(); // prevent duplicate messages for same note
@@ -1682,7 +1687,7 @@ const itemDiv = document.createElement("div");
 itemDiv.innerHTML = `
 
 <div class="checklist-item">
-  <input type="checkbox" id="item-${index}" ${item.checked ? "checked" : ""} onchange="toggleCheck(${index})">
+  -<input type="checkbox" id="item-${index}" ${item.checked ? "checked" : ""} onchange="toggleCheck(${index})">
   <label for="item-${index}">${item.name}</label>
   <button onclick="removeItem(${index})"><i class="fas fa-trash"></i> Remove</button>
 </div>
@@ -1862,51 +1867,61 @@ showSection('antithreatSection');
 }
 
 function startUpdate() {
-  document.getElementById("updateModal").style.display = "flex";
-  document.getElementById("updateButton").disabled = true;
-  
+  const modal = document.getElementById("updateModal");
+  const statusEl = document.getElementById("updateStatus");
+  const updateBtn = document.getElementById("updateButton");
 
-  
-const statusEl = document.getElementById("updateStatus");
-statusEl.textContent = "Preparing updates...";
+  modal.style.display = "flex";
+  updateBtn.disabled = true;
 
-// After 10 seconds: change status
-setTimeout(() => {
-  statusEl.textContent = "Downloading update...";
-}, 10000); // 10 sec
+  let baseText = "Preparing updates";
+  let dotCount = 0;
+  const dotsInterval = setInterval(() => {
+    dotCount = (dotCount + 1) % 4;
+    statusEl.textContent = baseText + ".".repeat(dotCount);
+  }, 500);
 
-// After 1 min 30 sec: change again
-setTimeout(() => {
-  statusEl.textContent = "Installing update...";
-}, 90000); // 1 min 30 sec
+  // Step transitions
+  setTimeout(() => { baseText = "Downloading update"; }, 5000);
+  setTimeout(() => { baseText = "Installing update"; }, 20000);
 
-// After full update (2 mins): finalize
-setTimeout(() => {
-  // Get current version and auto-increment
-  let currentVersion = localStorage.getItem("version") || "1.0";
-  let nextVersion = getNextVersion(currentVersion);
-  localStorage.setItem("version", nextVersion);
+  setTimeout(() => {
+    clearInterval(dotsInterval);
 
-  // Update timestamp
-  const now = Date.now();
-  localStorage.setItem("lastUpdated", now);
+    //  Fetch keywords from GitHub
+    fetch("https://raw.githubusercontent.com/Anagh904a/notefull/refs/heads/main/sensitiveKeywords.json")
+      .then(res => res.json())
+      .then(data => {
+        localStorage.setItem("sensitiveKeywords", JSON.stringify(data));
+        console.log("Keywords updated:", data);
+      })
+      .catch(err => {
+        console.error("Failed to fetch keywords:", err);
+      })
+      .finally(() => {
+        // Finalize version update
+        let cur = localStorage.getItem("version") || "v1.0";
+        let nv = getNextVersion(cur);
+        localStorage.setItem("version", nv);
+        localStorage.setItem("lastUpdated", Date.now());
 
-  document.getElementById("updateModal").style.display = "none";
-  openAntithreat(); // Refresh display with new version info
-}, 120000); // 2 min
-
-setTimeout(() => {
-alert("Database Updated Succesfully! Now we will run a quick scan to make sure everything is working fine.");
-startAiScan();
-}, 120500);
-
-
+        modal.style.display = "none";
+        openAntithreat();
+        alert("Database Updated — Now running a quick scan...");
+        startAiScan();
+      });
+  }, 45000);
 }
 
+
 function getNextVersion(version) {
+  if (!version || !/^v?\d+(\.\d+)?$/.test(version)) {
+    return "v1.0"; // default if bad value
+  }
+
   let parts = version.replace("v", "").split(".");
-  let major = parseInt(parts[0]);
-  let minor = parseInt(parts[1]);
+  let major = parseInt(parts[0], 10) || 1;
+  let minor = parseInt(parts[1], 10) || 0;
 
   minor++;
   if (minor >= 10) {
@@ -1918,14 +1933,13 @@ function getNextVersion(version) {
 }
 
 window.onload = function () {
-  const lastUpdated = localStorage.getItem("lastUpdated");
+  const lastUpdated = parseInt(localStorage.getItem("lastUpdated"), 10);
   const now = Date.now();
-  const threeDays = 3 * 24 * 60 * 60 * 1000;
+  const UPDATE_INTERVAL = 3 * 24 * 60 * 60 * 1000; // 3 days in ms
 
-  if (!lastUpdated || now - parseInt(lastUpdated) > threeDays) {
-    showToast("AntiThreat Update Available!")
-  } else {
-  return;
+  // Show toast if update is due or never updated
+  if (!lastUpdated || now - lastUpdated > UPDATE_INTERVAL) {
+    showToast("AntiThreat Update Available!");
   }
 };
 
