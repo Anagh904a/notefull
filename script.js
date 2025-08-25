@@ -317,17 +317,31 @@ function clearData() {
     
     displayNotes();
     displayLists();
-    showToast("All data cleared successfully!");
+    alert("All data cleared successfully! All Settings are also cleared! Next time you would need to complete setup for the app again!");
+    
   }
 }
 
-function encryptData() {
-  ("Your Notes are auto-encrypted while saving");
-  }
-
-function decryptData() {
-  alert("Your data can't be dencryted due to security reasons. If you still want to proceed, contact developer")
+function toggleTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  document.getElementById('themeToggle').checked = theme === 'dark';
+  document.getElementById('themeLabel').textContent = theme === 'dark' ? '🌙 Dark' : '☀️ Light';
 }
+
+// Load saved theme on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  toggleTheme(savedTheme);
+
+  document.getElementById('themeToggle').addEventListener('change', function () {
+    toggleTheme(this.checked ? 'dark' : 'light');
+  });
+});
+
+
+
+
 
 // Function to toggle button states (enable/disable)
 function toggleButtons() {
@@ -1687,7 +1701,7 @@ const itemDiv = document.createElement("div");
 itemDiv.innerHTML = `
 
 <div class="checklist-item">
-  -<input type="checkbox" id="item-${index}" ${item.checked ? "checked" : ""} onchange="toggleCheck(${index})">
+  -><input type="checkbox" id="item-${index}" ${item.checked ? "checked" : ""} onchange="toggleCheck(${index})">
   <label for="item-${index}">${item.name}</label>
   <button onclick="removeItem(${index})"><i class="fas fa-trash"></i> Remove</button>
 </div>
