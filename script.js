@@ -462,9 +462,11 @@ if (!Array.isArray(sensitiveKeywords) || sensitiveKeywords.length === 0) {
       const content = (note.content || "").toLowerCase();
       const title = note.title || "Untitled";
 
-      const matchedKeyword = sensitiveKeywords.find(keyword =>
-        content.includes(keyword.toLowerCase())
-      );
+ const matchedKeyword = sensitiveKeywords.find(keyword => {
+  const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+  return regex.test(content);
+});
+
 
       if (matchedKeyword && !scannedTitles.has(title)) {
         // Determine severity
@@ -478,6 +480,9 @@ if (!Array.isArray(sensitiveKeywords) || sensitiveKeywords.length === 0) {
         );
         scannedTitles.add(title);
         threatsCount++;
+        showToast("Threats Found!");
+    const sound = document.getElementById("alertSound");
+  sound.play();
         threatsCountElem.textContent = threatsCount;
       }
     }
@@ -500,7 +505,7 @@ function showAiToast() {
 
     setTimeout(() => {
       toast.classList.remove('show');
-    }, 4000); // show for 4 seconds
+    }, 2000); // show for 4 seconds
   }
 
 
@@ -517,7 +522,9 @@ function showList() {
 
 function closeListPassword() {
   document.getElementById("listPasswordModalr").style.display = "none";
-  showToast("You have unsaved changes.")
+  showToast("You have unsaved changes.");
+       const sound = document.getElementById("errorSound");
+  sound.play();
 }
 
 
@@ -729,6 +736,8 @@ function verifyListPassword() {
     document.getElementById("listPassword").value = list.password;
   } else {
     showToast("Incorrect password!"); // Show an error message
+         const sound = document.getElementById("errorSound");
+  sound.play();
   }
 }
 
@@ -772,6 +781,8 @@ function deleteListVerifyPassword() {
     displayLists();
   } else {
     showToast("Incorrect password!"); // Show an error message
+         const sound = document.getElementById("errorSound");
+  sound.play();
   }
 }
 
@@ -936,11 +947,15 @@ function saveNote() {
 
   if (content === "") {
     showToast("Type some text!");
+     const sound = document.getElementById("errorSound");
+  sound.play();
     return;
   }
 
   if (title === "") {
-   showToast("Enter a title!")
+   showToast("Enter a title!");
+        const sound = document.getElementById("errorSound");
+  sound.play();
     return;
   }
 
@@ -981,6 +996,8 @@ cancelList();
 function closeNotePassword() {
    showToast("You have unsaved changes.");
   document.getElementById("notePasswordModal").style.display = "none";
+       const sound = document.getElementById("errorSound");
+  sound.play();
  
 }
 
@@ -1254,6 +1271,8 @@ async function handleSummarizeButtonClick(buttonElement) {
         }
     } else {
         showToast("No content found to summarize for this note.", 3000);
+             const sound = document.getElementById("errorSound");
+  sound.play();
     }
 }
 
@@ -1291,7 +1310,8 @@ function verifyPassword() {
     showNoteContent(note);
   } else {
     showToast("Incorrect password!");
-    
+         const sound = document.getElementById("errorSound");
+  sound.play();
   }
 }
 
@@ -1311,6 +1331,8 @@ function deleteVerifyPassword() {
     closeDeletePasswordModal(); // Close the modal
   } else {
     showToast("Incorrect password!"); // Show an error message
+         const sound = document.getElementById("errorSound");
+  sound.play();
   }
 }
 
@@ -1428,6 +1450,8 @@ const formattedDate = formatDate(date);
 
 if (title === "" || currentItems.length === 0) {
 showToast("Enter Data!");
+     const sound = document.getElementById("errorSound");
+  sound.play();
 return;
 }
 
@@ -1557,6 +1581,8 @@ const newItemValue = newItemInput.value.trim();
 
 if (newItemValue === "") {
 showToast("Item cannot be empty");
+     const sound = document.getElementById("errorSound");
+  sound.play();
 return;
 }
 
