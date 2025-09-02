@@ -15,14 +15,4 @@ Upcoming Plans
 🎉 App Launch Event: A special event is planned for launch day!
 
 
-Why join the launch event?
-
-Participants will receive:
-
-🔑 Exclusive early access to experimental AI features and premium functionalities.
-
-🎁 Always free lifetime access for event registrants — no hidden costs, no subscriptions.
-
-🧪 Optional beta access for testing upcoming features before anyone else.
-
 
