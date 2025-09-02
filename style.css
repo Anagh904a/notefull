@@ -16,6 +16,9 @@
   --light-theme-fix: rgb(172, 172, 172);
   --footer-color: #bebebe;
   --footer-button: #fff;
+--glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(12px);
 }
 
 /* dark theme */
@@ -29,6 +32,9 @@
     --light-theme-fix: rgb(54, 54, 54);
     --footer-color: #353535;
     --footer-button: #000;
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(8px);
 }
 
 
@@ -330,18 +336,29 @@ background: var(--bg-color);
 
       /* Modal Button Styles */
 .modal-button {
-    background: var(--bg-color);
+ 
      color: var(--text-color);
-    border: 2px solid #000000; /* Black border */
-    border-radius: 50%; /* Fully rounded buttons */
-    width: 56px; /* Increased width */
-    height: 56px; /* Increased height */
-  text-align: center;
-    align-items: center; /* Center icon vertically */
-    justify-content: center; /* Center icon horizontally */
-    font-size: 24px; /* Icon size */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.05)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid var(--text-color);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .modal-btn {
@@ -428,7 +445,10 @@ button {
         /* No border */
     color: var(--bg-color);
         /* Teal */
-        background: var(--text-color);
+     background: var(--text-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  
         /* Orange background */
 font-weight: bolder;
         /* White text */
@@ -1734,7 +1754,7 @@ input:checked + .slider:before {
 
     .note {
   position: relative;
-border: 2px solid black;
+border: 2px solid var(--text-color);
   border-radius: 15px;
   padding: 15px;
   margin: 16px 8px;
@@ -1746,6 +1766,7 @@ border: 2px solid black;
   justify-content: center;
   align-items: center;
   color: var(--text-color);
+  
 }
 
 @media (max-width: 768px) {
@@ -1787,9 +1808,9 @@ border: 2px solid black;
 
 .delete-btn {
    background: linear-gradient(135deg, #f89494, #d80000);
-  color: #fff;
+  color: var(--text-color);
   border: none;
-  
+  font-weight: bolder;
   font-size: 14px;
   
   cursor: pointer;
@@ -2453,11 +2474,11 @@ textarea {
 
 .summarize-btn {
     display: flex;
- 
+ font-weight: bolder;
 
     width: auto; /* Adjust width based on content */
     background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-    color: #ffffff;
+    color: var(--text-color);
 
    text-align: left;
     border: none;
