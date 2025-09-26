@@ -972,10 +972,14 @@ function saveNote() {
     // Update existing note
     notes[editingNoteIndex] = note;
     showToast("Saved");
+    const sound = document.getElementById("alertSound");
+  sound.play();
   } else {
     // Add new note
     notes.push(note);
     showToast("Saved");
+    const sound = document.getElementById("alertSound");
+  sound.play();
   }
 
   // Save to localStorage
@@ -1465,9 +1469,13 @@ date: formattedDate,
 if (editingListIndex !== null) {
 lists[editingListIndex] = listData;
 showToast("Saved");
+const sound = document.getElementById("alertSound");
+  sound.play();
 } else {
 lists.push(listData);
 showToast("Saved");
+const sound = document.getElementById("alertSound");
+  sound.play();
 }
 
 localStorage.setItem("lists", JSON.stringify(lists));
@@ -1683,6 +1691,8 @@ if (!result) {
             // Done restoring
             overlay.style.display = "none";
             showToast("Notes and Lists restored from Secondory Storage!");
+            const sound = document.getElementById("alertSound");
+  sound.play();
           }
         };
       }
@@ -1979,7 +1989,8 @@ window.onload = function () {
 
   // Show toast if update is due or never updated
   if (!lastUpdated || now - lastUpdated > UPDATE_INTERVAL) {
-    showToast("AntiThreat Update Available!");
+    showToast("New Definitions Available!");
+
   }
 };
 
