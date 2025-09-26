@@ -1090,7 +1090,7 @@ progress::-moz-progress-bar {
 
 .sync-time-text {
 font-family: 'Inter', sans-serif;
- 
+ background: var(--card-color);
 max-width: fit-content;
 color: var(--text-color);
  
