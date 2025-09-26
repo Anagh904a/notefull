@@ -10,7 +10,7 @@
   --bg-color: #ffffff;
   --text-color: #000000;
   --card-color: #f4f4f4;
-  --sidebar-bg: linear-gradient(180deg, #e9fcff, #e6e6e7);
+  --sidebar-bg: white;
   --modal-bg: #fff;
   --button-hover: rgb(85, 85, 85); 
   --light-theme-fix: rgb(172, 172, 172);
@@ -26,7 +26,7 @@
   --bg-color: #121212;
   --text-color: #ffffff;
   --card-color: #1f1f1f;
-    --sidebar-bg: linear-gradient(180deg, #5e5e5e, #000000);
+    --sidebar-bg: black;
   --modal-bg: #000;
   --button-hover: rgb(190, 190, 190); 
     --light-theme-fix: rgb(54, 54, 54);
@@ -772,65 +772,59 @@ color: var(--text-color-un);
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 95%;
+  width: 90%;
+  max-width: 500px;
   height: 64px;
-  background: var(--footer-color);
-  backdrop-filter: blur(4px);
-  border-top: 1px solid #e5e7eb;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px; /* optional spacing */
+  background: var(--card-color); /* semi-transparent modern look */
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-around;
   align-items: center;
-  justify-items: center;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-  border-radius: 60px;
-  padding: 0 12px;
+  border-radius: 40px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  padding: 0 10px;
   z-index: 100;
-  overflow: hidden;
-  color: var(--text-color);
+  border: 1px solid var(--text-color);
 }
 
-    .footer-bar button {
-      background: var(--footer-button);
-      border: none;
-       color: var(--text-color);
-      border-radius: 32px;
-      height: 55px;
-      width: 60px;
-      padding: 10px 0;
-      cursor: pointer;
-      transition: 0.2s;
-      text-align: center;
-      align-items: center;
-      justify-content: center;
-  
-    }
+.footer-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--text-color); /* light neutral button color */
+  border: none;
+  border-radius: 30px;
+  width: 70px;
+  height: 55px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: sans-serif;
+}
 
-    .footer-bar i {
-      display: block;
-      font-size: 1.125rem;
-     
-     color: var(--text-color);
-      text-align: center;
-      align-items: center;
-      justify-content: center;
-    }
+.footer-btn i {
+  font-size: 1.25rem;
+  margin-bottom: 3px;
+  color: #4b5563;
+  transition: color 0.3s;
+}
 
-    .footer-bar span {
-      font-size: 0.75rem;
-        color: var(--text-color);
-      text-align: center;
-      align-items: center;
-      justify-content: center;
-    }
+.footer-btn span {
+  font-size: 0.75rem;
+  color: #4b5563;
+  transition: color 0.3s;
+}
 
-    .footer-bar button:hover i,
-    .footer-bar button:hover span {
-      color: #2563eb;
-      text-align: center;
-      align-items: center;
-      justify-content: center;
-    }
+.footer-btn:hover {
+  background: #2563eb;
+  transform: translateY(-3px);
+}
+
+.footer-btn:hover i,
+.footer-btn:hover span {
+  color: #ffffff;
+}
+
 
 
 
@@ -895,7 +889,7 @@ color: var(--text-color-un);
   position: fixed;
   top: 0; left: 0;
   height: 100vh;
-  width: 35%; /* Increased width for better spacing */
+  width: 24%; /* Increased width for better spacing */
   background: var(--sidebar-bg); /* Darker gradient for a professional look */
   display: flex;
   flex-direction: column;
@@ -1289,7 +1283,7 @@ padding: 0 10px;
 }
 
 /* Responsive - collapsible sidebar */
-@media (max-width: 588px) {
+@media (max-width: 680px) {
 #sidebar {
 width: 180px;
 transform: translateX(-100%);
@@ -1666,9 +1660,7 @@ input:checked + .slider:before {
 
  
 
-      #changePasswordButton {
-        color: #ffffff;
-      }
+  
 
       .settings-button {
         background: transparent;
@@ -2471,6 +2463,8 @@ textarea {
             font-family: Arial, sans-serif;
             font-size: 14px;
         }
+
+        
 
 .summarize-btn {
     display: flex;
