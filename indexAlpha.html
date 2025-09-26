@@ -242,7 +242,7 @@
   <div class="modal-content">
     <h2>Welcome to Notefull!</h2>
     <p class="important" style="color: rgb(255, 166, 0);">This is an BETA TESTING VERSION. It is not recommended to save very important data.</p>
-    <p>Whats's New<br>-Fixed Bugs and implented user feedback of personal window <br>-Fixed colours <br> -Sound Update</p>
+    <p>Whats's New<br>-Fixed Bugs <br>-Revamped Nav Bar <br> -Sound Update 2.0</p>
 
     
       
@@ -275,21 +275,17 @@
       <i class="fas fa-cog"></i>
       <span class="label">Settings</span>
     </button>
-   
-<div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Last Synced: Never</div>
+   <button class="sidebar-button" onclick="closeSidebar()">
+    <i class="fa fa-window-close" aria-hidden="true"></i>
+      <span class="label">Close</span>
+    </button><br>
+<div id="lastSyncedStatu" class="sync-time-text"><i class="fas fa-clock"></i> Last Synced: Under Maintaince</div>
 
 
   </div>
 
-  
-    
-    <button class="sidebar-button" onclick="closeSidebar()">
-    
-      <span class="label">x</span>
-    </button>
-  </div>
 </div>
-</div>
+
 
 
 
@@ -336,7 +332,7 @@
   </div>
   <div class="text-box">
     <div class="title">Privacy</div>
-    <div class="subtitle">Policy · Permissions Manager · Session Management</div>
+    <div class="subtitle">Policy · Permissions Manager</div>
   </div>
 </div>
 
@@ -374,7 +370,7 @@
 </div>
   <div class="text-box">
     <div class="title">About</div>
-    <div class="subtitle">Version · Defender · Updates</div>
+    <div class="subtitle">Version · Shield· Updates</div>
   </div>
 </div>
 
@@ -392,7 +388,7 @@
 
 <h2>Secondary Storage Settings</h2>
 <p>Manage your secondary storage which prevents data loss</p><br>
-      <button class="settings-button" onclick="restoreFromIndexedDB()">
+      <!--<button class="settings-button" onclick="restoreFromIndexedDB()">
         🔄 Restore 
       </button>
       <span id="syncStatus">🔄 Sync is OFF</span>
@@ -404,15 +400,18 @@
         <span class="toggle-slider"></span>
       </label>
     </div>
-    <br>
+    <br> 
    
-   <br>
+   <br> -->
+   <h3>We are sorry to inform you but this feature got some serious issues and data losses 
+    and has been put under maintaince. We have decided to re-release this feature into our 
+    app most likely in Diwali Update! We are planning a big suprise update for you all.</h3>
   </div>
 </div>
      
 <div id="updateModal" class="hidden full-update-modal">
   <div class="loading-circle"></div>
-  <p style="color: #000;">Updating Notefull Defender...</p>
+  <p style="color: #000;">Updating Notefull Security Definitions...</p>
   <p id="updateStatus" style="color: #000;">Preparing updates...</p>
 </div>
 
@@ -421,14 +420,17 @@
     <i class="fas fa-arrow-left back-icon"></i> 
   </button>
   <div class="section-card">
-  <h4>App Version: 6.1</h4>
-  <button onclick="alert('Go to play store page for app updates!')">Update App</button>
+  <h4>App Version: 6.2</h4>
+<a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
+  <button>App Updates</button>
+</a> 
+
   </div>
   <div class="section-card">
-  <h2>Notefull Defender Updater</h2>
+  <h2>Notefull Shield Updater</h2>
   <p>Protect yourself against threats and vulnerabilities in Notefull</p>
   <h3>Last Updated On: <span id="lastUpdated"></span></h3>
-  <h3>Defender Version: <span id="currentVersion"></span></h3>
+  <h3>ShieldVersion: <span id="currentVersion"></span></h3>
   <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
 </div>
 
@@ -492,25 +494,21 @@
 
   <div class="section-card">
     <h2>Our Privacy Policy</h2>
-    <a href="https://docs.google.com/document/d/1cAsN4hexlf5bXj6hRMURkGX9vYadIkCA9axixYQjswY/edit?addon_store&tab=t.0#heading=h.4o4shqu4d9pj">VIEW</a>
+    <a href="https://docs.google.com/document/d/1cAsN4hexlf5bXj6hRMURkGX9vYadIkCA9axixYQjswY/edit?addon_store&tab=t.0#heading=h.4o4shqu4d9pj">Click Me To View</a>
   </div>
 
 
  <div class="section-card">
   <h2>Permission Manager for Notefull</h2>
 
-<P>-Reading Saved Data of app</P>
-<p>-Install updates in notefull</p>
-<p>System Permission:<br>WRITE_READ_INTERNET_ACCESS</p>
-<h4>1 system and 2 app permission given to notefull</h4>
+<div class="toggle-container">
+  <p>Access network connections</p> 
+<button onclick="alert('This permission cannot be disabled as it was given by system and disabling it may cause app to malfunction.')">Disable</button>
+</div>
+<h4>1 system permission given to Notefull</h4>
  </div>
 
- <div class="section-card">
-  <h2>Sessions</h2>
- 
-<div class="toggle-container">
-  Current Session
-</div>
+
 
 
  </div>
@@ -548,7 +546,7 @@
     <div class="info-text" id="infoText">You can safely leave this page while the scan is done</div>
   </div>
 </div>
-        <h2>Notefull Defender Quick Scan For Notes</h2>
+        <h2>Notefull Shield Quick Scan For Notes</h2>
         <div class="scan-container">
           <div class="scan-circle" id="scanCircle"></div>
           <p id="scanStatus" class="toggle-container">Click the button to start scanning...</p>
