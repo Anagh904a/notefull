@@ -41,7 +41,7 @@
       id="searchInput"
       placeholder="Search your data"
       oninput="searchNotes()"
-      style="margin-left: 10px; padding: 5px; font-size: medium; font-weight: bolder;"
+      style="margin-left: 10px; padding: 5px; font-size: medium; font-weight: bolder; color: var(--text-color);"
 
      >
   
@@ -115,7 +115,7 @@
         </div>
         <div class="form-group">
           <label for="noteContent">Content</label>
-          <textarea id="noteContent" placeholder="Your note content here..."></textarea>
+          <textarea id="noteContent" oninput="dummySaveNote()" placeholder="note content here..."></textarea>
         </div>
         <div class="footer-bar">
      <button type="button" id="changePasswordButton" onclick="showNotePassword()">
@@ -242,7 +242,7 @@
   <div class="modal-content">
     <h2>Welcome to Notefull!</h2>
     <p class="important" style="color: rgb(255, 166, 0);">This is an BETA TESTING VERSION. It is not recommended to save very important data.</p>
-    <p>Whats's New<br>-Fixed Bugs <br>-Revamped Nav Bar <br> -Sound Update</p>
+    <p>What's New <br>-New Glass Effects <br> -New appearance <br> -TECHNICAL CHANGE: Removed Flex Properties <br> -Fixed Browser Bar issues <br> -Added Auto-save functionality for notes and lists</p>
 
     
       
@@ -280,7 +280,7 @@
       <span class="label">Close Sidebar</span>
     </button><br>
 
-    <div id="lastSyncedStatu" class="sync-time-text"><i class="fas fa-clock"></i> Last Synced: Under Maintenance</div>
+    <div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Sync: Wait for Diwali Update</div>
 
 
   </div>
@@ -421,7 +421,7 @@
     <i class="fas fa-arrow-left back-icon"></i> 
   </button>
   <div class="section-card">
-  <h4>App Version: 6.2</h4>
+  <h4>App Version: 6.3pre-release2</h4>
 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
   <button>App Updates</button>
 </a> 
@@ -430,8 +430,8 @@
   <div class="section-card">
   <h2>Notefull Shield Updater</h2>
   <p>Protect yourself against threats and vulnerabilities in Notefull</p>
-  <h3>Last Updated On: <span id="lastUpdated"></span></h3>
-  <h3>ShieldVersion: <span id="currentVersion"></span></h3>
+  <h3>Release Code: <span id="lastUpdated"></span></h3>
+  <h3>Shield Version: <span id="currentVersion"></span></h3>
   <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
 </div>
 
