@@ -19,6 +19,8 @@
 --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(12px);
+  --note-bg: yellow;
+  --list-bg: rgb(0, 140, 255);
 }
 
 /* dark theme */
@@ -35,6 +37,8 @@
       --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(8px);
+    --note-bg: rgb(143, 143, 39);
+  --list-bg: rgb(16, 92, 143);
 }
 
 
@@ -152,7 +156,12 @@ background: var(--bg-color);
         padding: 20px;
         border-radius: 15px;
         width: 350px;
-  background: var(--bg-color);
+    background: rgba(255, 255, 255, 0.1); /* semi-transparent */
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
+  backdrop-filter: blur(10px); /* blur the background behind the element */
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
       
       }
 
@@ -322,7 +331,12 @@ background: var(--bg-color);
         padding: 20px;
         border-radius: 15px;
         width: 350px;
-  background: var(--bg-color);
+    background: rgba(255, 255, 255, 0.1); /* semi-transparent */
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
+  backdrop-filter: blur(10px); /* blur the background behind the element */
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
         top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -623,28 +637,7 @@ h3 {
         overflow-y: auto;
       }
 
-     .toast {
-  position: fixed;
-  top: 20px;
-  right: -400px; /* start offscreen */
-  background-color: var(--text-color);
-  color: var(--card-color);
-  padding: 16px 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-  font-size: 14px;
-  z-index: 9999;
-  transition: right 0.5s ease, opacity 0.5s ease;
-  opacity: 0;
-  max-width: 320px;
-  pointer-events: auto;
-}
-
-.toast.show {
-  right: 20px;
-  opacity: 1;
-}
+   
 
 
 
@@ -775,7 +768,12 @@ color: var(--text-color-un);
   width: 90%;
   max-width: 500px;
   height: 64px;
-  background: var(--card-color); /* semi-transparent modern look */
+   background: rgba(255, 255, 255, 0.1); /* semi-transparent */
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
+  backdrop-filter: blur(10px); /* blur the background behind the element */
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-around;
@@ -843,11 +841,34 @@ color: var(--text-color-un);
         display: block;
         /* Ensure the date is on a new line */
         font-size: 14px;
-        color: #888;
+        color: var(--text-color);
         margin-top: 5px;
         text-align: left;
         /* Align text to the left */
       }
+
+      .list h4 {
+  margin: 0;
+ 
+  font: bolder;
+  font-size: large;
+}
+
+.list:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+
+}
+
+.list .list-date {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-top: 6px; /* controlled space below header */
+}
+
+.list .delete-btn {
+  margin-top: 10px;
+}
 
       /* Style for Undo and Redo Buttons */
       #undoButton,
@@ -890,7 +911,12 @@ color: var(--text-color-un);
   top: 0; left: 0;
   height: 100vh;
   width: 24%; /* Increased width for better spacing */
-  background: var(--sidebar-bg); /* Darker gradient for a professional look */
+   background: rgba(255, 255, 255, 0.1); /* semi-transparent */
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
+  backdrop-filter: blur(10px); /* blur the background behind the element */
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -907,17 +933,39 @@ color: var(--text-color);
 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-/* Animation states */
-#sidebar.hide-anim {
-  opacity: 0;
-  transform: translateX(-100%);
-
-}
-#sidebar.show-anim {
-  opacity: 1;
-  transform: translateX(0);
+#show-anim {
+  display: block;
+  animation: slideIn 0.3s ease forwards;
 }
 
+/* When hidden */
+hide-anim {
+  animation: slideOut 0.3s ease forwards;
+}
+
+/* Slide In Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide Out Animation */
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
 
 
 /* Animation states */
@@ -937,15 +985,15 @@ pointer-events: none;
 .sidebar-button {
 display: flex;
 align-items: center;
-background: transparent;
-border: none;
-color: var(--text-color);
+  background:  transparent; /* semi-transparent */
+  border-radius: 15px;
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
 padding: 12px 20px;
 font-size: 16px;
 width: 100%;
 cursor: pointer;
 transition: background-color 0.3s ease, color 0.3s ease;
-border-radius: 0 25px 25px 0;
 user-select: none;
 overflow: hidden;
 position: relative;
@@ -953,8 +1001,7 @@ position: relative;
 
 .sidebar-button:hover {
   background: transparent;
- 
-}
+ }
 
 .sidebar-button i {
 font-size: 20px;
@@ -1028,7 +1075,7 @@ transition: opacity 0.3s ease, transform 0.3s ease;
 
 .list-progress {
   margin-top: 5px;
-  
+  width: 98%;
 }
 
 #list-bar {
@@ -1090,7 +1137,12 @@ progress::-moz-progress-bar {
 
 .sync-time-text {
 font-family: 'Inter', sans-serif;
- background: var(--card-color);
+  background: rgba(255, 255, 255, 0.1); /* semi-transparent */
+  border-radius: 15px;
+  border: 1px solid var(--text-color); /* subtle border */
+  backdrop-filter: blur(10px); /* blur the background behind the element */
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
 max-width: fit-content;
 color: var(--text-color);
  
@@ -1196,7 +1248,7 @@ font-weight: bolder;
 .spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid #cce;
+  border: 5px solid var(--text-color);
   border-top: 5px solid #0078D7;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -1416,7 +1468,7 @@ input:checked + .slider:before {
    width: 80px;
       height: 80px;
       border: 5px solid transparent;
-      border-top-color: rgb(0, 0, 0);
+      border-top-color: var(--text-color);
       border-radius: 50%;
       animation: default-spin 1s linear infinite;
 }
@@ -1745,41 +1797,44 @@ input:checked + .slider:before {
 
 
     .note {
-  position: relative;
+  
 border: 2px solid var(--text-color);
   border-radius: 15px;
   padding: 15px;
   margin: 16px 8px;
-        background: var(--card-color);
+        background: var(--note-bg);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  flex: 1 1 calc(33% - 2rem); /* Three across by default */
-  min-width: 200px;
-  justify-content: center;
-  align-items: center;
-  color: var(--text-color);
+ width: calc(100% - 40px);
+color: var(--text-color);
   
 }
 
-@media (max-width: 768px) {
-  .note {
-    flex: 1 1 100%;
-    margin: 8px 0; /* optional so cards stack neatly */
-  }
+
+
+
+
+  .list {
+  border: 2px solid var(--text-color);
+  border-radius: 15px;
+  padding: 15px;
+  margin: 16px 8px;
+        background: var(--list-bg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+ width: calc(100% - 40px);
+color: var(--text-color);
 }
 
-@media (max-width: 500px) {
-  .note {
-    flex: 1 1 100%;
-    margin: 8px 0; /* optional so cards stack neatly */
-    align-items: center;
-    justify-content: center;
-  }
-}
+
+
+
+
+
 
 
 .note:hover {
-  transform: translateY(-2px);
+  transform: translateY(-6px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -1793,7 +1848,7 @@ border: 2px solid var(--text-color);
 .note-date {
   display: block;
   font-size: 15px;
-  color: #777;
+  color: var(--text-color);
   margin-top: 4px;
   margin-bottom: 10px;
 }
@@ -2233,8 +2288,7 @@ border: 2px solid var(--text-color);
   #notesContainer,
   #listsContainerContent {
     margin-bottom: 12px;
-    display: flex;
-    flex-wrap: wrap;
+   
   gap: 1rem;
   }
 
