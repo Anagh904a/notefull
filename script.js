@@ -1,5 +1,6 @@
 
 
+
 //part 1 of total code
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
 let editingNoteIndex = null;
@@ -522,9 +523,7 @@ function showList() {
 
 function closeListPassword() {
   document.getElementById("listPasswordModalr").style.display = "none";
-  showToast("You have unsaved changes.");
-       const sound = document.getElementById("errorSound");
-  sound.play();
+dummySaveList();
 }
 
 
@@ -997,11 +996,40 @@ cancelList();
   editingNoteIndex = null;
 }
 
+function dummySaveNote() {
+    const title = document.getElementById('noteTitle').value.trim();
+  const content = document.getElementById('noteContent').value.trim();
+  const password = document.getElementById('notePassword').value.trim();
+  const date = new Date();
+  const formattedDate = formatDate(date);
+
+  
+  const note = {
+    title,
+    content,
+    password,
+    pinned: false,
+    date: formattedDate
+  };
+ if (editingNoteIndex !== null) {
+    // Update existing note
+    notes[editingNoteIndex] = note;
+    
+  
+  } else {
+    // Add new note
+    notes.push(note);
+  
+  }
+
+  localStorage.setItem('notes', JSON.stringify(notes));
+
+}
+
 function closeNotePassword() {
-   showToast("You have unsaved changes.");
+
   document.getElementById("notePasswordModal").style.display = "none";
-       const sound = document.getElementById("errorSound");
-  sound.play();
+ dummySaveNote();
  
 }
 
@@ -1487,6 +1515,31 @@ syncListToIndexedDB(listData);
 cancelNote();
 }
 
+function dummySaveList() {
+const title = document.getElementById("listTitle").value.trim();
+const password = document.getElementById("listPassword").value.trim();
+const date = new Date();
+const formattedDate = formatDate(date);
+
+
+
+const listData = {
+title,
+items: JSON.parse(JSON.stringify(currentItems)), // Deep copy
+password,
+date: formattedDate,
+};
+
+if (editingListIndex !== null) {
+lists[editingListIndex] = listData;
+
+} else {
+lists.push(listData);
+}
+
+localStorage.setItem("lists", JSON.stringify(lists));
+}
+
 function syncListToIndexedDB(listData) {
   console.log("Trying to sync list to IndexedDB...");
 
@@ -1597,6 +1650,7 @@ return;
 currentItems.push({ name: newItemValue, checked: false });
 newItemInput.value = "";
 displayChecklist();
+dummySaveList();
 }
 // Event listener for adding item with Enter key
 document
@@ -1704,18 +1758,6 @@ if (!result) {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  updateLastSyncedDisplay();
-  displayNotes(); // Display notes on page load
-  displayLists(); // Display lists on page load
-  localStorage.setItem("lastSynced", new Date().toISOString()); // Initialize last synced time
-  const syncState = localStorage.getItem("syncEnabled");
-  if (syncState === null || syncState === "true") {
-    document.getElementById("syncToggle").checked = true;
-  } else {
-    document.getElementById("syncToggle").checked = false;
-  }
-});
 
 
 
@@ -1789,7 +1831,7 @@ const percent = (checked / total) * 100;
     }
 
     listDiv.innerHTML = `
-  <div class="note" onclick="openList(${index})">    
+  <div class="list" onclick="openList(${index})">    
   <i class="fas fa-list"></i>
   <div class="note-header">
     <h4>${list.title}</h4>
