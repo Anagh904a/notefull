@@ -31,8 +31,7 @@
 
 <div id="combinedContainer" class="container hidden">
       
-
-      <div class="top-bar">
+<div class="top-bar">
      
         <i id="sidebarToggle" class="fas fa-bars" onclick="toggleSidebar()"></i>
      
@@ -41,11 +40,10 @@
       id="searchInput"
       placeholder="Search your data"
       oninput="searchNotes()"
-      style="margin-left: 10px; padding: 5px; font-size: medium; font-weight: bolder; color: var(--text-color);"
-
-     >
-  
+>
+  <div id="account-icon" class="account-icon" onclick="alert('This feature is under active Development')">A</div>
       </div>
+      
       
       
 <div class="sort-container">
@@ -85,7 +83,7 @@
 </div>
 
   <div id="addItemSection" class="container hidden">
-    <button class="modal-button" onclick="showSection('combinedContainer')">
+    <button class="modal-button" onclick="hideAddItem()">
         <i class="fas fa-arrow-left back-icon"></i>
       </button>
     <div id="itemText">
@@ -242,7 +240,7 @@
   <div class="modal-content">
     <h2>Welcome to Notefull!</h2>
     <p class="important" style="color: rgb(255, 166, 0);">This is an BETA TESTING VERSION. It is not recommended to save very important data.</p>
-    <p>What's New <br>-New Glass Effects <br> -New appearance <br> -TECHNICAL CHANGE: Removed Flex Properties <br> -Fixed Browser Bar issues <br> -Added Auto-save functionality for notes and lists</p>
+    <p>What's New <br>-Fixed UI bugs <br> -UI adjustments <br> -Readded old sync system <br> -Implemeted local account</p>
 
     
       
@@ -259,9 +257,14 @@
   
     
   <div class="sidebar-top">
+         <button class="modal-bn" onclick="closeSidebar()">
+ 
+X
+    </button>
     <label class="brand-l">
     <img class="brand" src="icon.png"> <div class="brand-t">Notefull</div>
-    </label>
+
+    </label>  
     <br>
     <button class="sidebar-button" onclick="navigateTo('combinedContainer')">
       <i class="fas fa-home"></i>
@@ -275,12 +278,9 @@
       <i class="fas fa-cog"></i>
       <span class="label">Settings</span>
     </button>
-   <button class="sidebar-button" onclick="closeSidebar()">
-    <i class="fa fa-window-close" aria-hidden="true"></i>
-      <span class="label">Close Sidebar</span>
-    </button><br>
+ <br>
 
-    <div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Sync: Wait for Diwali Update</div>
+    <div id="lastSyncedStatus" class="sync-time-text"><i class="fas fa-clock"></i> Sync: Never</div>
 
 
   </div>
@@ -389,7 +389,7 @@
 
 <h2>Secondary Storage Settings</h2>
 <p>Manage your secondary storage which prevents data loss</p><br>
-      <!--<button class="settings-button" onclick="restoreFromIndexedDB()">
+      <button class="settings-button" onclick="restoreFromIndexedDB()">
         🔄 Restore 
       </button>
       <span id="syncStatus">🔄 Sync is OFF</span>
@@ -403,10 +403,10 @@
     </div>
     <br> 
    
-   <br> -->
-   <h3>We are sorry to inform you but this feature got some serious issues and data losses 
+   <br> 
+   <!--<h3>We are sorry to inform you but this feature got some serious issues and data losses 
     and has been put under Maintainance. We have decided to re-release this feature into our 
-    app most likely in Diwali Update! We are planning a big suprise update for you all.</h3>
+    app most likely in Diwali Update! We are planning a big suprise update for you all.</h3>-->
   </div>
 </div>
      
@@ -421,7 +421,7 @@
     <i class="fas fa-arrow-left back-icon"></i> 
   </button>
   <div class="section-card">
-  <h4>App Version: 6.3pre-release2</h4>
+  <h4>App Version: 7.0pre-release1</h4>
 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
   <button>App Updates</button>
 </a> 
