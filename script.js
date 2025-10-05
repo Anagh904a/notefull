@@ -57,7 +57,7 @@ let backupDirHandle = null;
 
 
 document.addEventListener("DOMContentLoaded", function () {
-  
+   updateAccountIcon();
     startAiScan();
     
 });
@@ -1967,7 +1967,23 @@ showSection('antithreatSection');
   }
 }
 
+function updateAccountIcon() {
+  const username = localStorage.getItem('notesAppUser');
+  const accountIcon = document.getElementById('account-icon');
 
+  if (username && accountIcon) {
+    // 1. Get the first letter and convert it to uppercase
+    const firstLetter = username.trim().charAt(0).toUpperCase();
+
+    // 2. Set the content of the icon
+    accountIcon.textContent = firstLetter;
+    
+    // Optional: Make the icon interactive with the actual username
+    accountIcon.onclick = () => {
+      alert(`Account: ${username}\nThis feature is under active Development.`);
+    };
+  }
+}
 
 function openAntithreat() {
 showSection('antithreatSection');
