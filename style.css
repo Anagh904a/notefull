@@ -19,8 +19,8 @@
 --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(12px);
-  --note-bg: yellow;
-  --list-bg: rgb(0, 140, 255);
+  --note-bg: rgb(255, 255, 94);
+  --list-bg: rgb(142, 192, 233);
 }
 
 /* dark theme */
@@ -37,8 +37,8 @@
       --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(8px);
-    --note-bg: rgb(143, 143, 39);
-  --list-bg: rgb(16, 92, 143);
+  --note-bg: rgb(255, 255, 94);
+  --list-bg: rgb(142, 192, 233);
 }
 
 
@@ -286,7 +286,31 @@ background: var(--bg-color);
        
       }
 
-     
+     #addItemSection {
+  position: fixed;
+  top: 0;
+  right: 0;                /* pop from top-right corner */
+  width: 0;
+  height: 0;
+  background-color: #fff;  /* change as needed */
+  border-radius: 12px;     /* optional rounding at start */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  opacity: 0;
+  overflow: hidden;
+  z-index: 1000;
+  transition: all 0.5s ease;
+}
+
+/* Active state: fill screen */
+#addItemSection.show {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  opacity: 1;
+}
+
 
      
 
@@ -388,6 +412,23 @@ color: #000;
     font-size: 18px; /* Icon size */
     cursor: pointer; /* Pointer cursor on hover */
     transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+}
+
+.modal-bn {
+  background: linear-gradient(135deg, #f89494, #d80000);
+color: var(--text-color);
+  width: 20%;
+  display: flex;
+    border-radius: 10px; /* Fully rounded buttons */
+   margin-left: 80%;
+    
+  text-align: center;
+    align-items: center; /* Center icon vertically */
+    justify-content: center; /* Center icon horizontally */
+    font-size: 18px; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+    min-width: 15px;
 }
 
 .modal-btn-close {
@@ -729,9 +770,7 @@ color: var(--text-color-un);
          color: var(--text-color);
     }
 
-    #sidebarToggle {
-      color: var(--text-color);
-    }
+   
 
     .form-group {
       margin-bottom: 1rem;
@@ -759,6 +798,10 @@ color: var(--text-color-un);
       min-height: 200px;
       resize: vertical;
     }
+
+
+
+    
 
 .footer-bar {
   position: fixed;
@@ -911,11 +954,8 @@ color: var(--text-color-un);
   top: 0; left: 0;
   height: 100vh;
   width: 24%; /* Increased width for better spacing */
-   background: rgba(255, 255, 255, 0.1); /* semi-transparent */
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
-  backdrop-filter: blur(10px); /* blur the background behind the element */
-  -webkit-backdrop-filter: blur(10px); /* for Safari */
+   background: var(--bg-color); /* semi-transparent */
+  
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
   display: flex;
   flex-direction: column;
@@ -936,6 +976,10 @@ color: var(--text-color);
 #show-anim {
   display: block;
   animation: slideIn 0.3s ease forwards;
+}
+
+#sidebar-toggle {
+  color: var(--text-color);
 }
 
 /* When hidden */
@@ -985,7 +1029,7 @@ pointer-events: none;
 .sidebar-button {
 display: flex;
 align-items: center;
-  background:  transparent; /* semi-transparent */
+  background: none; /* semi-transparent */
   border-radius: 15px;
   border: 1px solid var(--text-color);
   color: var(--text-color);
@@ -1278,7 +1322,7 @@ font-weight: bolder;
 }
 
 .highlight {
-    background-color: yellow;
+    background-color: rgb(255, 30, 0);
     font-weight: bold;
 }
 
@@ -1298,6 +1342,7 @@ color: var(--text-color);
 
 .brand-t {
   white-space: nowrap; /* prevent line-break */
+ 
 }
 
     .icon.wifi { background-color: #007bff; }
@@ -1745,49 +1790,71 @@ input:checked + .slider:before {
       }
 
 
- .top-bar {
-            display: flex;
-            align-items: center;
-            background-color: var(--card-color); /* bg-gray-100 */
-            border-radius: 9999px; /* rounded-full */
-            padding: 0.5rem; /* p-2 */
-            margin-bottom: 1rem; /* mb-4 */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-        }
+.top-bar {
+  width: 98%;
+ 
+  display: flex;          /* enables flex layout */
+  flex-direction: row;    /* default, horizontal alignment */
+  align-items: center;    /* vertical centering */
+  justify-content: space-between;
+  background-color: var(--card-color); /* keep style */
+  padding: 0.5rem 1rem; /* vertical + horizontal padding */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* subtle elevation */
+  border-radius: 9px; /* small rounding for the bar edges */
+  margin-bottom: 1rem;
+}
 
-        .top-bar input {
-            flex-grow: 1; /* flex-grow */
-            padding: 0.5rem; /* p-2 */
-            padding-left: 0.75rem; /* pl-3 */
-            background-color: transparent;
-            outline: none;
-            color: #4b5563; /* text-gray-700 */
-        }
-     
+.top-bar input {
+  
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-color); /* like Keep input bg */
+  border: none;
+  border-radius: 24px; /* rounded pill shape */
+  outline: none;
+  font-size: 0.95rem;
+  color: #202124; /* dark text like Keep */
+  transition: background 0.2s ease;
+  width: 40%;
+  margin-right: 40%;
+  margin-left: 2%;
+}
+
+.account-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #fbbc04; /* default accent color */
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.account-icon:hover {
+  transform: scale(1.1);
+  background-color: #e6ac00;
+}
 
 .top-bar button {
   background: none;
   border: none;
-  font-size: 18px;
-  color: #444;
+  font-size: 1.2rem;
+  color: #5f6368; /* Google Keep icon color */
   cursor: pointer;
-  margin-right: 10px;
+  margin-left: 0.5rem;
   transition: color 0.2s ease;
 }
 
 .top-bar button:hover {
-  color: var(--text-color)
+  color: #202124; /* darker on hover */
 }
 
-.top-bar input {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 17px;
-  padding: 8px 10px;
-  background-color: transparent;
-  color: #222;
-}
+
 
 .top-bar input::placeholder {
   color: #aaa;
@@ -1798,7 +1865,7 @@ input:checked + .slider:before {
 
     .note {
   
-border: 2px solid var(--text-color);
+
   border-radius: 15px;
   padding: 15px;
   margin: 16px 8px;
@@ -1815,8 +1882,7 @@ color: var(--text-color);
 
 
   .list {
-  border: 2px solid var(--text-color);
-  border-radius: 15px;
+border-radius: 15px;
   padding: 15px;
   margin: 16px 8px;
         background: var(--list-bg);
@@ -2112,24 +2178,7 @@ color: var(--text-color);
     text-align: center;
    }
 
-        .ai-note-home-btn {
-            background: linear-gradient(45deg, #38b2ac 0%, #48bb78 100%); /* Teal to Green Gradient */
-            color: #ffffff;
-            border: none;
-        }
-        .ai-note-home-btn:hover {
-            background: linear-gradient(45deg, #319795 0%, #38a169 100%);
-        }
-
-        .see-all-features-home-btn {
-            background-color: #cbd5e0; /* Gray for subtle look */
-            color: #4a5568; /* Darker text */
-            border: none;
-        }
-        .see-all-features-home-btn:hover {
-            background-color: #a0aec0;
-            color: #ffffff;
-        }
+  
 
   label {
     cursor: pointer;
