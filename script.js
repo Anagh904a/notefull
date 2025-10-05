@@ -321,6 +321,8 @@ function clearData() {
     alert("All data cleared successfully! All Settings are also cleared! Next time you would need to complete setup for the app again!");
     
   }
+  displayNotes();
+    displayLists();
 }
 
 function toggleTheme(theme) {
@@ -644,7 +646,7 @@ const listDate = new Date(list.date); // Convert the stored date string back to 
         const highlightedListName = highlightSearchTerm(list.title, document.getElementById('searchInput').value.toLowerCase());
 
         listDiv.innerHTML = `
-     <div class="note" onclick="openList(${index})">    
+     <div class="list" onclick="openList(${index})">    
   <i class="fas fa-list"></i>
   <div class="note-header">
      <h4>${highlightedListName}</h4>
@@ -808,6 +810,13 @@ function showSection(sectionId) {
   currentSection = sectionId; // Update current section
 }
 
+function showAddItem() {
+  addItemSection.classList.remove("hidden"); // make visible
+  setTimeout(() => {
+    addItemSection.classList.add("show");   // trigger pop animation
+  }, 10);
+}
+
 function navigateTo(sectionId) {
  document.querySelectorAll(".container").forEach((section) => {
     section.classList.add("hidden"); // Hide all sections
@@ -857,7 +866,7 @@ let isMessageBoxVisible = false; // Flag to track visibility
 
 
 function showAddNote() {
-  showSection("addItemSection"); // Show the add item section
+  showAddItem() // Show the add item section
   document.getElementById("noteContent").value = ""; // Clear the note content
   document.getElementById("notePassword").value = ""; // Clear the password input
   switchTab('note'); // Switch to the note tab
@@ -923,8 +932,7 @@ function closeAddItemModal() {
 
 // Function to cancel note and reset visibility
 function cancelNote() {
-  const section = document.getElementById("addItemSection");
-  section.classList.add("hidden");
+hideAddItem();
   showSection("combinedContainer");
   document.getElementById("notePasswordModal").classList.add("hidden");
 }
@@ -996,6 +1004,36 @@ cancelList();
   editingNoteIndex = null;
 }
 
+function syncNoteToIndexedDB(note) {
+  
+
+  if (!db) {
+    console.log("No DB");
+    return;
+  }
+  const syncState = localStorage.getItem("syncEnabled");
+  if (syncState !== "true") {
+    console.log("Sync disabled");
+    return;
+  }
+
+  if (!note.noteId) {
+    note.noteId = `${note.title}-${Date.now()}`;
+  }
+
+  if (notes.length === 0) {
+    
+    console.log("No notes to sync.");
+    return;
+   
+  }
+
+  const tx = db.transaction("notes", "readwrite");
+  tx.objectStore("notes").put(note);
+  localStorage.setItem("lastSynced", new Date().toISOString());
+updateLastSyncedDisplay();
+}
+
 function dummySaveNote() {
     const title = document.getElementById('noteTitle').value.trim();
   const content = document.getElementById('noteContent').value.trim();
@@ -1023,7 +1061,7 @@ function dummySaveNote() {
   }
 
   localStorage.setItem('notes', JSON.stringify(notes));
-
+editingNoteIndex = null;
 }
 
 function closeNotePassword() {
@@ -1038,27 +1076,7 @@ function showInfo(message) {
     document.getElementById('infoText').textContent = message;
     infoBox.style.display = 'flex';
   }
-function syncNoteToIndexedDB(note) {
-  if (!db) return;
-  const syncState = localStorage.getItem("syncEnabled");
-  if (syncState !== "true") return;
 
-  if (!note.noteId) {
-    note.noteId = `${note.title}-${Date.now()}`;
-  }
-
-  if (notes.length === 0) {
-    
-    console.log("No notes to sync.");
-    return;
-   
-  }
-
-  const tx = db.transaction("notes", "readwrite");
-  tx.objectStore("notes").put(note);
-  localStorage.setItem("lastSynced", new Date().toISOString());
-updateLastSyncedDisplay();
-}
 
 
 
@@ -1328,7 +1346,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function showListsSection() {
   showSection("combinedContainer"); // Show the lists container
   displayLists(); // Refresh the displayed lists
-  document.getElementById("addItemSection").classList.add("hidden"); // Ensure add list section is hidden
+hideAddItem();
 }
 
 function verifyPassword() {
@@ -1373,7 +1391,7 @@ function showNoteContent(note) {
   document.getElementById("noteContent").value = note.content;
   document.getElementById("notePassword").value = note.password;
   
-  showSection("addItemSection"); // Show the add item section
+  showAddItem() // Show the add item section
   // Set the index of the note being edited
   editingNoteIndex = notes.findIndex(
     (n) => n.title === note.title && n.content === note.content
@@ -1410,7 +1428,8 @@ function closeDeletePasswordModal() {
 }
 
 function closeAddListSection() {
-  document.getElementById("addItemSection").classList.add("hidden"); // Hide the add list section
+hideAddItem();
+    section.classList.remove("show"); // Hide the add list section
   showSection("combinedContainer"); // Show the lists section
 }
 
@@ -1431,11 +1450,12 @@ function showAddListSection() {
   // Hide all sections first
 
   document.querySelectorAll(".container").forEach((section) => {
-    section.classList.add("hidden"); // Hide all sections
+    
   });
 
   // Show the add list section
-  document.getElementById("addItemSection").classList.remove("hidden"); // Show the add list section
+showAddItem();
+   
 document.getElementById("addListSection").style.display = "block"; // Show the add list section
 document.getElementById("addNoteSection").style.display = "none"; // Show the add list section
 switchTab('checklist'); // Switch to the add list tab
@@ -1463,12 +1483,20 @@ switchTab('checklist'); // Switch to the add list tab
 // Function to cancel adding a list
 function cancelList() {
   // Hide the add list section and show the lists section
-  document.getElementById("addItemSection").classList.add("hidden"); // Hide the add list section
+hideAddItem();
+    section.classList.remove("show"); // Hide the add list section
   showSection("combinedContainer"); // Show the lists section
   displayNotes();
   displayLists();
   document.getElementById("listPasswordModalr").classList.add("hidden");
 
+}
+
+function hideAddItem() {
+  addItemSection.classList.remove("show");  // start hide animation
+  setTimeout(() => {
+    addItemSection.classList.add("hidden"); // hide completely
+  }, 500); // match transition duration
 }
 
 // Function to show a specific section
@@ -1564,12 +1592,13 @@ function updateLastSyncedDisplay() {
   if (!div) return;
 
   if (!lastSynced) {
-    div.innerText = "🕒 Last Synced: Never";
+    div.innerText = `<i class="fas fa-clock"></i> Last Synced: Never`;
     return;
   }
 
   const syncedDate = new Date(lastSynced);
-  div.innerText = "🕒 Last Synced: " + formatSyncTime(syncedDate);
+  div.innerHTML = `<i class="fas fa-clock"></i> Last Synced: ${formatSyncTime(syncedDate)}`;
+
 }
 
 // Function to open a list and pre-fill the add list section
@@ -1744,7 +1773,7 @@ if (!result) {
 
             // Done restoring
             overlay.style.display = "none";
-            showToast("Notes and Lists restored from Secondory Storage!");
+            showToast("Data restored from Secondory Storage!");
             const sound = document.getElementById("alertSound");
   sound.play();
           }
@@ -1891,10 +1920,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const syncState = localStorage.getItem("syncEnabled");
 
   if (syncToggle) {
-    if (syncState === null || syncState === "true") {
-      syncToggle.checked = true;
-    } else {
+    if (syncState === null || syncState === "false") {
       syncToggle.checked = false;
+    } else {
+      syncToggle.checked = true;
     }
 
     // Optional: set visual text
@@ -1926,7 +1955,7 @@ showSection('antithreatSection');
   const lastUpdated = localStorage.getItem("lastUpdated");
   const version = localStorage.getItem("version") || "v1.0";
 
-  document.getElementById("lastUpdated").textContent = lastUpdated || "Never";
+  document.getElementById("lastUpdated").textContent = lastUpdated || "Outdated";
   document.getElementById("currentVersion").textContent = version;
 
   const now = Date.now();
@@ -1946,7 +1975,7 @@ showSection('antithreatSection');
   const lastUpdated = localStorage.getItem("lastUpdated");
   const version = localStorage.getItem("version") || "v1.0";
 
-  document.getElementById("lastUpdated").textContent = lastUpdated || "Never";
+  document.getElementById("lastUpdated").textContent = lastUpdated || "Outdated";
   document.getElementById("currentVersion").textContent = version;
 
   const now = Date.now();
