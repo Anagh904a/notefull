@@ -1,186 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <title>Notes App Onboarding</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-    <style>
-      body {
-        font-family: "Poppins", sans-serif;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes App Onboarding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom Font Import (Optional: Use a nice mobile-friendly font) */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
-      @keyframes gradientShift {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
+    :root {
+      --color-primary: #8B5CF6; /* Violet-500 */
+      --color-secondary: #FFD700; /* Gold/Accent */
+      --color-background-start: #1E1E3F; /* Dark Blue */
+      --color-background-middle: #383177; /* Deeper Purple */
+      --color-background-end: #0D0C29; /* Very Dark Blue */
+    }
 
-      .animated-gradient {
-        background-size: 200% 200%;
-        animation: gradientShift 8s ease infinite;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="min-h-screen flex items-center justify-center px-6 sm:px-12 animated-gradient" style="background-image: linear-gradient(135deg, #FFE3B3, #8B5CF6, #1E1E3F);">
-      <div class="max-w-2xl w-full space-y-10 text-white text-center">
+    body {
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+    }
 
-        <!-- Step 0: Landing -->
-        <div id="step0" class="transition-opacity duration-500">
-          <h1 class="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight text-black dark:text-white">
-            Your Thoughts, To-Dos, and Ideas – <br />
-            <span class="text-white">All in One Beautiful Place.</span>
-          </h1>
-          <button onclick="nextStep(1)" class="mt-8 bg-[#0B0B1B] text-white text-sm font-medium rounded-full px-6 py-2 hover:bg-[#1a1a2e] transition flex items-center justify-center mx-auto gap-2">
-            Get Started
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
+    /* Enhanced Animated Gradient */
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .animated-gradient {
+      background: linear-gradient(135deg, var(--color-background-start), var(--color-background-middle), var(--color-background-end));
+      background-size: 300% 300%;
+      animation: gradientShift 15s ease infinite;
+    }
 
-        <!-- Step 1: Terms -->
-        <div id="step1" class="hidden transition-opacity duration-500">
-          <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">Terms & Conditions</h2>
-          <p class="text-sm text-gray-100 mb-6">
-            1. All your data is securely stored <strong>only on your device</strong>.<br />
-            2. Notes are never uploaded unless you explicitly export them.<br />
-            3. This app works offline and respects your privacy.<br />
-          </p>
-          <button onclick="nextStep(2)" class="bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
-            Agree & Continue
-          </button>
-        </div>
+    /* Fixed Button Styling */
+    .bottom-button {
+      position: fixed;
+      bottom: 1.5rem; /* Increased spacing */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%; /* More mobile-friendly width */
+      max-width: 400px;
+      padding: 1rem;
+      font-weight: 700; /* Bolder text */
+      font-size: 1.15rem;
+      border-radius: 0.75rem; /* Slightly less rounded than original */
+      transition: all 0.3s ease-in-out;
+      background: white; /* Default background */
+      color: var(--color-background-start); /* Dark text for contrast */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    }
+    .bottom-button:hover {
+      background: #f0f0f0;
+      transform: translateX(-50%) translateY(-2px); /* Slight lift on hover/tap */
+    }
 
-        <!-- Step 2: Name Input -->
-        <div id="step2" class="hidden transition-opacity duration-500">
-          <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">What should we call you?</h2>
-          <input type="text" id="userName" placeholder="Enter your name" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black" />
-          <button onclick="saveName()" class="mt-4 bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
-            Continue
-          </button>
-        </div>
+    /* Step Container for Transitions */
+    .step-container {
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .step-container.hidden-step {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0.95); /* Subtle exit effect */
+    }
 
-        <div id="step3" class="hidden transition-opacity duration-500">
-  <h2 class="text-xl font-semibold mb-4 text-black dark:text-white">Secure Your Notes</h2>
+    /* Ensure content wrapper accommodates fixed button */
+    .content-wrapper {
+      position: relative; /* For absolute positioning of steps */
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5%;
+      padding-bottom: 7rem; /* Space for the fixed button */
+    }
 
-  <input type="email" id="signupEmail" placeholder="Email" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black mb-2" />
-  <input type="password" id="signupPassword" placeholder="Password" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black mb-2" />
-  <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" class="w-full max-w-md mx-auto px-4 py-2 rounded-lg text-black mb-4" />
+    /* Custom input styling */
+    .onboarding-input {
+      background-color: rgba(255, 255, 255, 0.95);
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    .onboarding-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+      outline: none;
+    }
 
-  <button onclick="handleSignUp()" class="bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
-    Sign Up & Continue
-  </button>
+    /* Special style for accent text */
+    .accent-text {
+      color: var(--color-secondary);
+      -webkit-text-stroke: 1px var(--color-primary); /* Outline for contrast */
+  
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col animated-gradient text-white">
 
- <button onclick="nextStep(4)" class="bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
-  Skip Sign up
-  </button>
+  <div class="content-wrapper">
 
-  <p id="signupError" class="text-red-300 mt-2 text-sm"></p>
-</div>
-        
-        <div id="step4" class="hidden transition-opacity duration-500">
-  <h2 class="text-3xl font-bold text-purple-200 mb-4">You're All Set!</h2>
-  <p class="text-md text-white mb-6">Welcome, <span id="displayName"></span> 👋<br />Start organizing your thoughts beautifully.</p>
-  <img src="https://cdn-icons-png.flaticon.com/512/3039/3039385.png" alt="Success Icon" class="w-20 h-20 mx-auto mb-6 animate-bounce" />
-  <button onclick="goToApp()" class="mt-4 bg-[#0B0B1B] text-white px-6 py-2 rounded-full hover:bg-[#1a1a2e] transition">
-    Go to My Notes
-  </button>
-</div>
-        
+    <div id="step0" class="step-container text-center max-w-sm px-4">
+      <h1 class="text-4xl font-extrabold leading-snug">
+        Your Ideas, <span class="accent-text">Organized</span>.<br />
+        <span class="text-gray-300 font-semibold text-2xl mt-2 block">Simple. Secure. Private.</span>
+      </h1>
+      </div>
+
+    <div id="step1" class="step-container hidden-step text-center max-w-sm px-4">
+      <div class="bg-white/10 p-6 rounded-2xl shadow-xl backdrop-blur-sm space-y-4">
+        <h2 class="text-2xl font-bold text-white mb-4">Privacy First 🔒</h2>
+        <p class="text-sm text-gray-200 text-left space-y-3">
+          <strong class="text-lg block">Your data belongs to you.</strong>
+          <span class="block">1. All notes are stored **only on your device**.</span>
+          <span class="block">2. No cloud uploads, no tracking, no data sharing.</span>
+          <span class="block">3. The app is fully functional offline.</span>
+        </p>
       </div>
     </div>
-    <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-  import {
-    getAuth,
-    createUserWithEmailAndPassword,
-  } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCAnKRiTCTQkCV7T5-pSJdr20ctvy1XzTY",
-    authDomain: "notes-81cd8.firebaseapp.com",
-    projectId: "notes-81cd8",
-    storageBucket: "notes-81cd8.appspot.com",
-    messagingSenderId: "93954393984",
-    appId: "1:93954393984:web:f39d129b6e4bacd1796365",
-  };
+    <div id="step2" class="step-container hidden-step text-center max-w-sm px-4">
+      <h2 class="text-2xl font-bold text-white mb-6">What should we call you?</h2>
+      <input type="text" id="usernameInput" placeholder="Your Display Name"
+             class="onboarding-input w-full px-5 py-3 rounded-xl text-lg text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-violet-400" />
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+      <p id="error-message" class="text-sm text-red-400 mt-2 hidden">Please enter a name to continue.</p>
+      <p class="text-gray-300 text-xs mt-3">This name is stored locally to personalize your experience.</p>
+    </div>
 
-  window.handleSignUp = () => {
-    const email = document.getElementById("signupEmail").value;
-    const password = document.getElementById("signupPassword").value;
-    const confirmPassword = document.getElementById("signupConfirmPassword").value;
-    const errorElement = document.getElementById("signupError");
+    <div id="step3" class="step-container hidden-step text-center max-w-sm px-4">
+      <div class="space-y-6">
+        <img src="https://cdn-icons-png.flaticon.com/512/3039/3039385.png" alt="Success Icon" class="w-24 h-24 mx-auto animate-bounce filter drop-shadow-lg" />
+        <h2 class="text-4xl font-black text-white">Setup Complete! 🎉</h2>
+        <p class="text-xl text-gray-200">Welcome, <span id="displayName" class="text-yellow-300 font-bold">User</span>.<br />Start capturing your thoughts.</p>
+      </div>
+    </div>
 
-    if (!email || !password || !confirmPassword) {
-      errorElement.textContent = "All fields are required.";
-      return;
-    }
+  </div>
 
-    if (password !== confirmPassword) {
-      errorElement.textContent = "Passwords do not match.";
-      return;
-    }
+  <button id="mainButton" class="bottom-button" onclick="handleButtonClick()">Get Started</button>
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        // Redirect to indexAlpha after signup
-        nextStep(4);
-        document.getElementById('step3').style.display = 'none';
-      })
-      .catch((error) => {
-        errorElement.textContent = error.message;
-      });
-  };
-</script>
-<script>
-  if (localStorage.getItem("onboardingComplete") === "true") {
-    window.location.href = "indexAlpha.html";
-  }
-</script>
-    <script>
-      
-      function nextStep(step) {
-        for (let i = 0; i <= 2; i++) {
-          const el = document.getElementById("step" + i);
-          if (el) el.classList.add("hidden");
-        }
-        const next = document.getElementById("step" + step);
-        if (next) next.classList.remove("hidden");
+  <script>
+    const steps = document.querySelectorAll(".step-container");
+    const mainButton = document.getElementById('mainButton');
+    const usernameInput = document.getElementById('usernameInput');
+    const displayNameSpan = document.getElementById('displayName');
+    const errorMessage = document.getElementById('error-message');
+
+    let currentStep = 0;
+
+    const LOCAL_STORAGE_KEY_SETUP = 'notesAppSetupComplete';
+    const LOCAL_STORAGE_KEY_USER = 'notesAppUser';
+
+    /**
+     * Checks if the setup is complete and redirects if necessary.
+     */
+    function checkSetupComplete() {
+      if (localStorage.getItem(LOCAL_STORAGE_KEY_SETUP) === 'true') {
+        // In a real app, this would redirect to the main index.html
         
+        window.location.href = 'indexAlpha.html'; // Or whatever your main app page is
+      } else {
+        showStep(0); // Start the onboarding flow
+      }
+    }
+
+    /**
+     * Toggles the visibility and class for the current step.
+     */
+    function showStep(stepIndex) {
+      currentStep = stepIndex;
+
+      steps.forEach((el, idx) => {
+        const isCurrent = idx === stepIndex;
+        // Use a class for animated visibility toggle
+        el.classList.toggle('hidden-step', !isCurrent);
+        // Ensure only the current step is visible (absolute positioning)
+        el.style.zIndex = isCurrent ? '10' : '1';
+      });
+
+      // Update button text based on the new step
+      switch(stepIndex) {
+        case 0:
+          mainButton.textContent = 'Get Started';
+          break;
+        case 1:
+          mainButton.textContent = 'Agree & Create Account';
+          break;
+        case 2:
+          const savedName = localStorage.getItem(LOCAL_STORAGE_KEY_USER) || '';
+          usernameInput.value = savedName; // Pre-fill if name was previously entered
+          mainButton.textContent = 'Looks Good! Continue';
+          break;
+        case 3:
+          mainButton.textContent = 'Go to My Notes';
+          break;
+        default:
+          mainButton.textContent = 'Continue';
+      }
+    }
+
+    /**
+     * Handles the button click action for each step.
+     */
+    function handleButtonClick() {
+      switch(currentStep) {
+        case 0:
+          showStep(1);
+          break;
+        case 1:
+          showStep(2);
+          // Focus the input field for better mobile UX
+          setTimeout(() => usernameInput.focus(), 500);
+          break;
+        case 2:
+          createLocalAccount();
+          break;
+        case 3:
+          finalizeSetup();
+          break;
+      }
+    }
+
+    /**
+     * Handles the logic for creating the local user account.
+     */
+    function createLocalAccount() {
+      const username = usernameInput.value.trim();
+
+      if (username.length === 0) {
+        errorMessage.classList.remove('hidden');
+        usernameInput.focus();
+        return;
       }
 
-      function saveName() {
-        const name = document.getElementById("userName").value.trim();
-        if (name === "") {
-          alert("Please enter a name.");
-          return;
-        } else {
-        nextStep(3);
-        }
-         localStorage.setItem("userName", name);
-         localStorage.setItem("onboardingComplete", "true"); // ✅ Flag setup as done
-      }
+      errorMessage.classList.add('hidden');
 
-      function setDisplay() {
-        const name = localStorage.getItem("userName");
-        if (name) document.getElementById("displayName").textContent = name;
-        }
+      // 1. Save the username to Local Storage
+      localStorage.setItem(LOCAL_STORAGE_KEY_USER, username);
 
-         function goToApp() {
-          window.location.href = "indexAlpha.html";
-          }
-    </script>
-  </body>
+      // 2. Update the display name on the final step
+      displayNameSpan.textContent = username;
+
+      // 3. Move to the final step
+      showStep(3);
+    }
+
+    /**
+     * Marks setup as complete and redirects.
+     */
+    function finalizeSetup() {
+      // 1. Mark setup as complete
+      localStorage.setItem(LOCAL_STORAGE_KEY_SETUP, 'true');
+
+      // 2. Alert and Redirect
+      
+      window.location.href = 'indexAlpha.html'; // Redirect to main app
+    }
+
+    // --- Initialization ---
+    // Check if setup is already done when the page loads
+    window.onload = checkSetupComplete;
+  </script>
+
+</body>
 </html>
