@@ -173,94 +173,7 @@ width: 98%;
         display: none;
       }
 
-
-
-   .modal-fac {
-    display: flex;
-    position: fixed;
-    z-index: 999;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-fact{
-background: var(--bg-color);
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    position: relative;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .modal-fac h2 {
-    margin-top: 0;
-    color: #d9534f;
-  }
-
-  .modal-fac p {
-    margin: 1rem 0;
-    color: #333;
-  }
-
-  .modal-actions {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 1.5rem;
-  }
-
-  .confirm-btn {
-    background-color: #d9534f;
-    color: white;
-    padding: 0.5rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .cancel-btn {
-    background-color: #f0f0f0;
-    color: #333;
-    padding: 0.5rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-
-  .confirm-btn:hover {
-    background-color: #c9302c;
-  }
-
-  .cancel-btn:hover {
-    background-color: #ddd;
-  }
-
-  .close {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #888;
-  }
-
-  .close:hover {
-    color: #000;
-  }
-
-
       /* Hide modal with fade-out animation */
-
-      .delete-button {
-        position: relative;
-        margin-left: 94%;
-      }
 
       textarea {
         width: 95%;
@@ -271,12 +184,6 @@ background: var(--bg-color);
         border-radius: 14px;
         font-family: Arial, sans-serif;
         font-size: 16px;
-      }
-
-      input[type="password"] {
-        padding: 5px;
-        margin: 10px 0;
-        width: 80%;
       }
 
       .container {
@@ -461,19 +368,6 @@ color: var(--text-color);
     transform: scale(1.05); /* Slightly enlarge on hover */
 }
 
-      .nav-button {
-        background: none;
-        border: none;
-        color: rgb(58, 57, 57);
-        font-size: 16px;
-        cursor: pointer;
-        margin-right: 20px;
-      }
-
-      .nav-button:hover {
-        background: rgb(167, 167, 167);
-      }
-
       /* Styling for password input fields */
       input[type="password"] {
         width: 100%;
@@ -547,22 +441,6 @@ font-weight: bolder;
         /* Add a subtle shadow effect */
         outline: none;
         /* Remove default outline */
-      }
-
-    
-
-      .checklist-container div {
-        display: flex;
-        /* Flexbox for checklist items */
-        align-items: center;
-        /* Center items vertically */
-        margin: 5px 0;
-        /* Space between checklist items */
-      }
-
-      .checklist-container input[type="checkbox"] {
-        margin-right: 10px;
-        /* Space between checkbox and label */
       }
 
       .close-button {
@@ -682,31 +560,6 @@ h3 {
 
 
 
-
-
-    .containerr {
-      position: fixed;
-      display: none;
-      inset: 0;
-      z-index: 5;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      animation: slide-in 0.4s ease-out forwards;
-    }
-
-    .header {
-      text-align: center;
-    }
-
-    .header h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
     .header p {
       font-size: 0.875rem;
       color: var(--text-color);
@@ -768,30 +621,6 @@ color: var(--text-color-un);
 
     p {
          color: var(--text-color);
-    }
-
-   
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 1rem;
-      box-sizing: border-box;
-      
     }
 
     .form-group textarea {
@@ -1687,15 +1516,6 @@ input:checked + .slider:before {
       text-align: center;
     }
 
-.nav-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #555;
-  transition: color 0.3s;
-}
-
 .nav-button:hover {
   color: #000;
 }
@@ -1803,20 +1623,28 @@ input:checked + .slider:before {
   border-radius: 9px; /* small rounding for the bar edges */
   margin-bottom: 1rem;
 }
-
 .top-bar input {
-  
-  padding: 0.5rem 0.75rem;
-  background-color: var(--bg-color); /* like Keep input bg */
-  border: none;
-  border-radius: 24px; /* rounded pill shape */
-  outline: none;
+  padding: 10px 15px;
   font-size: 0.95rem;
-  color: #202124; /* dark text like Keep */
-  transition: background 0.2s ease;
+  color: #202124;
   width: 40%;
   margin-right: 40%;
   margin-left: 2%;
+  border: 3px solid transparent;
+  border-radius: 24px; /* pill-shaped */
+  background-image: 
+    linear-gradient(#fff, #fff), /* inner background */
+    linear-gradient(to right, #ff00cc, #3333ff); /* gradient border */
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+/* Focus glow effect */
+.top-bar input:focus {
+  box-shadow: 0 0 10px rgba(255, 0, 204, 0.6), 0 0 15px rgba(51, 51, 255, 0.5);
 }
 
 .account-icon {
@@ -2170,6 +1998,34 @@ color: var(--text-color);
 
 
   .ai-feature {
+
+.ai-answer {
+  background-color: #e7f3fe;
+  border-left: 4px solid #2196F3;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.ai-answer h4 {
+  margin-top: 0;
+  color: #1E88E5;
+}
+
+
+
+/* AI searching animation */
+@keyframes ai-searching-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.ai-searching {
+  animation: ai-searching-animation 2s linear infinite;
+  background-size: 200% 200%;
+  background-image: linear-gradient(to right, #ff00cc, #3333ff, #ff00cc);
+}
+
     margin-bottom: 0.8rem;
   }
 
@@ -2177,6 +2033,57 @@ color: var(--text-color);
    #itemText {
     text-align: center;
    }
+
+/* Add this new rule for the AI Fixer button */
+/* Container button */
+#ai-fixer-button {
+  display: inline-flex;
+  
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #007bff, #8a2be2);
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 50px; /* Fully rounded, One UI style */
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5), 0 0 10px rgba(138, 43, 226, 0.7) inset;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Circular icon inside button */
+#ai-fixer-button i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%; /* Circle */
+  margin-right: 12px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hover effect */
+#ai-fixer-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 25px rgba(0, 123, 255, 0.8), 0 0 15px rgba(138, 43, 226, 0.9) inset;
+}
+
+#ai-fixer-button:hover .icon {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1);
+}
+
+/* Click / active effect */
+#ai-fixer-button:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.6), 0 0 8px rgba(138, 43, 226, 0.6) inset;
+}
+
+
 
   
 
@@ -2423,41 +2330,6 @@ color: var(--text-color);
   margin-bottom: 15px;
 }
 
-.form-group label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-textarea {
-  min-height: 120px;
-  resize: vertical;
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.cancel-btn,
-.save-btn {
-  padding: 10px 20px;
-  font-size: 14px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
 .cancel-btn {
   background: #eee;
 }
@@ -2465,16 +2337,6 @@ textarea {
 .save-btn {
   background: #007bff;
   color: white;
-}
-
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
 }
 
 .hidden {
