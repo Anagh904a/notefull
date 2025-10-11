@@ -19,8 +19,8 @@
 --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(12px);
-  --note-bg: rgb(255, 255, 94);
-  --list-bg: rgb(142, 192, 233);
+  --note-bg: rgb(240, 240, 178);
+  --list-bg: rgb(230, 142, 233);
 }
 
 /* dark theme */
@@ -322,20 +322,24 @@ color: #000;
 }
 
 .modal-bn {
-  background: linear-gradient(135deg, #f89494, #d80000);
-color: var(--text-color);
-  width: 20%;
+  background: transparent;
+  color: var(--text-color);
+  width: 50px;           /* Fixed width for circle */
+  height: 50px;          /* Fixed height for circle */
   display: flex;
-    border-radius: 10px; /* Fully rounded buttons */
-   margin-left: 80%;
-    
+  border-radius: 50%;    /* Makes it a perfect circle */
   text-align: center;
-    align-items: center; /* Center icon vertically */
-    justify-content: center; /* Center icon horizontally */
-    font-size: 18px; /* Icon size */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
-    min-width: 15px;
+  align-items: center;   /* Center icon vertically */
+  justify-content: center; /* Center icon horizontally */
+  font-size: 30px;       /* Icon size */
+  cursor: pointer;       /* Pointer cursor on hover */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+  margin-left: 80%;
+}
+
+.modal-bn:hover {
+  background: transparent;
+  color: red;
 }
 
 .modal-btn-close {
@@ -783,7 +787,7 @@ color: var(--text-color-un);
   top: 0; left: 0;
   height: 100vh;
   width: 24%; /* Increased width for better spacing */
-   background: var(--bg-color); /* semi-transparent */
+    background: var(--bg-color); /* semi-transparent */
   
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
   display: flex;
@@ -791,7 +795,7 @@ color: var(--text-color-un);
   justify-content: space-between;
   padding: 20px 0; /* Increased padding for better spacing */
   box-shadow: 4px 0 12px rgba(0,0,0,0.3); /* Enhanced shadow for depth */
-color: var(--text-color);
+color: white;
   z-index: 1000;
   overflow: hidden;
   transition: transform 0.25s cubic-bezier(0.33, 1, 0.68, 1), 
@@ -1611,7 +1615,7 @@ input:checked + .slider:before {
 
 
 .top-bar {
-  width: 98%;
+  width: 90%;
  
   display: flex;          /* enables flex layout */
   flex-direction: row;    /* default, horizontal alignment */
@@ -1623,6 +1627,32 @@ input:checked + .slider:before {
   border-radius: 9px; /* small rounding for the bar edges */
   margin-bottom: 1rem;
 }
+
+.profile-header input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.save-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: #ffd700;
+  color: #d80000;
+  font-weight: bold;
+}
+
+.profile-msg {
+  margin-top: 10px;
+  font-size: 14px;
+  color:  var(--text-color);
+}
+
 .top-bar input {
   padding: 10px 15px;
   font-size: 0.95rem;
@@ -2024,6 +2054,7 @@ color: var(--text-color);
   animation: ai-searching-animation 2s linear infinite;
   background-size: 200% 200%;
   background-image: linear-gradient(to right, #ff00cc, #3333ff, #ff00cc);
+
 }
 
     margin-bottom: 0.8rem;
@@ -2036,52 +2067,7 @@ color: var(--text-color);
 
 /* Add this new rule for the AI Fixer button */
 /* Container button */
-#ai-fixer-button {
-  display: inline-flex;
-  
-  padding: 12px 24px;
-  background: linear-gradient(90deg, #007bff, #8a2be2);
-  color: white;
-  font-weight: bold;
-  font-size: 1rem;
-  border: none;
-  border-radius: 50px; /* Fully rounded, One UI style */
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5), 0 0 10px rgba(138, 43, 226, 0.7) inset;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  position: relative;
-  overflow: hidden;
-}
 
-/* Circular icon inside button */
-#ai-fixer-button i {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%; /* Circle */
-  margin-right: 12px;
-  transition: all 0.3s ease-in-out;
-}
-
-/* Hover effect */
-#ai-fixer-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 25px rgba(0, 123, 255, 0.8), 0 0 15px rgba(138, 43, 226, 0.9) inset;
-}
-
-#ai-fixer-button:hover .icon {
-  background: rgba(255, 255, 255, 0.35);
-  transform: scale(1.1);
-}
-
-/* Click / active effect */
-#ai-fixer-button:active {
-  transform: scale(0.97);
-  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.6), 0 0 8px rgba(138, 43, 226, 0.6) inset;
-}
 
 
 
@@ -2130,7 +2116,7 @@ color: var(--text-color);
             border-radius: 50%;
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
-            font-size: 35px;
+            font-size: 25px;
             font-weight: bolder;
             border: none;
             box-shadow: 
@@ -2183,6 +2169,7 @@ color: var(--text-color);
         .fab-icon {
             position: relative;
             z-index: 1;
+            
         }
 
         @keyframes pulse {
