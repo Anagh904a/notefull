@@ -231,14 +231,11 @@ function clearData() {
 function toggleTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
-  document.getElementById('themeToggle').checked = theme === 'dark';
+  document.getElementById('themeToggle').checked = theme === 'light';
   document.getElementById('themeLabel').textContent = theme === 'dark' ? '🌙 Dark' : '☀️ Light';
 }
 
-function changeNote(noteBg) {
-  document.documentElement.setAttribute('data-note-bg', noteBg);
-  localStorage.setItem('noteBg', noteBg);
-}
+
 
 
 
@@ -482,9 +479,9 @@ function displayFilteredNotesAndLists(filteredNotes, filteredLists, isAISearchin
     const listsContainer = document.getElementById("listsContainerContent");
     listsContainer.innerHTML = "";
     const noNotesMessage = document.getElementById("noNotesMessage");
-    noNotesMessage.innerHTML = isAISearching ? "Searching with AI..." : "No matching notes found.";
+    noNotesMessage.innerHTML = isAISearching ? "Searching with AI..." : "No matching notes with that title were found.";
     const noListsMessage = document.getElementById("noListsMessage");
-    noListsMessage.innerHTML = "No matching lists found.";
+    noListsMessage.innerHTML = "No matching lists with that title were found.";
 
     if (filteredNotes.length === 0 && filteredLists.length === 0) {
         noNotesMessage.classList.remove("hidden");
@@ -588,6 +585,7 @@ function searchNotes() {
         // Only call AI if nothing matches locally
         if (filteredNotes.length === 0 && filteredLists.length === 0) {
             document.getElementById('searchInput').classList.add('ai-searching');
+            showToast("Searching with AI...");
             searchWithAI(searchTerm);
         } else {
             document.getElementById('searchInput').classList.remove('ai-searching');
@@ -632,13 +630,8 @@ ${notesToSearch.map(note => `Title: ${note.title}\nContent: ${note.content}`).jo
             displayFilteredNotesAndLists([notes[noteIndex]], []);
         } else {
             // If the AI response doesn't mention a specific note, just show the answer
-            const container = document.getElementById("combinedContainer");
-            container.innerHTML = `
-                <div class="ai-answer">
-                    <h4>AI Answer:</h4>
-                    <p>${aiResponse}</p>
-                </div>
-            `;
+            alert(`AI Answer:\n\n${aiResponse}`);
+            
         }
     } else {
         // If the AI fails, show the original "no results" message
@@ -801,10 +794,11 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Function to close the list password modal
-
-
-// Function to close a specific feature section
+function refresh() {
+  displayNotes();
+  displayLists();
+  showToast("Refreshed!");
+}
 
 
 // Function to verify the password for accessing the list
@@ -1373,7 +1367,7 @@ async function summarizeNoteWithAI(textToSummarize) {
 function handleBack() {
    
         closeSidebar();
-    
+    showSection("combinedContainer");
 }
 
     
@@ -2030,23 +2024,47 @@ showSection('antithreatSection');
   }
 }
 
+// Update the account icon
 function updateAccountIcon() {
   const username = localStorage.getItem('notesAppUser');
   const accountIcon = document.getElementById('account-icon');
 
   if (username && accountIcon) {
-    // 1. Get the first letter and convert it to uppercase
     const firstLetter = username.trim().charAt(0).toUpperCase();
-
-    // 2. Set the content of the icon
     accountIcon.textContent = firstLetter;
-    
-    // Optional: Make the icon interactive with the actual username
+
     accountIcon.onclick = () => {
-      alert(`Account: ${username}\nThis feature is under active Development.`);
+      alert(`Account: ${username}\nThis feature is under active development.`);
     };
+
+    // Fill the input with current username
+    const usernameInput = document.getElementById('usernameInput');
+    if (usernameInput) usernameInput.value = username;
   }
 }
+
+// Save updated profile
+function saveProfile() {
+  const usernameInput = document.getElementById('usernameInput');
+  const profileMsg = document.getElementById('profile-msg');
+
+  if (usernameInput && usernameInput.value.trim() !== '') {
+    const newName = usernameInput.value.trim();
+    localStorage.setItem('notesAppUser', newName);
+    updateAccountIcon();
+    profileMsg.textContent = 'Profile updated successfully!';
+    setTimeout(() => profileMsg.textContent = '', 3000);
+  } else {
+    profileMsg.textContent = 'Please enter a valid name.';
+  }
+}
+
+// Show section helper (like in your credits section)
+
+
+// Initialize profile on load
+document.addEventListener('DOMContentLoaded', updateAccountIcon);
+
 
 function openAntithreat() {
 showSection('antithreatSection');
