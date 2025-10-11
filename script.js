@@ -1371,24 +1371,9 @@ async function summarizeNoteWithAI(textToSummarize) {
 
 // --- Event Listeners for AI Feature Toggles ---
 function handleBack() {
-    // Close any open modal
-    const openModal = document.querySelector('.modal'); // assuming open modal has class 'open'
-    if (openModal) {
-        openModal.classList.remove('open');
-        // Optionally hide modal completely
-        openModal.style.display = 'none';
-    }
-
-    // Close addItemSection if open
-    const addItemSection = document.getElementById('addItemSection'); // replace with your ID
-    if (addItemSection && addItemSection.style.display !== 'none') {
-        addItemSection.style.display = 'none';
-    }
-
-    // Call closeSidebar function
-    if (typeof closeSidebar === 'function') {
+   
         closeSidebar();
-    }
+    
 }
 
     
