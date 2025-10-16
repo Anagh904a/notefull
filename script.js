@@ -20,7 +20,8 @@ let notesDirectoryHandle = null;
 
 let backupDirHandle = null;
 
-// Prompt once and store basic reference
+// Prompt once and store basic ref
+
 
 
 // Restore backup folder handle (user must re-select)
@@ -43,7 +44,31 @@ const placeholders = [
   "Ask Notefull AI...",
   "e.g When is my meeting?",
   "Search with Notefull AI...",
-  "Quickly find your note..."
+  "Quickly find your note...",
+  "Find notes by keyword...",
+  "What did I write last week?",
+  "Locate that important file...",
+  "Search through your ideas...",
+  "Ask AI for suggestions...",
+  "Check your upcoming tasks...",
+  "Find meeting notes fast...",
+  "Discover your saved thoughts...",
+  "Quick search your notes...",
+  "Ask Notefull anything...",
+  "Where did I save that note?",
+  "Search by topic or tag...",
+  "Need a reminder? Ask AI...",
+  "Look for ideas in your notes...",
+  "Search your thoughts quickly...",
+  "Find yesterday’s notes...",
+  "What notes did I take today?",
+  "Quickly find that important detail...",
+  "Search for events, tasks, or ideas...",
+  "Ask questions about your notes...",
+  "Find related notes fast...",
+  "Search by keyword or phrase...",
+  "AI can help if note isn’t found...",
+  "Instantly find any note..."
 ];
 
 let index = 0; // start from first placeholder
@@ -66,7 +91,7 @@ const input = document.getElementById("searchInput");
 setInterval(() => {
   input.placeholder = placeholders[index];
   index = (index + 1) % placeholders.length; // loop back to start
-}, 10000); // change every 1000ms (1 second)
+}, 5000); // change every 5000ms (5 second)
 
 function saveState() {
   const noteContent = document.getElementById("noteContent").value;
@@ -508,6 +533,7 @@ function displayFilteredNotesAndLists(filteredNotes, filteredLists, isAISearchin
                 data-note-content="${note.content}" 
                 data-note-title="${note.title}"
                 onclick="handleSummarizeButtonClick(this); event.stopPropagation();">
+                  
             <i class="fas fa-magic"></i> Summarize Note
         </button>
         ` 
@@ -674,6 +700,7 @@ noListsMessage.classList.remove("hidden"); // Show the no lists message
                 data-note-content="${note.content}" 
                 data-note-title="${note.title}"
                 onclick="handleSummarizeButtonClick(this); event.stopPropagation();">
+                  
             <i class="fas fa-magic"></i> Summarize Note
         </button>
         ` 
@@ -1222,6 +1249,7 @@ function displayNotes() {
             data-note-content="${note.content}" 
             data-note-title="${note.title}"
             onclick="handleSummarizeButtonClick(this); event.stopPropagation();">
+              
         <i class="fas fa-magic"></i> Summarize Note
     </button>
   ` 
@@ -2034,7 +2062,7 @@ function updateAccountIcon() {
     accountIcon.textContent = firstLetter;
 
     accountIcon.onclick = () => {
-      alert(`Account: ${username}\nThis feature is under active development.`);
+      alert(`Account: ${username}\n`);
     };
 
     // Fill the input with current username
@@ -2084,7 +2112,7 @@ showSection('antithreatSection');
   }
 }
 
-function startUpdate() {
+async function startUpdate() {
   const modal = document.getElementById("updateModal");
   const statusEl = document.getElementById("updateStatus");
   const updateBtn = document.getElementById("updateButton");
@@ -2099,36 +2127,69 @@ function startUpdate() {
     statusEl.textContent = baseText + ".".repeat(dotCount);
   }, 500);
 
-  // Step transitions
-  setTimeout(() => { baseText = "Downloading update"; }, 5000);
-  setTimeout(() => { baseText = "Installing update"; }, 20000);
+  // Timed transitions for visual feedback
+  setTimeout(() => baseText = "Downloading update", 5000);
+  setTimeout(() => baseText = "Installing update", 20000);
 
-  setTimeout(() => {
+  try {
+    // Simulate long installation
+    await new Promise(resolve => setTimeout(resolve, 45000));
+
     clearInterval(dotsInterval);
+    statusEl.textContent = "Finalizing...";
 
-    //  Fetch keywords from GitHub
-    fetch("https://raw.githubusercontent.com/Anagh904a/notefull/refs/heads/main/sensitiveKeywords.json")
-      .then(res => res.json())
-      .then(data => {
-        localStorage.setItem("sensitiveKeywords", JSON.stringify(data));
-        console.log("Keywords updated:", data);
-      })
-      .catch(err => {
-        console.error("Failed to fetch keywords:", err);
-      })
-      .finally(() => {
-        // Finalize version update
-        let cur = localStorage.getItem("version") || "v1.0";
-        let nv = getNextVersion(cur);
-        localStorage.setItem("version", nv);
-        localStorage.setItem("lastUpdated", Date.now());
+    // Fetch latest keywords from GitHub
+    const response = await fetch(
+      "https://raw.githubusercontent.com/Anagh904a/notefull/refs/heads/main/sensitiveKeywords.json"
+    );
 
-        modal.style.display = "none";
-        openAntithreat();
-        alert("Database Updated — Now running a quick scan...");
-        startAiScan();
-      });
-  }, 45000);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+
+    localStorage.setItem("sensitiveKeywords", JSON.stringify(data));
+    console.log("✅ Keywords updated:", data);
+
+    // Update version info
+    const curVersion = localStorage.getItem("version") || "v1.0";
+    const nextVersion = getNextVersion(curVersion);
+    localStorage.setItem("version", nextVersion);
+    localStorage.setItem("lastUpdated", Date.now());
+
+    statusEl.textContent = "Update completed successfully!";
+    setTimeout(() => {
+      modal.style.display = "none";
+      openAntithreat();
+      alert("Database Updated — Now running a quick scan...");
+      startAiScan();
+    }, 2000);
+
+  } catch (err) {
+    clearInterval(dotsInterval);
+    statusEl.textContent = "Update failed. Please try again.";
+    console.error("❌ Update error:", err);
+    alert("Failed to fetch update. Please check your internet connection.");
+  } finally {
+    updateBtn.disabled = false;
+  }
+}
+
+function getNextVersion(currentVersion) {
+  // Remove 'v' prefix if present
+  let num = currentVersion.replace(/^v/i, "");
+
+  // Split into major.minor
+  let [major, minor] = num.split(".").map(Number);
+
+  // Increment minor version
+  minor++;
+
+  // If minor reaches 10, roll over to next major
+  if (minor >= 10) {
+    major++;
+    minor = 0;
+  }
+
+  return `v${major}.${minor}`;
 }
 
 
