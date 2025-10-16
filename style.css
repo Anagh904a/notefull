@@ -334,7 +334,17 @@ color: #000;
   font-size: 30px;       /* Icon size */
   cursor: pointer;       /* Pointer cursor on hover */
   transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
-  margin-left: 80%;
+  margin-left: 70%;
+}
+
+#btnAnimation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180%;
+  height: 180%;
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* so animation doesn't block clicks */
 }
 
 .modal-bn:hover {
@@ -1654,6 +1664,7 @@ input:checked + .slider:before {
 }
 
 .top-bar input {
+  position: relative;
   padding: 10px 15px;
   font-size: 0.95rem;
   color: #202124;
@@ -1661,21 +1672,57 @@ input:checked + .slider:before {
   margin-right: 40%;
   margin-left: 2%;
   border: 3px solid transparent;
-  border-radius: 24px; /* pill-shaped */
-  background-image: 
-    linear-gradient(#fff, #fff), /* inner background */
-    linear-gradient(to right, #ff00cc, #3333ff); /* gradient border */
+  border-radius: 24px; /* pill shape */
+  background-image:
+    linear-gradient(#fff, #fff), /* inside background */
+    linear-gradient(
+      90deg,
+
+  #00ffff,
+  #00ff99,
+  #00ccff,
+  #3333ff,
+  #8a2be2,
+  #ff00ff,
+    #ff70f3
+      
+    ); /* animated border gradient */
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
+  background-size: 300% 300%;
   outline: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  animation: borderMove 4s linear infinite; /* Animate border */
 }
 
 /* Focus glow effect */
 .top-bar input:focus {
-  box-shadow: 0 0 10px rgba(255, 0, 204, 0.6), 0 0 15px rgba(51, 51, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+           
+  background-image:
+    linear-gradient(#fff, #fff),
+    linear-gradient(
+      90deg,
+   #00ffff,
+  #00ff99,
+  #00ccff,
+  #3333ff,
+  #8a2be2,
+  #ff00ff,
+    #ff70f3
+
+      
+    );
 }
+
+/* Keyframes for moving gradient border */
+@keyframes borderMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 
 .account-icon {
   width: 36px;
@@ -2420,31 +2467,49 @@ color: var(--text-color);
 
 .summarize-btn {
     display: flex;
- font-weight: bolder;
-
-    width: auto; /* Adjust width based on content */
-    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-    color: var(--text-color);
-
-   text-align: left;
-    border: none;
-    cursor: pointer;
-    font-size: 0.95rem;
+    align-items: center;
+    gap: 0.5em;
     font-weight: 600;
-    transition: background 0.3s ease;
-
- 
-   
+    font-size: 0.95rem;
+    width: auto; /* size based on content */
+    padding: 0.6em 1.5em;
+    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    color: var(--text-color, white);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
 
-.summarize-btn:hover {
+/* Hover effect: scale + glow */
+.summarize-btn:hover,
+.summarize-btn:focus {
     background: linear-gradient(90deg, #4299e1 0%, #008ecc 100%);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
 }
 
-.summarize-btn i {
- 
+/* Subtle sparkle-like overlay */
+.summarize-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
 
-    text-align: left;
+.summarize-btn:hover::before,
+.summarize-btn:focus::before {
+    opacity: 1;
+}
+
+/* Optional icon spacing */
+.summarize-btn i {
+    display: inline-flex;
+    align-items: center;
 }
 
  
