@@ -11,8 +11,7 @@
 
     <link rel="manifest" href="manifest.json">
    
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <title>Notefull - Home</title>
   
     <link rel="stylesheet" href="style.css" />
@@ -62,9 +61,24 @@
       <div id="noListsMessage" class="hidden">No lists yet.. Add</div>
       <div id="noNotesMessage" class="hidden">This space is lonely. Add a note!</div>
  
-    <button class="fab" onclick="showAddOptions()">
-        <span class="fab-icon">+</span>
-    </button>
+    <div class="fab-container">
+        
+        <button class="main-fab-style" id="mainFab">
+            <i class="fas fa-plus fab-icon"></i> 
+        </button>
+        
+        <div class="fab-options">
+            
+            <button class="modal-btn note-option" onclick="showAddNote()">
+                <i class="fas fa-sticky-note" style="margin-right: 8px;"></i> Note
+            </button>
+            
+            <button class="modal-btn list-option" onclick="showAddListSection()"">
+                <i class="fas fa-list-check" style="margin-right: 8px;"></i> List
+            </button>
+            
+        </div>
+    </div>
 
     </div>
 
@@ -118,14 +132,15 @@
           <textarea id="noteContent" oninput="dummySaveNote()" placeholder="note content here..."></textarea>
         </div>
         <div class="footer-bar">
-     <button type="button" id="changePasswordButton" onclick="showNotePassword()">
-      <i class="fas fa-key"></i>
-      <span>Pass</span>
-    </button>
-    <button type="button" onclick="saveNote()">
+     <button type="button" class="save-btn" onclick="saveNote()">
       <i class="fas fa-save"></i>
       <span>Save</span>
     </button>
+          <button type="button" id="changePasswordButton" onclick="showNotePassword()">
+      <i class="fas fa-key"></i>
+      <span>Key</span>
+    </button>
+   
    <button type="button" id="undoButton" onclick="undo()">
         <i class="fas fa-undo"></i>
         <span>Undo</span>
@@ -167,9 +182,9 @@
         <div class="footer-bar" style="align-items: center;">
     <button type="button" onclick="showList()">
       <i class="fas fa-key"></i>
-      <span>Pass</span>
+      <span>Key</span>
     </button>
-    <button type="button" onclick="saveList()">
+    <button type="button" class="save-btn" onclick="saveList()">
       <i class="fas fa-save"></i>
       <span>Save</span>
     </button>
@@ -243,7 +258,7 @@
   <div class="modal-content">
     <h2>Happy Diwali!</h2>
     <p class="important" style="color: rgb(255, 166, 0);"> Welcome to Notefull Beta 7.0. We are delighted to announce our app is soon going to release!</p>
-    <p>What's new <br>-Bug fixes and fixed secondary storage <br> -Deep AI intergrations <br> -UI refreshed <br> -New Profile Feature</p>
+    <p>What's new <br>-Bug fixes <br> -New Fonts<br> -UI enhancements <br> -New Add Item Modal </p>
 
     
       
@@ -460,7 +475,7 @@
     <i class="fas fa-arrow-left back-icon"></i> 
   </button>
   <div class="section-card">
-  <h4>App Version: 7.0pre-release1</h4>
+  <h4>App Version: 7.1</h4>
 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
   <button>App Updates</button>
 </a> 
@@ -590,7 +605,7 @@
     <div class="info-text" id="infoText">You can safely leave this page while the scan is done</div>
   </div>
 </div>
-        <h2>Notefull Shield Quick Scan For Notes</h2>
+        <h2>Quick Shield Scan</h2>
         <div class="scan-container">
           <div class="scan-circle" id="scanCircle"></div>
           <p id="scanStatus" class="toggle-container">Click the button to start scanning...</p>
