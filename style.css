@@ -43,7 +43,7 @@
 
 
       body {
-        font-family: 'Inter', sans-serif;
+font-family: 'Poppins', sans-serif;
 background: var(--bg-color);
         margin: 0;
         padding: 0;
@@ -182,7 +182,7 @@ width: 98%;
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 14px;
-        font-family: Arial, sans-serif;
+font-family: 'Poppins', sans-serif;
         font-size: 16px;
       }
 
@@ -409,6 +409,7 @@ button {
     color: var(--bg-color);
         /* Teal */
      background: var(--text-color);
+     
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   
@@ -485,7 +486,7 @@ font-weight: bolder;
       
 
       input[type="password"] {
-        font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
         /* Ensure consistent font for password input */
       }
 
@@ -683,7 +684,7 @@ color: var(--text-color-un);
   height: 55px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: sans-serif;
+font-family: 'Poppins', sans-serif;
 }
 
 .footer-btn i {
@@ -724,13 +725,11 @@ color: var(--text-color-un);
      
 
       .list-date {
-        display: block;
-        /* Ensure the date is on a new line */
-        font-size: 14px;
-        color: var(--text-color);
-        margin-top: 5px;
-        text-align: left;
-        /* Align text to the left */
+          display: block;
+  font-size: 15px;
+  color: grey;
+  margin-top: 4px;
+  margin-bottom: 10px;
       }
 
       .list h4 {
@@ -746,11 +745,7 @@ color: var(--text-color-un);
 
 }
 
-.list .list-date {
-  font-size: 0.8rem;
-  opacity: 0.7;
-  margin-top: 6px; /* controlled space below header */
-}
+
 
 .list .delete-btn {
   margin-top: 10px;
@@ -814,7 +809,7 @@ color: white;
   opacity: 0;
   pointer-events: none;
 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+font-family: 'Poppins', sans-serif;
 }
 #show-anim {
   display: block;
@@ -944,7 +939,7 @@ transition: opacity 0.3s ease, transform 0.3s ease;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  font-family: "Segoe UI", sans-serif;
+font-family: 'Poppins', sans-serif;
   font-size: 1.2rem;
   color: #333;
   display: none;
@@ -971,7 +966,7 @@ transition: opacity 0.3s ease, transform 0.3s ease;
   background: linear-gradient(135deg, #48eff8, #00c3ff);
   border-radius: 12px; /* Fully rounded corners */
   overflow: hidden; /* Clip the inner bar’s corners */
-  box-shadow: 0 2px 6px rgba(0, 195, 255, 0.3); /* subtle glow */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* subtle glow */
   position: relative;
 justify-content: space-around;
 }
@@ -1023,7 +1018,7 @@ progress::-moz-progress-bar {
 
 
 .sync-time-text {
-font-family: 'Inter', sans-serif;
+font-family: 'Poppins', sans-serif;
   background: rgba(255, 255, 255, 0.1); /* semi-transparent */
   border-radius: 15px;
   border: 1px solid var(--text-color); /* subtle border */
@@ -1368,7 +1363,7 @@ input:checked + .slider:before {
   font-size: 18px;
   font-weight: bold;
   color: white;
-  background: linear-gradient(90deg, #007bff, #00e5ff);
+  background: #007AFF;
   border: none;
   border-radius: 50px;
   cursor: pointer;
@@ -1449,7 +1444,7 @@ input:checked + .slider:before {
       margin-bottom: 20px; /* Space from the bottom */
       background-color: var(--light-theme-fix);
       color: white;
-      font-family: Arial, sans-serif;
+font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
       height: 100%;
@@ -1647,15 +1642,7 @@ input:checked + .slider:before {
   text-align: center;
 }
 
-.save-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background-color: #ffd700;
-  color: #d80000;
-  font-weight: bold;
-}
+
 
 .profile-msg {
   margin-top: 10px;
@@ -1772,12 +1759,12 @@ input:checked + .slider:before {
   
 
   border-radius: 15px;
-  padding: 15px;
-  margin: 16px 8px;
+  padding: 20px 25px;
+  margin: 16px auto;
         background: var(--note-bg);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
- width: calc(100% - 40px);
+ width: calc(100% - 32px);
 color: var(--text-color);
   
 }
@@ -1787,17 +1774,21 @@ color: var(--text-color);
 
 
   .list {
-border-radius: 15px;
-  padding: 15px;
-  margin: 16px 8px;
+ border-radius: 15px;
+  padding: 20px 25px;
+  margin: 16px auto;
         background: var(--list-bg);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
- width: calc(100% - 40px);
+ width: calc(100% - 32px);
 color: var(--text-color);
+
 }
 
-
+.save-btn {
+background: linear-gradient(135deg, #89f7fe, #66a6ff);
+color: #000;
+}
 
 
 
@@ -1819,7 +1810,7 @@ color: var(--text-color);
 .note-date {
   display: block;
   font-size: 15px;
-  color: var(--text-color);
+  color: grey;
   margin-top: 4px;
   margin-bottom: 10px;
 }
@@ -1939,7 +1930,7 @@ color: var(--text-color);
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
+font-family: 'Poppins', sans-serif;
     font-size: 14px;
     z-index: 9999;
     transition: right 0.5s ease, opacity 0.5s ease;
@@ -2219,6 +2210,147 @@ color: var(--text-color);
             
         }
 
+                .main-fab-style {
+            width: 66px;
+            height: 66px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-size: 25px;
+            font-weight: bolder;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            outline: none;
+            
+            /* FIX: Icon Centering */
+                        cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            position: relative; 
+           text-align: center;
+        }
+
+        .main-fab-style::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .main-fab-style:hover {
+            transform: scale(1.05);
+           box-shadow: 
+                0 6px 16px rgba(0, 118, 255, 0.25),
+                0 0 0 10px rgba(79, 172, 254, 0.1),
+                0 0 0 20px rgba(79, 172, 254, 0.05);
+            background: linear-gradient(135deg, #3d9cf4 0%, #00d9e6 100%);
+            animation: pulse 2s infinite;
+        }
+        .main-fab-style:active {
+            transform: scale(0.98);
+             box-shadow: 
+                0 2px 8px rgba(0, 118, 255, 0.3),
+                0 0 0 6px rgba(79, 172, 254, 0.15);
+        }
+        .main-fab-style:hover::before {
+            opacity: 1;
+        }
+
+        /* FIX: Icon Rotation/Animation */
+        .fab-icon {
+            margin-left: 11px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
+        .fab-container.open .fab-icon {
+            transform: rotate(135deg); 
+        }
+
+
+        /* ============================================== */
+        /* 2. EXPANDING FAB CONTAINER & OPTIONS (FIXED)   */
+        /* ============================================== */
+        .fab-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            
+            /* FIX: Forces vertical stacking of children (options container and main fab) */
+            display: flex;
+            flex-direction: column-reverse; 
+            align-items: center;
+            
+            /* FIX: Gap between options container and main button */
+            gap: 12px; 
+        }
+
+        .fab-options {
+            opacity: 0;
+            pointer-events: none; 
+            transition: opacity 0.3s ease;
+            
+            /* FIX: Forces options themselves to stack vertically */
+            display: flex;
+            flex-direction: column-reverse; 
+            align-items: flex-end; /* Aligns options neatly to the right */
+            
+            /* FIX: Gap between individual option buttons */
+            gap: 12px; 
+            
+            /* Ensure it is initially hidden/positioned */
+            transform: translateY(10px); 
+        }
+
+       /* .option-button {
+            width: auto; 
+            height: 40px;
+            padding: 0 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 20px; 
+            background-color: white; 
+            color: #2c2c2e; 
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+
+            
+            transition: all 0.3s ease;
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }  */
+
+        .option-button:hover {
+            background-color: #f0f0f0; 
+        }
+
+
+        /* --- OPEN STATE CSS (FIXED) --- */
+        .fab-container.open .fab-options {
+            opacity: 1;
+            pointer-events: auto;
+            /* FIX: Move the options container up */
+            transform: translateY(0); 
+        }
+
+        /* FIX: Staggered animation */
+        .fab-container.open .list-option { transition-delay: 0.05s; }
+        .fab-container.open .note-option { transition-delay: 0.1s; }
+
         @keyframes pulse {
             0% {
                 box-shadow: 
@@ -2368,10 +2500,6 @@ color: var(--text-color);
   background: #eee;
 }
 
-.save-btn {
-  background: #007bff;
-  color: white;
-}
 
 .hidden {
   display: none;
@@ -2385,7 +2513,7 @@ color: var(--text-color);
   background: var(--card-color);
   color: var(--text-color);
   font-size: 14px;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+font-family: 'Poppins', sans-serif;
   outline: none;
   appearance: none; /* Remove default arrow styling (for custom styling later) */
 
@@ -2459,7 +2587,7 @@ color: var(--text-color);
         }
         
         .toggle-label {
-            font-family: Arial, sans-serif;
+        font-family: 'Poppins', sans-serif;
             font-size: 14px;
         }
 
@@ -2473,7 +2601,7 @@ color: var(--text-color);
     font-size: 0.95rem;
     width: auto; /* size based on content */
     padding: 0.6em 1.5em;
-    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    background: #007AFF ;
     color: var(--text-color, white);
     border: none;
     border-radius: 50px;
