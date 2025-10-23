@@ -22,7 +22,30 @@ let backupDirHandle = null;
 
 // Prompt once and store basic ref
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const fabContainer = document.querySelector('.fab-container');
+            const mainFab = document.getElementById('mainFab');
+            const optionButtons = document.querySelectorAll('.option-button');
+           
 
+           
+
+            // 1. Toggle the FAB state
+            mainFab.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                fabContainer.classList.toggle('open');
+            });
+
+            // 2. Handle option clicks
+            
+            
+            // 3. Close FAB when clicking anywhere else
+            document.addEventListener('click', (e) => {
+                if (!fabContainer.contains(e.target) && fabContainer.classList.contains('open')) {
+                    fabContainer.classList.remove('open');
+                }
+            });
+        });
 
 // Restore backup folder handle (user must re-select)
 
@@ -219,7 +242,7 @@ function applySortFilter() {
 }
 
 // Add click effect that creates ripples
-        document.querySelector('.fab').addEventListener('click', function(e) {
+       document.querySelector('.main-fab-style').addEventListener('click', function(e) {
             const x = e.clientX - e.target.getBoundingClientRect().left;
             const y = e.clientY - e.target.getBoundingClientRect().top;
             
@@ -233,7 +256,7 @@ function applySortFilter() {
             setTimeout(() => {
                 ripple.remove();
             }, 600);
-        });
+        }); 
 
 function clearData() {
   if (
@@ -973,6 +996,10 @@ function showAddNote() {
   document.getElementById("noteContent").value = ""; // Clear the note content
   document.getElementById("notePassword").value = ""; // Clear the password input
   switchTab('note'); // Switch to the note tab
+  const listButton = document.getElementById('checklist-tab'); 
+
+// 2. Disable the button
+listButton.disabled = true;
 
   if (editingNoteIndex !== null) {
     // Editing an existing note
@@ -1489,6 +1516,10 @@ function showNoteContent(note) {
   );
   closeAddOptions();
   switchTab('note');
+const listButton = document.getElementById('checklist-tab'); 
+
+// 2. Disable the button
+listButton.disabled = true;
 }
 
 // Modify the deleteNote function to include password verification
@@ -1550,7 +1581,11 @@ showAddItem();
    
 document.getElementById("addListSection").style.display = "block"; // Show the add list section
 document.getElementById("addNoteSection").style.display = "none"; // Show the add list section
-switchTab('checklist'); // Switch to the add list tab
+switchTab('checklist');
+const noteButton = document.getElementById('note-tab'); 
+
+// 2. Disable the button
+noteButton.disabled = true; // Switch to the add list tab
   if (editingListIndex !== null) {
     const list = lists[editingListIndex]; // Get the list being edited
     document.getElementById("listTitle").value = list.title; // Set the input value to the list title
@@ -1741,6 +1776,10 @@ function openList(index) {
   }
   const itemText = document.getElementById("itemText");
   switchTab('checklist');
+ const noteButton = document.getElementById('note-tab'); 
+
+// 2. Disable the button
+noteButton.disabled = true;
 
   // Change the heading and paragraph
   itemText.querySelector("h2").textContent = "Manage your item";
