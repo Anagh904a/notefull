@@ -848,6 +848,8 @@ function refresh() {
   displayNotes();
   displayLists();
   showToast("Refreshed!");
+  closeSidebar();
+
 }
 
 
@@ -996,10 +998,10 @@ function showAddNote() {
   document.getElementById("noteContent").value = ""; // Clear the note content
   document.getElementById("notePassword").value = ""; // Clear the password input
   switchTab('note'); // Switch to the note tab
-  const listButton = document.getElementById('checklist-tab'); 
+  const listButton = document.getElementById('summarize-btn'); 
 
 // 2. Disable the button
-listButton.disabled = true;
+listButton.disabled = false;
 
   if (editingNoteIndex !== null) {
     // Editing an existing note
@@ -1010,9 +1012,9 @@ listButton.disabled = true;
   } else {
     // Creating a new note
     document.getElementById("noteTitle").value = ""; // Clear the title input
-    
+     document.getElementById("noteContent").value = "";
   }
-  document.getElementById('addOptionsModal').classList.add("hidden");
+  
     const itemText = document.getElementById("itemText");
 
   itemText.querySelector("h2").textContent = "Create a new item";
@@ -1072,15 +1074,11 @@ function saveNote() {
 
   if (content === "") {
     showToast("Type some text!");
-     const sound = document.getElementById("errorSound");
-  sound.play();
     return;
   }
 
   if (title === "") {
-   showToast("Enter a title!");
-        const sound = document.getElementById("errorSound");
-  sound.play();
+   showToast("Enter a title!")
     return;
   }
 
@@ -1092,30 +1090,15 @@ function saveNote() {
     pinned: false,
     date: formattedDate
   };
-  
+
   if (editingNoteIndex !== null) {
     // Update existing note
     notes[editingNoteIndex] = note;
     showToast("Saved");
-    const sound = document.getElementById("alertSound");
-  sound.play();
-  } else if (currentNoteId) {
-    // This is a new note that was being auto-saved. Find and finalize it.
-    const draftNoteIndex = notes.findIndex(n => n.noteId === currentNoteId);
-    if (draftNoteIndex !== -1) {
-      notes[draftNoteIndex] = note; // Overwrite the draft with the final version
-    } else {
-      notes.push(note); // Fallback: if draft not found, add as new
-    }
-    showToast("Saved");
-    const sound = document.getElementById("alertSound");
-  sound.play();
   } else {
-    // This case should ideally not be hit if auto-save is working, but it's a safe fallback.
+    // Add new note
     notes.push(note);
     showToast("Saved");
-    const sound = document.getElementById("alertSound");
-  sound.play();
   }
 
   // Save to localStorage
@@ -1128,10 +1111,10 @@ function saveNote() {
   displayNotes();
   showSection('combinedContainer');
   document.getElementById("notePasswordModal").classList.add("hidden");
-cancelList();
+    const sound = document.getElementById("alertSound");
+  sound.play();
   // Reset editing state
   editingNoteIndex = null;
-  currentNoteId = null; // Clear the temporary ID
 }
 
 function syncNoteToIndexedDB(note) {
@@ -1168,49 +1151,11 @@ updateLastSyncedDisplay();
  * This is the auto-save function. It should ONLY update an existing note
  * or a new note being drafted. It should not add multiple new notes.
  */
-function dummySaveNote() {
-  const title = document.getElementById('noteTitle').value.trim();
-  const content = document.getElementById('noteContent').value.trim();
-  const password = document.getElementById('notePassword').value.trim();
-  const date = new Date();
-  const formattedDate = formatDate(date);
-
-  // If we are editing an existing note, update it.
-  if (editingNoteIndex !== null) {
-    notes[editingNoteIndex].title = title;
-    notes[editingNoteIndex].content = content;
-    notes[editingNoteIndex].password = password;
-  } else {
-    // This is a NEW note. We need to handle it carefully to avoid duplicates.
-    if (!currentNoteId) {
-      // This is the VERY FIRST input for a new note. Create it and assign a temp ID.
-      currentNoteId = `draft-${Date.now()}`;
-      const newNote = {
-        noteId: currentNoteId, // Use a temporary ID
-        title,
-        content,
-        password,
-        pinned: false,
-        date: formattedDate,
-      };
-      notes.push(newNote);
-    } else {
-      // This is a subsequent input for the same new note. Find and update it.
-      const draftNote = notes.find(n => n.noteId === currentNoteId);
-      if (draftNote) {
-        draftNote.title = title;
-        draftNote.content = content;
-      }
-    }
-  }
-
-  localStorage.setItem('notes', JSON.stringify(notes));
-}
 
 function closeNotePassword() {
 
   document.getElementById("notePasswordModal").style.display = "none";
- dummySaveNote();
+
  
 }
 
@@ -1420,10 +1365,28 @@ async function summarizeNoteWithAI(textToSummarize) {
 
 // --- Event Listeners for AI Feature Toggles ---
 function handleBack() {
-   
-        closeSidebar();
-    showSection("combinedContainer");
+   closeAddItem();
 }
+
+document.addEventListener('keydown', function(event) {
+    // Check if the pressed key is the 'Escape' key
+    if (event.key === 'Escape') {
+        
+        // Prevent default browser actions (like stopping media playback)
+        event.preventDefault(); 
+        
+        // 1. Call your primary Escape function here
+        closeAddItem();
+    }
+});
+
+
+function closeAddItem() {
+  hideAddItem();
+  showSection("combinedContainer");
+}
+
+
 
     
 
@@ -1514,7 +1477,7 @@ function showNoteContent(note) {
   editingNoteIndex = notes.findIndex(
     (n) => n.title === note.title && n.content === note.content
   );
-  closeAddOptions();
+
   switchTab('note');
 const listButton = document.getElementById('checklist-tab'); 
 
@@ -1556,14 +1519,6 @@ hideAddItem();
   showSection("combinedContainer"); // Show the lists section
 }
 
-// Function to show the add options modal
-function showAddOptions() {
-  document.getElementById('addOptionsModal').classList.toggle("hidden");
-}
-
-function closeAddOptions() {
-  
-}
 
 // Function to open a list and pre-fill the add list section
 
@@ -1582,7 +1537,7 @@ showAddItem();
 document.getElementById("addListSection").style.display = "block"; // Show the add list section
 document.getElementById("addNoteSection").style.display = "none"; // Show the add list section
 switchTab('checklist');
-const noteButton = document.getElementById('note-tab'); 
+const noteButton = document.getElementById('summarize-btn'); 
 
 // 2. Disable the button
 noteButton.disabled = true; // Switch to the add list tab
@@ -1600,7 +1555,7 @@ noteButton.disabled = true; // Switch to the add list tab
     displayChecklist(); // Clear the checklist display
   }
 
- document.getElementById('addOptionsModal').classList.add("hidden");
+ 
     const itemText = document.getElementById("itemText");
 
   itemText.querySelector("h2").textContent = "Create a new item";
@@ -1612,7 +1567,7 @@ function cancelList() {
   // Hide the add list section and show the lists section
   currentListId = null; // Also clear the draft list ID on cancel
 hideAddItem();
-    section.classList.remove("show"); // Hide the add list section
+    
   showSection("combinedContainer"); // Show the lists section
   displayNotes();
   displayLists();
@@ -1821,13 +1776,7 @@ displayChecklist();
 dummySaveList();
 }
 // Event listener for adding item with Enter key
-document
-  .getElementById("newItem")
-  .addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-      alert("Please use add button, enter functions are under devlopment!");
-    }
-  });
+
 
   
 
@@ -2241,7 +2190,7 @@ async function fixNote() {
         return;
     }
 
-    const prompt = `Please fix the grammar and spelling of the following text:\n\n${originalContent}`;
+    const prompt = `Please fix the grammar and spelling of the following text and don't not share any explaination just in your answer the corrected text as you are being used as a summarizer feature:\n\n${originalContent}`;
     const fixedContent = await callGeminiAPI(prompt, "Note Fixer");
 
     if (fixedContent) {
