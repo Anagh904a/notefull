@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width">
 
     <meta name="description" content="This is a notes app built by anagh , its completely free" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
 
     <link rel="manifest" href="manifest.json">
    
@@ -69,11 +69,11 @@
         
         <div class="fab-options">
             
-            <button class="modal-btn note-option" onclick="showAddNote()">
+            <button class="modal-btn note-option" id="addNoteButton" onclick="showAddNote()">
                 <i class="fas fa-sticky-note" style="margin-right: 8px;"></i> Note
             </button>
             
-            <button class="modal-btn list-option" onclick="showAddListSection()"">
+            <button class="modal-btn list-option" id="addListButton" onclick="showAddListSection()"">
                 <i class="fas fa-list-check" style="margin-right: 8px;"></i> List
             </button>
             
@@ -95,14 +95,15 @@
 </div>
 
   <div id="addItemSection" class="container hidden">
-    <button class="modal-button" onclick="hideAddItem()">
-        <i class="fas fa-arrow-left back-icon"></i>
-      </button>
+ 
+
     <div id="itemText">
       <h2>Create a new item</h2>
      
        
     </div>
+  
+    
     
 
     <form class="form">
@@ -117,19 +118,16 @@
 
       <!-- Note Panel -->
       <div id="addNoteSection" class="section">
-                  
-        <div class="form-group">
+                
+        <div class="form-group-title">
 
-          <label for="noteTitle">Title</label>
+         
           <input type="text" class="title" id="noteTitle" placeholder="Enter a title" />
         </div>
         <div class="form-group"> 
            
-          <label for="noteContent">Content</label>  <button type="button" class="summarize-btn" onclick="fixNote()">
-        <i class="fas fa-magic"></i> Fix
-
-      </button>
-          <textarea id="noteContent" oninput="dummySaveNote()" placeholder="note content here..."></textarea>
+         
+          <textarea id="noteContent" placeholder="note content here..."></textarea>
         </div>
         <div class="footer-bar">
      <button type="button" class="save-btn" onclick="saveNote()">
@@ -150,6 +148,11 @@
         <i class="fas fa-redo"></i>
         <span>Redo</span>
       </button>
+
+       <button type="button" id="summarize-btn" onclick="fixNote()">
+        <i class="fas fa-magic"></i> 
+<span>Fix</span>
+      </button>
    
   </div>
   <div id="notePasswordModal" class="modal hidden">
@@ -165,8 +168,7 @@
       <!-- Checklist Panel -->
       <div id="addListSection" class="section" style="display: none;">
         <div class="form-group">
-          <label for="checklistTitle">Title</label>
-
+          
           <input type="text" id="listTitle" class="title" placeholder="Enter checklist title" /><br>
           <br><label for="inputforitem">Item Name</label> 
           <input id="newItem" type="text" placeholder="Item name..." /> 
@@ -215,19 +217,7 @@
     
 
     <!-- Add Options Modal -->
-    <div id="addOptionsModal" class="modal hidden">
-      <div class="modal-content2">
-        <h3>What to add?</h3>
-       
-       <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
-          <i class="fas fa-sticky-note"></i> Note
-        </button>
-        <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
-          <i class="fas fa-list"></i> List
-        </button>
-       
-      </div>
-    </div>
+   
 
     <div id="passwordModal" class="modal hidden">
       <div class="modal-content">
@@ -256,9 +246,9 @@
 
    <div class="modal " id="modal">
   <div class="modal-content">
-    <h2>Happy Diwali!</h2>
-    <p class="important" style="color: rgb(255, 166, 0);"> Welcome to Notefull Beta 7.0. We are delighted to announce our app is soon going to release!</p>
-    <p>What's new <br>-Bug fixes <br> -New Fonts<br> -UI enhancements <br> -New Add Item Modal </p>
+    <h2>Welcome to Notefull</h2>
+    <p class="important" style="color: rgb(255, 222, 222);"> Welcome to Notefull 8 (Early Acess). This is a stable Release! </p>
+    <p>What's new <br>->Bug Fixes <br>->UI/UFX Major and Minor Improvements </p>
 
     
       
@@ -337,7 +327,7 @@
     <div class="card" onclick="showSection('creditSection')">
   <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
   <div class="text-box">
-    <div class="title">Credits</div>
+    <div class="title2">Credits</div>
     <div class="subtitle">Developer · About Dev</div>
   </div>
 </div>
@@ -345,18 +335,12 @@
     <div class="card" onclick="showSection('profileSection')">
   <div class="icon wifi"><span class="material-icons">manage_accounts</span></div>
   <div class="text-box">
-    <div class="title">Profile</div>
+    <div class="title2">Profile</div>
     <div class="subtitle">Account Management · Profile info</div>
   </div>
 </div>
 
-<div class="card" onclick="showSection('tSection')">
-  <div class="icon wifi"><span class="material-icons"><svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="#ffff"><path d="M680-80q-83 0-141.5-58.5T480-280q0-83 58.5-141.5T680-480q83 0 141.5 58.5T880-280q0 83-58.5 141.5T680-80Zm88-114q5-5 2.5-12t-9.5-8q-26-5-48.5-19.5T676-272q-14-24-15.5-51t7.5-52q2-7-2.5-12.5T654-391q-67 12-91.5 76T582-196q35 44 92 45t94-43ZM480-480ZM370-80l-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-74 56q-22-11-45-18.5T714-558l63-48-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q17 17 36.5 30.5T400-275q1 57 23.5 107T484-80H370Zm41-279q6-20 14.5-38.5T445-433q-11-8-17-20.5t-6-26.5q0-25 17.5-42.5T482-540q14 0 27 6.5t21 17.5q17-11 35-19.5t38-13.5q-18-32-50-51.5T482-620q-59 0-99.5 41T342-480q0 38 18.5 70.5T411-359Z"/></svg></span></div>
-  <div class="text-box">
-    <div class="title">Personalization</div>
-    <div class="subtitle">Themes</div>
-  </div>
-</div>
+
 
 
 
@@ -366,7 +350,7 @@
     <div class="icon privacy"><span class="material-icons">privacy_tip</span></div>
   </div>
   <div class="text-box">
-    <div class="title">Privacy</div>
+    <div class="title2">Privacy</div>
     <div class="subtitle">Policy · Permissions Manager</div>
   </div>
 </div>
@@ -374,7 +358,7 @@
 <div class="card" onclick="showSection('backupTab')">
   <div class="icon device"><span class="material-icons">backup</span></div>
   <div class="text-box">
-    <div class="title">Secondary Storage</div>
+    <div class="title2">Secondary Storage</div>
     <div class="subtitle">Restore · Status · Sync</div>
   </div>
 </div>
@@ -384,7 +368,7 @@
 <div class="card" onclick="showSection('ecSection')">
   <div class="icon modes"><span class="material-icons">security</span></div>
   <div class="text-box">
-    <div class="title">Data Management</div>
+    <div class="title2">Data Management</div>
     <div class="subtitle">Factory Reset</div>
   </div>
 </div>
@@ -394,7 +378,7 @@
   <span class="material-icons">mail</span>
 </div>
   <div class="text-box">
-    <div class="title">Developer Email</div>
+    <div class="title2">Developer Email</div>
     <div class="subtitle">Bug Report · Feedback · Bugs</div>
   </div>
 </div>
@@ -404,7 +388,7 @@
   <span class="material-icons">info</span>
 </div>
   <div class="text-box">
-    <div class="title">About</div>
+    <div class="title2">About</div>
     <div class="subtitle">Version · Shield· Updates</div>
   </div>
 </div>
@@ -475,7 +459,7 @@
     <i class="fas fa-arrow-left back-icon"></i> 
   </button>
   <div class="section-card">
-  <h4>App Version: 7.1</h4>
+  <h4>App Version: 8</h4>
 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
   <button>App Updates</button>
 </a> 
