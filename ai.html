@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in { animation: slideIn 0.5s ease-out; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse-slow { animation: pulse 2s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    
+    <!-- Modal Overlay -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 slide-in overflow-hidden">
+            
+            <!-- Modal Content -->
+            <div id="modalContent" class="p-8">
+                <!-- Initial Screen -->
+                <div id="initialScreen">
+                    <div class="text-center mb-6">
+                        <div class="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome to AI Setup</h2>
+                        <p class="text-gray-600">Before continuing, we need to download some critical components</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-xl p-6 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Notefull AI Model</h3>
+                                    <p class="text-sm text-gray-600">Quantized Q4_0 Format Gemma 3.1B</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-purple-600">1.1 GB</p>
+                                <p class="text-xs text-gray-500">Approx. size</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                </svg>
+                                <span>Stored locally in your browser</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                </svg>
+                                <span>One-time download, reusable</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                </svg>
+                                <span>No server uploads required</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="startBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        Start Download
+                    </button>
+                </div>
+                
+                <!-- Download Screen -->
+                <div id="downloadScreen" class="hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Downloading AI Model</h2>
+                        <p class="text-gray-600">Please keep this tab open</p>
+                    </div>
+                    
+                    <!-- Slideshow Messages -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 min-h-[120px] flex items-center justify-center">
+                        <p id="slideMessage" class="text-lg text-gray-700 text-center slide-in"></p>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between text-sm text-gray-600 mb-2">
+                            <span id="progressText">Preparing download...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div id="progressBar" class="bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 h-full rounded-full transition-all duration-300 bg-[length:200%_100%] animate-[gradient_2s_ease-in-out_infinite]" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-2">
+                            <span id="downloadSpeed">0 MB/s</span>
+                            <span id="downloadSize">0 MB / 1200 MB</span>
+                        </div>
+                    </div>
+                    
+                    <div id="statusMessage" class="text-center text-sm text-gray-500 pulse-slow"></div>
+                </div>
+                
+                <!-- Success Screen -->
+                <div id="successScreen" class="hidden text-center">
+                    <div class="mx-auto w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mb-6 slide-in">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Download Complete!</h2>
+                    <p class="text-gray-600 mb-6">AI model is ready to use, you can use it by clicking the summarize button</p>
+                    <button id="continueBtn" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+    </style>
+
+    <script>
+       const MODEL_URL = 'https://archive.org/download/notefull-componets/gemma-3-1b-it-q4_0.gguf';
+        const DB_NAME = 'AIModelDB';
+        const STORE_NAME = 'models';
+        const MODEL_KEY = 'gemma-3-1b-q4';
+        
+        const slideMessages = [
+            "🧠 AI models enable intelligent applications...",
+            "⚡ Quantized models are optimized for speed...",
+            "🔒 Your data stays private on your device...",
+            "🌟 This model can understand and generate text...",
+            "💾 Stored locally for offline access...",
+            "🚀 One-time download, unlimited usage..."
+        ];
+        
+        let currentSlide = 0;
+        let slideInterval;
+        
+        // Initialize IndexedDB
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+            });
+        }
+        
+        // Save model to IndexedDB
+        async function saveModel(blob) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put(blob, MODEL_KEY);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        // Update slideshow
+        function updateSlide() {
+            const messageEl = document.getElementById('slideMessage');
+            messageEl.style.opacity = '0';
+            
+            setTimeout(() => {
+                messageEl.textContent = slideMessages[currentSlide];
+                messageEl.style.opacity = '1';
+                currentSlide = (currentSlide + 1) % slideMessages.length;
+            }, 300);
+        }
+        
+        // Download model
+       async function downloadModel() {
+            try {
+                console.log('Starting download from:', MODEL_URL);
+                
+                const response = await fetch(MODEL_URL, {
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const contentLength = response.headers.get('content-length');
+                const total = parseInt(contentLength, 10);
+                
+                let loaded = 0;
+                const chunks = [];
+                const startTime = Date.now();
+                
+                const reader = response.body.getReader();
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) break;
+                    
+                    chunks.push(value);
+                    loaded += value.length;
+                    
+                    // Update progress
+                    const percent = Math.round((loaded / total) * 100);
+                    const loadedMB = (loaded / (1024 * 1024)).toFixed(1);
+                    const totalMB = (total / (1024 * 1024)).toFixed(1);
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    const speed = (loaded / (1024 * 1024) / elapsed).toFixed(2);
+                    
+                    document.getElementById('progressBar').style.width = percent + '%';
+                    document.getElementById('progressPercent').textContent = percent + '%';
+                    document.getElementById('progressText').textContent = 'Downloading...';
+                    document.getElementById('downloadSpeed').textContent = speed + ' MB/s';
+                    document.getElementById('downloadSize').textContent = `${loadedMB} MB / ${totalMB} MB`;
+                    document.getElementById('statusMessage').textContent = `Downloaded ${loadedMB} MB of ${totalMB} MB`;
+                }
+                
+                // Combine chunks and save
+                document.getElementById('progressText').textContent = 'Saving to storage...';
+                document.getElementById('statusMessage').textContent = 'Preparing model data...';
+                
+                const blob = new Blob(chunks);
+                await saveModel(blob);
+                
+                // Show success
+                clearInterval(slideInterval);
+                document.getElementById('downloadScreen').classList.add('hidden');
+                document.getElementById('successScreen').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Download failed: ' + error.message);
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('initialScreen').classList.add('hidden');
+            document.getElementById('downloadScreen').classList.remove('hidden');
+            
+            // Start slideshow
+            updateSlide();
+            slideInterval = setInterval(updateSlide, 4000);
+            
+            // Start download
+            downloadModel();
+        });
+        
+document.getElementById('continueBtn').addEventListener('click', () => {
+    // Set flag that model is downloaded
+    localStorage.setItem('modelDownloaded', 'true');
+    // Redirect to indexAlpha.html
+    window.location.href = 'indexAlpha.html';
+});
+
+// Check if model is already downloaded on page load
+async function checkModelExists() {
+    try {
+        const downloaded = localStorage.getItem('modelDownloaded');
+        if (downloaded === 'true') {
+            // Model already downloaded, redirect immediately
+            window.location.href = 'indexAlpha.html';
+        }
+    } catch (error) {
+        console.error('Error checking model:', error);
+    }
+}
+
+// Run check on page load
+checkModelExists();
+    </script>
+</body>
+</html>
