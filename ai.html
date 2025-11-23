@@ -53,7 +53,7 @@
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-2xl font-bold text-purple-600">1.1 GB</p>
+                                <p class="text-2xl font-bold text-purple-600">1.5 GB</p>
                                 <p class="text-xs text-gray-500">Approx. size</p>
                             </div>
                         </div>
@@ -108,7 +108,7 @@
                         </div>
                         <div class="flex justify-between text-xs text-gray-500 mt-2">
                             <span id="downloadSpeed">0 MB/s</span>
-                            <span id="downloadSize">0 MB / 1200 MB</span>
+                            <span id="downloadSize">0 MB / 1500 MB</span>
                         </div>
                     </div>
                     
@@ -140,7 +140,12 @@
     </style>
 
     <script>
-       const MODEL_URL = 'https://pixeldrain.com/api/file/een1wXzn';
+        // Google Drive file ID with CORS proxy
+        const GOOGLE_DRIVE_FILE_ID = '1GJon4_-LDJf_DJPu5aR4y_5EVhDPCOn0';
+        const DIRECT_URL = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_FILE_ID}&confirm=t`;
+        // Use CORS proxy for file:// origins
+        const MODEL_URL = `https://corsproxy.io/?url=https://drive.google.com/uc?export=download&id=1GJon4_-LDJf_DJPu5aR4y_5EVhDPCOn0&confirm=t`;
+        
         const DB_NAME = 'AIModelDB';
         const STORE_NAME = 'models';
         const MODEL_KEY = 'gemma-3-1b-q4';
@@ -199,40 +204,42 @@
             }, 300);
         }
         
-        // Download model
-       async function downloadModel() {
+        // Download model from Google Drive
+        async function downloadModel() {
             try {
-                console.log('Starting download from:', MODEL_URL);
+                console.log('Starting download from Google Drive...');
+                document.getElementById('progressText').textContent = 'Connecting to Google Drive...';
                 
                 const response = await fetch(MODEL_URL, {
-                    mode: 'cors',
-                    credentials: 'omit'
+                    method: 'GET',
+                    mode: 'cors'
                 });
-                
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const contentLength = response.headers.get('content-length');
-                const total = parseInt(contentLength, 10);
-                
+                const total = contentLength ? parseInt(contentLength, 10) : 1500 * 1024 * 1024; // Default 1.5GB
+
+                if (!response.body) {
+                    throw new Error('ReadableStream not supported in this browser.');
+                }
+
+                const reader = response.body.getReader();
                 let loaded = 0;
                 const chunks = [];
                 const startTime = Date.now();
-                
-                const reader = response.body.getReader();
-                
+
+                document.getElementById('progressText').textContent = 'Downloading...';
+
                 while (true) {
                     const { done, value } = await reader.read();
-                    
                     if (done) break;
-                    
+
                     chunks.push(value);
                     loaded += value.length;
-                    
+
                     // Update progress
                     const percent = Math.round((loaded / total) * 100);
                     const loadedMB = (loaded / (1024 * 1024)).toFixed(1);
@@ -242,27 +249,28 @@
                     
                     document.getElementById('progressBar').style.width = percent + '%';
                     document.getElementById('progressPercent').textContent = percent + '%';
-                    document.getElementById('progressText').textContent = 'Downloading...';
                     document.getElementById('downloadSpeed').textContent = speed + ' MB/s';
                     document.getElementById('downloadSize').textContent = `${loadedMB} MB / ${totalMB} MB`;
-                    document.getElementById('statusMessage').textContent = `Downloaded ${loadedMB} MB of ${totalMB} MB`;
+                    document.getElementById('statusMessage').textContent = `Downloaded ${loadedMB} MB`;
                 }
-                
+
                 // Combine chunks and save
                 document.getElementById('progressText').textContent = 'Saving to storage...';
                 document.getElementById('statusMessage').textContent = 'Preparing model data...';
                 
                 const blob = new Blob(chunks);
                 await saveModel(blob);
-                
+
                 // Show success
                 clearInterval(slideInterval);
                 document.getElementById('downloadScreen').classList.add('hidden');
                 document.getElementById('successScreen').classList.remove('hidden');
-                
+
             } catch (error) {
                 console.error('Download error:', error);
-                alert('Download failed: ' + error.message);
+                document.getElementById('statusMessage').textContent = 
+                    "Download failed: " + error.message + ". Please check your connection and try again.";
+                document.getElementById('progressText').textContent = 'Download failed';
             }
         }
         
@@ -279,28 +287,31 @@
             downloadModel();
         });
         
-document.getElementById('continueBtn').addEventListener('click', () => {
-    // Set flag that model is downloaded
-    localStorage.setItem('modelDownloaded', 'true');
-    // Redirect to indexAlpha.html
-    window.location.href = 'indexAlpha.html';
-});
-
-// Check if model is already downloaded on page load
-async function checkModelExists() {
-    try {
-        const downloaded = localStorage.getItem('modelDownloaded');
-        if (downloaded === 'true') {
-            // Model already downloaded, redirect immediately
+        document.getElementById('continueBtn').addEventListener('click', () => {
+            // Set flag that model is downloaded
+            localStorage.setItem('modelDownloaded', 'true');
+            // Redirect to indexAlpha.html
             window.location.href = 'indexAlpha.html';
-        }
-    } catch (error) {
-        console.error('Error checking model:', error);
-    }
-}
+        });
 
-// Run check on page load
-checkModelExists();
+        // Check if model is already downloaded on page load
+        async function checkModelExists() {
+            try {
+                const modelDownloaded = localStorage.getItem('modelDownloaded');
+                const setupComplete = localStorage.getItem('setupComplete');
+                
+                if (modelDownloaded === 'true' && setupComplete === 'true') {
+                    window.location.href = 'ai.html';
+                } else if (modelDownloaded === 'true') {
+                    window.location.href = 'indexAlpha.html';
+                }
+            } catch (error) {
+                console.error('Error checking model:', error);
+            }
+        }
+
+        // Run check on page load
+        checkModelExists();
     </script>
 </body>
 </html>
