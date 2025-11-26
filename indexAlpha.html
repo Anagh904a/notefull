@@ -2,36 +2,68 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width">
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
     <meta name="description" content="This is a notes app built by anagh , its completely free" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
-
+<link rel="icon" href="icon.png" type="image/x-icon">
     <link rel="manifest" href="manifest.json">
    
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <title>Notefull - Home</title>
   
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="compressed-style.css" />
    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   </head>
 
 
   <body>
+   <div class="nav__menu" id="nav-menu">
+  <ul class="nav__list">
+    <li class="nav__item" >
+      <a href="javascript:void(0)" class="nav__link active-link" onclick="showSection('combinedContainer')">
+        <i class='bx bx-home-alt nav__icon'></i>
+        <span class="nav__name">Home</span>
+      </a>
+    </li>
+    
+    <li class="nav__item">
+      <a href="javascript:void(0)" class="nav__link" onclick="showSection('aiSection')">
+        <i class='bx bx-lock nav__icon'></i>
+        <span class="nav__name">Security</span>
+      </a>
+    </li>
+
+    <li class="nav__item">
+      <a href="javascript:void(0)" class="nav__link" onclick="refresh()">
+<i class='bx bx-refresh nav__icon'></i>
+        <span class="nav__name">Refresh</span>
+      </a>
+    </li>
+
+    <li class="nav__item">
+      <a href="javascript:void(0)" class="nav__link" onclick="showSection('settingsSection')">
+        <i class='bx bx-cog nav__icon'></i>
+        <span class="nav__name">Settings</span>
+      </a>
+    </li>
+  </ul>
+</div>
 <!-- Combined Notes and Lists Section -->
 <!-- Add this somewhere in your HTML -->
 <audio id="alertSound" src="t.mp3" preload="auto"></audio>
 <audio id="errorSound" src="e.mp3" preload="auto"></audio>
 
+
+
 <div id="combinedContainer" class="container hidden">
       
-<div class="top-bar">
+
      
-        <i id="sidebarToggle" class="fas fa-bars" onclick="toggleSidebar()"></i>
-     
+       <div class="header">
       <input
       type="text"
       id="searchInput"
@@ -39,7 +71,7 @@
       oninput="searchNotes()"
 >
   <div id="account-icon" class="account-icon">A</div>
-      </div>
+   </div>
       
       
       
@@ -58,13 +90,20 @@
       <div id="listsSection">
         <div id="listsContainerContent"></div>
       </div>
-      <div id="noListsMessage" class="hidden">No lists yet.. Add</div>
-      <div id="noNotesMessage" class="hidden">This space is lonely. Add a note!</div>
- 
+     <div id="noListsMessage" class="hidden empty-state">
+      <i class="fas fa-inbox empty-icon"></i>
+      <p>No lists yet</p>
+      <span>Tap + to create your first list</span>
+    </div>
+    <div id="noNotesMessage" class="hidden empty-state">
+      <i class="fas fa-note-sticky empty-icon"></i>
+      <p>This space is lonely</p>
+      <span>Tap + to add your first note</span>
+    </div>
     <div class="fab-container">
         
         <button class="main-fab-style" id="mainFab">
-            <i class="fas fa-plus fab-icon"></i> 
+          Add   <i class="fas fa-plus fab-icon"></i> 
         </button>
         
         <div class="fab-options">
@@ -118,43 +157,46 @@
 
       <!-- Note Panel -->
       <div id="addNoteSection" class="section">
-                
-        <div class="form-group-title">
 
+       
+        <div class="form-group-title">
+                         <div class="footer-bar-container">
+        <div class="footer-bar">
+     <button type="button" class="save-btn" onclick="saveNote()">
+      <i class="fas fa-save"></i>
+     
+    </button>
+          <button type="button" id="changePasswordButton" onclick="showNotePassword()">
+      <i class="fas fa-key"></i>
+     
+    </button>
+   
+   <button type="button" id="undoButton" onclick="undo()">
+        <i class="fas fa-undo"></i>
+        
+      </button>
+
+      <button type="button" id="redoButton" onclick="redo()">
+        <i class="fas fa-redo"></i>
+      
+      </button>
+
+       <button type="button" id="summarize-btn" onclick="fixNote()">
+        <i class="fas fa-magic"></i> 
+
+      </button>
+   
+  </div>
+  </div><br><br><br>
          
-          <input type="text" class="title" id="noteTitle" placeholder="Enter a title" />
+          <input type="text" class="title" id="noteTitle" placeholder="Enter a title (Double Tap Me)" />
         </div>
         <div class="form-group"> 
            
          
           <textarea id="noteContent" placeholder="note content here..."></textarea>
         </div>
-        <div class="footer-bar">
-     <button type="button" class="save-btn" onclick="saveNote()">
-      <i class="fas fa-save"></i>
-      <span>Save</span>
-    </button>
-          <button type="button" id="changePasswordButton" onclick="showNotePassword()">
-      <i class="fas fa-key"></i>
-      <span>Key</span>
-    </button>
-   
-   <button type="button" id="undoButton" onclick="undo()">
-        <i class="fas fa-undo"></i>
-        <span>Undo</span>
-      </button>
 
-      <button type="button" id="redoButton" onclick="redo()">
-        <i class="fas fa-redo"></i>
-        <span>Redo</span>
-      </button>
-
-       <button type="button" id="summarize-btn" onclick="fixNote()">
-        <i class="fas fa-magic"></i> 
-<span>Fix</span>
-      </button>
-   
-  </div>
   <div id="notePasswordModal" class="modal hidden">
         <div class="modal-content">
             <h3>Enter Password</h3>
@@ -168,19 +210,7 @@
       <!-- Checklist Panel -->
       <div id="addListSection" class="section" style="display: none;">
         <div class="form-group">
-          
-          <input type="text" id="listTitle" class="title" placeholder="Enter checklist title" /><br>
-          <br><label for="inputforitem">Item Name</label> 
-          <input id="newItem" type="text" placeholder="Item name..." /> 
-        </div>
-                <button type="button" onclick="addItem()">
-      <i class="fas fa-plus"></i>
-     Add Item
-    </button>
-        <div id="checklistContainer"></div>
-
-          <!-- Dynamic checklist items -->
-        
+            
         <div class="footer-bar" style="align-items: center;">
     <button type="button" onclick="showList()">
       <i class="fas fa-key"></i>
@@ -192,6 +222,18 @@
     </button>
 
     </div>
+          <input type="text" id="listTitle" class="title" placeholder="Enter list title (Double Tap Me)" /><br>
+          <br><label for="inputforitem">Item Name</label> 
+          <input id="newItem" type="text" placeholder="Item name..." /> 
+        </div>
+                <button type="button" onclick="addItem()">
+      <i class="fas fa-plus"></i>
+     Add Item
+    </button>
+        <div id="checklistContainer"></div>
+
+          <!-- Dynamic checklist items -->
+      
 
   <div id="listPasswordModalr" class="modal hidden">
   <div class="modal-content">
@@ -322,7 +364,7 @@
         
     <button class="modal-button" onclick="showSection('combinedContainer')">
         <i class="fas fa-arrow-left back-icon"></i>
-      </button>
+      </button> <h2>Settings</h2>
      <br>
     <div class="card" onclick="showSection('creditSection')">
   <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
@@ -544,11 +586,8 @@
  <div class="section-card">
   <h2>Permission Manager for Notefull</h2>
 
-<div class="toggle-container">
-  <p>Access network connections</p> 
-<button onclick="alert('This permission cannot be disabled as it was given by system and disabling it may cause app to malfunction.')">Disable</button>
-</div>
-<h4>1 system permission given to Notefull</h4>
+
+<h4>0 Apps are allowed to acess your data in Notefull</h4>
  </div>
 
 
@@ -648,7 +687,7 @@
   </div>
 </div>
 <script src="storage.js"></script>
-    <script src="script.js"></script>
+    <script src="compressed-script.js"></script>
      
    </body>
 </html>
