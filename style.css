@@ -5,6 +5,111 @@
         cursor: not-allowed;
       }
 
+      /* Full screen overlay for the guided tour */
+.nav__menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  background-color: #FFF;
+  box-shadow: 0 -1px 12px hsla(174, 63%, 15%, 0.15);
+  width: 100%;
+  height: 4rem;
+  padding: 0 1rem;
+  display: grid;
+  align-content: center;
+  border-radius: 1.25rem 1.25rem 0 0;
+  transition: .4s;
+  z-index: 100;
+}
+
+.nav__list, 
+.nav__link {
+  display: flex;
+}
+
+.nav__link {
+  flex-direction: column;
+  align-items: center;
+  row-gap: 4px;
+  color: #1C1B1F;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.nav__list {
+  justify-content: space-around;
+}
+
+.nav__name {
+  font-size: 0.625rem;
+}
+
+.nav__icon {
+  font-size: 1.5rem;
+}
+
+.nav__list {
+  list-style: none;
+  justify-content: space-around;
+}
+
+.nav__item {
+  list-style: none;
+}
+
+ul {
+  list-style: none;
+}
+
+li {
+  list-style: none;
+}
+
+/*Active link - NO RED DOTS*/
+.active-link {
+  color: #3485ff;
+  transition: .3s;
+}
+
+/*=============== MEDIA QUERIES ===============*/
+@media screen and (max-width: 320px) {
+  .nav__name {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 576px) {
+  .nav__list {
+    justify-content: center;
+    column-gap: 3rem;
+  }
+}
+
+/* Bottom nav stays at bottom even on large screens */
+@media screen and (min-width: 767px) {
+
+  
+  .nav__icon {
+    font-size: 1.5rem;
+  }
+  
+  .nav__name {
+    font-size: 1rem;
+  }
+  
+  .nav__link:hover {
+    color: #3485ff;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .nav__list {
+    justify-content: center;
+    column-gap: 4rem;
+  }
+}
+
    /* base theme setup */
 :root {
   --bg-color: #ffffff;
@@ -48,7 +153,7 @@ background: var(--bg-color);
         margin: 0;
         padding: 0;
      transition: background-color 0.6s ease, color 0.6s ease;
-
+transition: 0.4s ease-in-out;
         display: flex;
         flex-direction: column;
         height: 100vh;
@@ -226,18 +331,41 @@ font-family: 'Poppins', sans-serif;
 
      
 
-      #noNotesMessage {
-       margin-left: 20px;
-        border-left: var(--text-color) 4px solid;
-        font-weight: bolder;
-          color: var(--text-color);
-      }
+    #noNotesMessage {
+    /* 1. Sizing and Spacing */
+    padding: 30px 60px; /* Generous padding for a 'big' look */
+    max-width: 80%; /* Ensures it doesn't get too wide on large screens */
+    text-align: center; /* Centers the text within the element */
+
+    /* 2. Typography */
+    font-size: 2.5em; /* Significantly larger font size */
+    font-weight: 800; /* Extra bold text */
+    color: #858585; /* Darker text for better contrast */
+    line-height: 1.2;
+
+    /* 3. Visual Style */
+    background-color: #ffffff; /* Crisp white background */
+  
+   
+    transition: transform 0.3s ease-in-out; /* Smooth transition for hover effect */
+}
 
            #noListsMessage {
-        margin-left: 20px;
-        border-left: var(--text-color) 4px solid;
-              font-weight: bolder;
-                color: var(--text-color);
+         padding: 30px 60px; /* Generous padding for a 'big' look */
+    max-width: 80%; /* Ensures it doesn't get too wide on large screens */
+    text-align: center; /* Centers the text within the element */
+
+    /* 2. Typography */
+    font-size: 2.5em; /* Significantly larger font size */
+    font-weight: 800; /* Extra bold text */
+    color: #858585; /* Darker text for better contrast */
+    line-height: 1.2;
+
+    /* 3. Visual Style */
+    background-color: #ffffff; /* Crisp white background */
+  
+   
+    transition: transform 0.3s ease-in-out; /* Smooth transition for hover effect */
       }
 
 
@@ -267,8 +395,8 @@ font-family: 'Poppins', sans-serif;
         padding: 20px;
         border-radius: 15px;
         width: 350px;
-    background: rgba(255, 255, 255, 0.1); /* semi-transparent */
-  border-radius: 15px;
+    background: rgba(255, 255, 255, 0.226); /* semi-transparent */
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
   backdrop-filter: blur(10px); /* blur the background behind the element */
   -webkit-backdrop-filter: blur(10px); /* for Safari */
@@ -577,16 +705,14 @@ h3 {
         flex: 1;
         padding: 10px;
         overflow-y: auto;
+     
       }
 
    
 
 
 
-    .header p {
-      font-size: 0.875rem;
-      color: var(--text-color);
-    }
+ 
 
     .form {
       flex: 1;
@@ -659,68 +785,70 @@ color: var(--text-color-un);
 
     
 
+
+
+/* 1. Footer Bar Container (Required for Centering and Safety) */
+.footer-bar-container {
+    /* Ensures the bar stays centered and off the very bottom edge */
+   position: fixed;
+   margin-top: 1%;
+    /* Ensures it scales correctly on all mobile widths */
+    max-width: 600px; 
+    width: calc(100% - 40px); /* 20px margin on left and right */
+    
+    z-index: 1000;
+}
+
+/* 2. The Footer Bar itself */
 .footer-bar {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 500px;
-  height: 64px;
-   background: rgba(255, 255, 255, 0.1); /* semi-transparent */
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
-  backdrop-filter: blur(10px); /* blur the background behind the element */
-  -webkit-backdrop-filter: blur(10px); /* for Safari */
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* soft shadow */
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-radius: 40px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  padding: 0 10px;
-  z-index: 100;
-  border: 1px solid var(--text-color);
-   transition: 0.2s;
+    display: flex;
+    /* Removed min-width: fit-content; */
+    width: 100%; /* Fill the container width */
+    
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1); 
+    border-radius: 40px; /* Highly rounded ends */
+
+    /* Key for responsiveness: evenly space the items */
+    justify-content: space-evenly; 
+    align-items: center;
+    
+    /* Use padding to keep content clean, reduced side padding since we use space-evenly */
+    padding: 0 8px; 
+    
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border: 1px solid var(--text-color);
+    
+    /* Smooth, deliberate transition */
+    transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: white;
 }
 
-.footer-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--text-color); /* light neutral button color */
-  border: none;
-  border-radius: 30px;
-  width: 70px;
-  height: 55px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-font-family: 'Poppins', sans-serif;
+/* 3. Button/Item Responsiveness & Touch Targets */
+.footer-bar button {
+    /* Key: Make the icons flexible to fill the available space */
+   color: #000;
+    
+    /* Ensure a minimum touch area for mobile */
+    min-width: 44px; 
+    height: 100%;
+    max-height: 35px;
+    
+    /* Style cleanup */
+   background: white;
+    
+    /* Smooth tap feedback */
+    transition: transform 0.15s ease-out, color 0.15s ease-out;
 }
 
-.footer-btn i {
-  font-size: 1.25rem;
-  margin-bottom: 3px;
-  color: #4b5563;
-  transition: color 0.3s;
-}
+/* 4. Professional Tap Feedback */
 
-.footer-btn span {
-  font-size: 0.75rem;
-  color: #4b5563;
-  transition: color 0.3s;
-}
 
-.footer-btn:hover {
-  background: #2563eb;
-  transform: translateY(-3px);
-}
-
-.footer-btn:hover i,
-.footer-btn:hover span {
-  color: #ffffff;
+/* 5. Highlight the Primary Action (Save) */
+.footer-bar .save-btn {
+    /* Give the save button a distinct look if desired */
+    color:  #007AFF;
+    font-weight: bold; 
 }
 
 
@@ -792,7 +920,8 @@ font-family: 'Poppins', sans-serif;
         /* Rounded corners */
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         /* Shadow for depth */
-height: 95%;
+min-height: 100000px;
+min-width: max-content;
         /* Space above the section */
       }
 /* Sidebar Base */
@@ -893,10 +1022,12 @@ transition: background-color 0.3s ease, color 0.3s ease;
 user-select: none;
 overflow: hidden;
 position: relative;
+font-weight: bold;
 }
 
 .sidebar-button:hover {
-  background: transparent;
+  background: rgb(0, 162, 255);
+  border-radius: 12px;
  }
 
 .sidebar-button i {
@@ -924,7 +1055,7 @@ transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
     .card {
-      background: var(--card-color);
+      background: white;
       padding: 16px;
       border-radius: 16px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
@@ -1181,20 +1312,26 @@ font-weight: bolder;
 .brand-l {
   display: flex;
   align-items: center;
-color: var(--text-color);
+
   font-weight: bolder;
   padding: 10px;
-  font-size: 20px; /* responsive font size */
+  font-size: 25px; /* responsive font size */
+min-width: 240px;
 }
 
 .brand {
   height: 40px; /* adjust as needed */
+  width: fit-content;
   margin-right: 10px; /* space between icon and text */
 }
 
 .brand-t {
   white-space: nowrap; /* prevent line-break */
- 
+color: transparent;
+background: linear-gradient(to right, #ffae00, #f6ff77, #ffe600);
+background-clip: text;
+-webkit-text-fill-color: transparent;
+min-width: 240px;
 }
 
     .icon.wifi { background-color: #007bff; }
@@ -1687,30 +1824,23 @@ font-family: 'Poppins', sans-serif;
   color:  var(--text-color);
 }
 
-.top-bar input {
+.header{
+white-space: nowrap;
+
+}
+
+#searchInput{
+
   position: relative;
-  padding: 10px 15px;
+  padding: 17px;
   font-size: 0.95rem;
   color: #202124;
-  width: 40%;
+  width: 97%;
   margin-right: 40%;
   margin-left: 2%;
   border: 3px solid transparent;
-  border-radius: 24px; /* pill shape */
-  background-image:
-    linear-gradient(#fff, #fff), /* inside background */
-    linear-gradient(
-      90deg,
-
-  #00ffff,
-  #00ff99,
-  #00ccff,
-  #3333ff,
-  #8a2be2,
-  #ff00ff,
-    #ff70f3
-      
-    ); /* animated border gradient */
+  border-radius: 30px; /* pill shape */
+background: #ebf2fd;
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   background-size: 300% 300%;
@@ -1718,7 +1848,9 @@ font-family: 'Poppins', sans-serif;
   transition: all 0.3s ease;
   box-sizing: border-box;
   animation: borderMove 4s linear infinite; /* Animate border */
+ 
 }
+
 
 /* Focus glow effect */
 .top-bar input:focus {
@@ -1756,7 +1888,7 @@ font-family: 'Poppins', sans-serif;
   color: white;
   font-weight: bold;
   font-size: 1rem;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -1800,7 +1932,7 @@ font-family: 'Poppins', sans-serif;
   margin: 16px auto;
         background: var(--note-bg);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
  width: calc(100% - 32px);
 color: var(--text-color);
   
@@ -2011,7 +2143,7 @@ font-family: 'Poppins', sans-serif;
   padding: 20px;
  
 
-  margin: 20px;
+background: #E2DFD2;
   font-family: 'Poppins', sans-serif;
 }
 
@@ -2138,6 +2270,8 @@ font-family: 'Poppins', sans-serif;
 
    #itemText {
     text-align: center;
+    font-size: 15px;
+   
    }
 
 /* Add this new rule for the AI Fixer button */
@@ -2182,76 +2316,13 @@ font-family: 'Poppins', sans-serif;
   }
 
 
-        .fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 66px;
-            height: 66px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            font-size: 25px;
-            font-weight: bolder;
-            border: none;
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.15),
-                0 2px 4px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            overflow: hidden;
-            outline: none;
-        }
 
-        .fab::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .fab:hover {
-            transform: scale(1.05);
-            box-shadow: 
-                0 6px 16px rgba(0, 118, 255, 0.25),
-                0 0 0 10px rgba(79, 172, 254, 0.1),
-                0 0 0 20px rgba(79, 172, 254, 0.05);
-            background: linear-gradient(135deg, #3d9cf4 0%, #00d9e6 100%);
-            animation: pulse 2s infinite;
-        }
-
-        .fab:hover::before {
-            opacity: 1;
-        }
-
-        .fab:active {
-            transform: scale(0.98);
-            box-shadow: 
-                0 2px 8px rgba(0, 118, 255, 0.3),
-                0 0 0 6px rgba(79, 172, 254, 0.15);
-        }
-
-        .fab-icon {
-            position: relative;
-            z-index: 1;
-            
-        }
 
                 .main-fab-style {
-            width: 66px;
-            height: 66px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      
+            border-radius: 10px;
+           
+  background-image: linear-gradient(to bottom, #0084ff, #36618b);
             color: white;
             font-size: 25px;
             font-weight: bolder;
@@ -2269,6 +2340,7 @@ font-family: 'Poppins', sans-serif;
             z-index: 1000;
             position: relative; 
            text-align: center;
+           bottom: 50px;
         }
 
         .main-fab-style::before {
@@ -2279,7 +2351,7 @@ font-family: 'Poppins', sans-serif;
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
-            border-radius: 50%;
+
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -2312,7 +2384,9 @@ font-family: 'Poppins', sans-serif;
         }
         .fab-container.open .fab-icon {
             transform: rotate(135deg); 
+        
         }
+        
 
 
         /* ============================================== */
@@ -2342,7 +2416,8 @@ font-family: 'Poppins', sans-serif;
             display: flex;
             flex-direction: column-reverse; 
             align-items: flex-end; /* Aligns options neatly to the right */
-            
+            bottom: 15%;
+            position: fixed;
             /* FIX: Gap between individual option buttons */
             gap: 12px; 
             
@@ -2529,15 +2604,9 @@ font-family: 'Poppins', sans-serif;
   font-weight: bold;
 }
 
-.form-group {
-  margin-bottom: 15px;
-}
 
-.form-group-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
+
+
 
 .cancel-btn {
   background: #eee;
