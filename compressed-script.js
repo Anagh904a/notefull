@@ -43,7 +43,7 @@ Content: ${e.content}`).join("\n\n")}`,i=await callGeminiAPI(s,"AI Search");if(t
 
 ${i}`);let o=notes.findIndex(e=>e.title===a.title);displayFilteredNotesAndLists([notes[o]],[])}else alert(`AI Answer:
 
-${i}`)}else displayFilteredNotesAndLists([],[]),console.log("AI search failed:",i);let l=notes.filter(t=>t?.title?.toLowerCase().includes(e)),d=lists.filter(t=>t?.title?.toLowerCase().includes(e));0===l.length&&0===d.length?noNotesMessage.classList.remove("hidden"):noNotesMessage.classList.add("hidden");let r=document.getElementById("noListsMessage");0===d.length?r.classList.remove("hidden"):r.classList.add("hidden"),l.forEach((e,t)=>{let n=document.createElement("div"),s=new Date(e.date),i=formatDate(s),a=e.password&&""!==e.password?' <i class="fas fa-lock"></i>':"",o=e.password&&""!==e.password?"":`
+${i}`),refresh()}else displayFilteredNotesAndLists([],[]),console.log("AI search failed:",i);let l=notes.filter(t=>t?.title?.toLowerCase().includes(e)),d=lists.filter(t=>t?.title?.toLowerCase().includes(e));0===l.length&&0===d.length?noNotesMessage.classList.remove("hidden"):noNotesMessage.classList.add("hidden");let r=document.getElementById("noListsMessage");0===d.length?r.classList.remove("hidden"):r.classList.add("hidden"),l.forEach((e,t)=>{let n=document.createElement("div"),s=new Date(e.date),i=formatDate(s),a=e.password&&""!==e.password?' <i class="fas fa-lock"></i>':"",o=e.password&&""!==e.password?"":`
         <button class="summarize-btn" 
                 data-note-content="${e.content}" 
                 data-note-title="${e.title}"
