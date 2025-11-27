@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <title>Notefull - Home</title>
   
-    <link rel="stylesheet" href="compressed-style.css" />
+    <link rel="stylesheet" href="style.css" />
    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   </head>
@@ -133,128 +133,130 @@
   <p>Restoring backup...</p>
 </div>
 
-  <div id="addItemSection" class="container hidden">
- 
-
-    <div id="itemText">
+<div id="addItemSection" class="container hidden">
+  
+  <!-- Full Screen Add Note Modal Style -->
+  <div class="add-note-fullscreen">
+    
+    <!-- Header -->
+    <div class="add-note-header">
+        <div id="itemText">
       <h2>Create a new item</h2>
      
        
-    </div>
-  
-    
-    
-
-    <form class="form">
-      <div class="tab-container">
-        <button type="button" id="note-tab" onclick="switchTab('note')" class="tab-btn data-active">
+    </div>    <div id="ubtn" ><button type="button" class="action-btn" id="undoButton" onclick="undo()">
+            <i class="fas fa-undo"></i>
+          </button>
+          <button type="button" class="action-btn" id="redoButton" onclick="redo()">
+            <i class="fas fa-redo"></i>
+          </button></div>
+      <div class="header-tabs">
+        <button type="button" id="note-tab" onclick="switchTab('note')" class="tab-btn-header active">
           <i class="fas fa-sticky-note"></i> Note
         </button>
-        <button type="button" id="checklist-tab" onclick="switchTab('checklist')" class="tab-btn">
+        <button type="button" id="checklist-tab" onclick="switchTab('checklist')" class="tab-btn-header">
           <i class="fas fa-check"></i> Checklist
         </button>
       </div>
-
-      <!-- Note Panel -->
-      <div id="addNoteSection" class="section">
-
-       
-        <div class="form-group-title">
-                         <div class="footer-bar-container">
-        <div class="footer-bar">
-     <button type="button" class="save-btn" onclick="saveNote()">
-      <i class="fas fa-save"></i>
-     
-    </button>
-          <button type="button" id="changePasswordButton" onclick="showNotePassword()">
-      <i class="fas fa-key"></i>
-     
-    </button>
-   
-   <button type="button" id="undoButton" onclick="undo()">
-        <i class="fas fa-undo"></i>
-        
-      </button>
-
-      <button type="button" id="redoButton" onclick="redo()">
-        <i class="fas fa-redo"></i>
-      
-      </button>
-
-       <button type="button" id="summarize-btn" onclick="fixNote()">
-        <i class="fas fa-magic"></i> 
-
-      </button>
-   
-  </div>
-  </div><br><br><br>
-         
-          <input type="text" class="title" id="noteTitle" placeholder="Enter a title (Double Tap Me)" />
-        </div>
-        <div class="form-group"> 
-           
-         
-          <textarea id="noteContent" placeholder="note content here..."></textarea>
-        </div>
-
-  <div id="notePasswordModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Enter Password</h3>
-            <input type="password" id="notePassword" placeholder="Enter New Password.." style="display: block" />
-            
-            <button type="button" onclick="closeNotePassword()">Close</button>
-        </div>
     </div>
+
+    <!-- Note Panel -->
+    <div id="addNoteSection" class="container hidden">
+      
+      <!-- Top Toolbar for Note -->
+      <div class="toolbar-secondary">
+        <button type="button" class="tool-btn" id="changePasswordButton" onclick="showNotePassword()">
+          <i class="fas fa-key"></i> Password
+        </button>
+        <button type="button" class="tool-btn" id="summarize-btn" onclick="fixNote()">
+          <i class="fas fa-magic"></i> Fix
+        </button>
+                  <button type="button" class="save-btn-bottom" onclick="saveNote()">
+            <i class="fas fa-save"></i> Save
+          </button>
       </div>
 
-      <!-- Checklist Panel -->
-      <div id="addListSection" class="section" style="display: none;">
-        <div class="form-group">
-            
-        <div class="footer-bar" style="align-items: center;">
-    <button type="button" onclick="showList()">
-      <i class="fas fa-key"></i>
-      <span>Key</span>
-    </button>
-    <button type="button" class="save-btn" onclick="saveList()">
-      <i class="fas fa-save"></i>
-      <span>Save</span>
-    </button>
-
-    </div>
-          <input type="text" id="listTitle" class="title" placeholder="Enter list title (Double Tap Me)" /><br>
-          <br><label for="inputforitem">Item Name</label> 
-          <input id="newItem" type="text" placeholder="Item name..." /> 
-        </div>
-                <button type="button" onclick="addItem()">
-      <i class="fas fa-plus"></i>
-     Add Item
-    </button>
-        <div id="checklistContainer"></div>
-
-          <!-- Dynamic checklist items -->
-      
-
-  <div id="listPasswordModalr" class="modal hidden">
-  <div class="modal-content">
-      <h3>Enter Password</h3>
-      <input
-        type="password"
-        id="listPassword"
-        placeholder="Enter New Password.."
-       style="display: block;"
-      />
-      
-      <button type="button" onclick="closeListPassword()">Close</button>
-  </div>
-</div>
-    </div>
+      <!-- Note Editor -->
     
-  </div>
+          <input 
+            type="text" 
+            class="note-title-input" 
+            id="noteTitle" 
+            placeholder="Title"
+          />
+          <textarea 
+            class="note-content-input" 
+            id="noteContent" 
+            placeholder="Start typing your note..."
+          ></textarea>
+   
+
+      <!-- Bottom Toolbar for Note -->
+      
+
+      <!-- Note Password Modal -->
+      <div id="notePasswordModal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Enter Password</h3>
+          <input type="password" id="notePassword" placeholder="Enter New Password.." />
+          <button type="button" onclick="closeNotePassword()">Close</button>
+        </div>
       </div>
-    </form>
+    
+    </div>
+
+    <!-- Checklist Panel -->
+    <div id="addListSection" class="container hidden">
+      
+      <!-- Top Toolbar for Checklist -->
+      <div class="toolbar-secondary">
+        <button type="button" class="tool-btn" onclick="showList()">
+          <i class="fas fa-key"></i> Password
+        </button>
+        <button type="button" class="save-btn-bottom" onclick="saveList()">
+            <i class="fas fa-save"></i> Save
+          </button>
+      </div>
+
+     
+      
+          <input 
+            type="text" 
+            id="listTitle" 
+            class="note-title-input" 
+            placeholder="List Title"
+          />
+          
+        <div id="list-input">
+            <input 
+              id="newItem" 
+              type="text" 
+              class="list-item-input" 
+              placeholder="Add item..." 
+            />
+            <button type="button" class="add-item-btn" onclick="addItem()">
+              <i class="fas fa-plus"></i>
+            </button>
+    </div>
+
+          <div id="checklistContainer" class="checklist-items"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Toolbar for Checklist -->
+     
+
+      <!-- List Password Modal -->
+      <div id="listPasswordModalr" class="modal hidden">
+        <div class="modal-content">
+          <h3>Enter Password</h3>
+          <input type="password" id="listPassword" placeholder="Enter New Password.." />
+          <button type="button" onclick="closeListPassword()">Close</button>
+        </div>
+      </div>
+    </div>
+
   </div>
-</div>
 </div>
     
 
@@ -687,7 +689,7 @@
   </div>
 </div>
 <script src="storage.js"></script>
-    <script src="compressed-script.js"></script>
+    <script src="script.js"></script>
      
    </body>
 </html>
