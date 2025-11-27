@@ -315,6 +315,8 @@ font-family: 'Poppins', sans-serif;
   overflow: hidden;
   z-index: 1000;
   transition: all 0.4s ease;
+           touch-action: pan-y
+           overflow-x: hidden;
 }
 
 /* Active state: fill screen */
