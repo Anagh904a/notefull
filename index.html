@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notefull</title>
+  <title>Notes App Onboarding</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Custom Font Import (Optional: Use a nice mobile-friendly font) */
@@ -137,14 +137,14 @@
     <div id="step3" class="step-container hidden-step text-center max-w-sm px-4">
       <div class="space-y-6">
         <img src="https://cdn-icons-png.flaticon.com/512/3039/3039385.png" alt="Success Icon" class="w-24 h-24 mx-auto animate-bounce filter drop-shadow-lg" />
-        <h2 class="text-4xl font-black text-white">Setup Complete! 🎉</h2>
-        <p class="text-xl text-gray-200">Welcome, <span id="displayName" class="text-yellow-300 font-bold">User</span>.<br />Start capturing your thoughts.</p>
+        <h2 class="text-4xl font-black text-white">You're Almost There 🎉</h2>
+        <p class="text-xl text-gray-200">Welcome, <span id="displayName" class="text-yellow-300 font-bold">User</span>.<br />Just One More step To Go</p>
       </div>
     </div>
 
   </div>
 
-  <button id="mainButton" class="bottom-button" onclick="handleButtonClick()">Get Started</button>
+  <button id="mainButton" class="bottom-button" onclick="handleButtonClick()">Countinue</button>
 
   <script>
     const steps = document.querySelectorAll(".step-container");
@@ -161,15 +161,19 @@
     /**
      * Checks if the setup is complete and redirects if necessary.
      */
-    function checkSetupComplete() {
-      if (localStorage.getItem(LOCAL_STORAGE_KEY_SETUP) === 'true') {
-        // In a real app, this would redirect to the main index.html
+async function checkModelExists() {
+    try {
         
-        window.location.href = 'indexAlpha.html'; // Or whatever your main app page is
-      } else {
-        showStep(0); // Start the onboarding flow
-      }
+        const setupComplete = localStorage.getItem('notesAppSetupComplete');
+        
+        if (setupComplete === 'true') {
+            // Both model downloaded and setup complete, redirect to main app
+            window.location.href = 'indexAlpha.html';
+        } 
+    } catch (error) {
+        console.error('Error checking model:', error);
     }
+}
 
     /**
      * Toggles the visibility and class for the current step.
@@ -199,7 +203,7 @@
           mainButton.textContent = 'Looks Good! Continue';
           break;
         case 3:
-          mainButton.textContent = 'Go to My Notes';
+          mainButton.textContent = 'Go';
           break;
         default:
           mainButton.textContent = 'Continue';
@@ -261,12 +265,12 @@
 
       // 2. Alert and Redirect
       
-      window.location.href = 'indexAlpha.html'; // Redirect to main app
+      window.location.href = 'ai.html'; // Redirect to main app
     }
 
     // --- Initialization ---
     // Check if setup is already done when the page loads
-    window.onload = checkSetupComplete;
+    window.onload = checkModelExists;
   </script>
 
 </body>
