@@ -64,12 +64,15 @@
 
      
        <div class="header">
+        <i class="fas fa-search"></i>
       <input
       type="text"
       id="searchInput"
       placeholder="Ask Notefull AI..."
       oninput="searchNotes()"
->
+    >
+          
+<i class="fa-solid fa-xmark" onclick="clearSearch()" id="clearSearch"></i>
   <div id="account-icon" class="account-icon">A</div>
    </div>
       
@@ -199,7 +202,7 @@
         <div class="modal-content">
           <h3>Enter Password</h3>
           <input type="password" id="notePassword" placeholder="Enter New Password.." />
-          <button type="button" onclick="closeNotePassword()">Close</button>
+          <button type="button" onclick="closeNotePassword()">Close <i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
     
@@ -251,7 +254,7 @@
         <div class="modal-content">
           <h3>Enter Password</h3>
           <input type="password" id="listPassword" placeholder="Enter New Password.." />
-          <button type="button" onclick="closeListPassword()">Close</button>
+          <button type="button" onclick="closeListPassword()">Close <i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
     </div>
@@ -269,7 +272,7 @@
           <input type="password" id="passwordInput" placeholder="Password">
           <button onclick="verifyPassword()">Go <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
  </button>
-          <button onclick="closePasswordModal()">Close</button>
+          <button onclick="closePasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
         </div>
   </div>
 
@@ -284,15 +287,15 @@
         />
         <button onclick="deleteVerifyPassword()">Go <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
 </button>
-        <button onclick="closeDeletePasswordModal()">Close</button>
+        <button onclick="closeDeletePasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
 
    <div class="modal " id="modal">
   <div class="modal-content">
     <h2>Welcome to Notefull</h2>
-    <p class="important" style="color: rgb(255, 222, 222);"> Welcome to Notefull 8 (Early Acess). This is a stable Release! </p>
-    <p>What's new <br>->Bug Fixes <br>->UI/UFX Major and Minor Improvements </p>
+    <p class="important" style="color: rgb(40, 66, 68);"> Welcome to Notefull 8 (Early Acess). This is a stable Release! </p>
+    <p>What's new <br>->Bug Fixes <br>->UI/UFX corrections </p>
 
     
       
@@ -366,7 +369,7 @@
         
     <button class="modal-button" onclick="showSection('combinedContainer')">
         <i class="fas fa-arrow-left back-icon"></i>
-      </button> <h2>Settings</h2>
+      </button> <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
      <br>
     <div class="card" onclick="showSection('creditSection')">
   <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
@@ -503,7 +506,7 @@
     <i class="fas fa-arrow-left back-icon"></i> 
   </button>
   <div class="section-card">
-  <h4>App Version: 8</h4>
+  <div class="info-box"><img class="brand-t" src="icon.png"><h4>App Version: 8.1</h4></div>
 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
   <button>App Updates</button>
 </a> 
@@ -512,8 +515,8 @@
   <div class="section-card">
   <h2>Notefull Shield Updater</h2>
   <p>Protect yourself against threats and vulnerabilities in Notefull</p>
-  <h3>Release Code: <span id="lastUpdated"></span></h3>
-  <h3>Shield Version: <span id="currentVersion"></span></h3>
+  <div class="info-box"><h3>Release Code: <span id="lastUpdated"></span></h3></div>
+  <div class="info-box"><h3>Shield Version: <span id="currentVersion"></span></h3></div>
   <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
 </div>
 
@@ -566,10 +569,10 @@
   </button>
  
   <div class="section-card">
-    <p>Email ID</p>
+    <h3>Email ID</h3>
     <br>
 
-    <p>mastiwithanagh@gmail.com</p>
+   <div class="info-box"><p>anaghmanglick@gmail.com</p></div><br>
     <p>Any data related bugs? Report them to this email ID given above:</p>
    </div>
 </div>
@@ -589,7 +592,7 @@
   <h2>Permission Manager for Notefull</h2>
 
 
-<h4>0 Apps are allowed to acess your data in Notefull</h4>
+<div class="info-box"><h4>0 Apps are allowed to acess your data in Notefull</h4></div>
  </div>
 
 
@@ -607,8 +610,8 @@
         </button>
           <div class="section-card">
         <h2>Credits</h2>
-        <p>Developed by <strong>Anagh Manglick</strong></p>
-      <p>I am a school student developer. Development is my hobby.</p>
+        <div class="info-box"><p>Developed by <strong>Anagh Manglick</strong></p></div>
+      <div class="info-box"><p>I am a student developer and development is my hobby.</p></div>
        </div>
           </div>
       </div>
@@ -662,7 +665,7 @@
         <h3>Enter Password</h3>
         <input type="password" id="listPasswordInput" placeholder="Password" />
         <button onclick="verifyListPassword()">Go <i class="fas fa-arrow-right"></i></button>
-        <button onclick="closeListPasswordModal()">Close</button>
+        <button onclick="closeListPasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
 
@@ -676,7 +679,7 @@
           placeholder="Password"
         />
         <button onclick="deleteListVerifyPassword()">Go <i class="fas fa-arrow-right"></i></button>
-        <button onclick="closeDeleteListPasswordModal()">Close</button>
+        <button onclick="closeDeleteListPasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
 
