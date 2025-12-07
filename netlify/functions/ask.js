@@ -2,7 +2,7 @@ exports.handler = async (event, context) => {
   const { prompt } = JSON.parse(event.body);
 
   const r = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + process.env.GEMINI_KEY,
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + process.env.GEMINI_KEY,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
