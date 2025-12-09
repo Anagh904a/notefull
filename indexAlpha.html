@@ -21,37 +21,35 @@
 
 
   <body>
-   <div class="nav__menu" id="nav-menu">
-  <ul class="nav__list">
-    <li class="nav__item" >
-      <a href="javascript:void(0)" class="nav__link active-link" onclick="showSection('combinedContainer')">
-        <i class='bx bx-home-alt nav__icon'></i>
-        <span class="nav__name">Home</span>
-      </a>
-    </li>
-    
-    <li class="nav__item">
-      <a href="javascript:void(0)" class="nav__link" onclick="showSection('aiSection')">
-        <i class='bx bx-lock nav__icon'></i>
-        <span class="nav__name">Security</span>
-      </a>
-    </li>
+       <div class="nav-wrapper">
+        <nav class="glass-nav">
+            
+            <a href="javascript:void(0)" class="nav-item active" 
+                onclick="updateNavbar(this); showSection('combinedContainer');">
+                <i class="fa-solid fa-house"></i>
+                <span class="nav-text">Home</span>
+            </a>
 
-    <li class="nav__item">
-      <a href="javascript:void(0)" class="nav__link" onclick="refresh()">
-<i class='bx bx-refresh nav__icon'></i>
-        <span class="nav__name">Refresh</span>
-      </a>
-    </li>
+            <a href="javascript:void(0)" class="nav-item" 
+                onclick="updateNavbar(this); showSection('aiSection');">
+                <i class="fas fa-shield-alt"></i>
+                <span class="nav-text">Security</span>
+            </a>
 
-    <li class="nav__item">
-      <a href="javascript:void(0)" class="nav__link" onclick="showSection('settingsSection')">
-        <i class='bx bx-cog nav__icon'></i>
-        <span class="nav__name">Settings</span>
-      </a>
-    </li>
-  </ul>
-</div>
+            <a href="javascript:void(0)" class="nav-item" 
+                onclick="updateNavbar(this); showSection('settingsSection');">
+                <i class="fas fa-cog"></i>
+                <span class="nav-text">Settings</span>
+            </a>
+
+            <a href="javascript:void(0)" class="nav-item" id="mainFab" 
+                onclick="updateNavbar(this);">
+                <i class="fas fa-plus"></i>
+                <span class="nav-text">Add</span>
+            </a>
+
+        </nav>
+    </div>
 <!-- Combined Notes and Lists Section -->
 <!-- Add this somewhere in your HTML -->
 <audio id="alertSound" src="t.mp3" preload="auto"></audio>
@@ -105,18 +103,18 @@
     </div>
     <div class="fab-container">
         
-        <button class="main-fab-style" id="mainFab">
+        <button class="main-fab-style" id="mainab" style="display: none;">
           Add   <i class="fas fa-plus fab-icon"></i> 
         </button>
         
         <div class="fab-options">
             
             <button class="modal-btn note-option" id="addNoteButton" onclick="showAddNote()">
-                <i class="fas fa-sticky-note" style="margin-right: 8px;"></i> Note
+                <i class="fas fa-sticky-note" style="margin-right: 8px;"></i> 
             </button>
             
             <button class="modal-btn list-option" id="addListButton" onclick="showAddListSection()"">
-                <i class="fas fa-list-check" style="margin-right: 8px;"></i> List
+                <i class="fas fa-list-check" style="margin-right: 8px;"></i> 
             </button>
             
         </div>
@@ -692,7 +690,7 @@
   </div>
 </div>
 <script src="storage.js"></script>
-    <script src="script.js"></script>
+    <script src="compressed-script.js"></script>
      
    </body>
 </html>
