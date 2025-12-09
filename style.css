@@ -6,108 +6,79 @@
       }
 
       /* Full screen overlay for the guided tour */
-.nav__menu {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  background-color: #FFF;
-  box-shadow: 0 -1px 12px hsla(174, 63%, 15%, 0.15);
-  width: 100%;
-  height: 4rem;
-  padding: 0 1rem;
-  display: grid;
-  align-content: center;
-  transition: .4s;
-  z-index: 100;
-}
+        .nav-wrapper {
+            position: fixed;
+            bottom: calc(20px + var(--safe-bottom)); /* Dynamic safe-area positioning */
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+            pointer-events: none; 
+        }
 
-.nav__list, 
-.nav__link {
-  display: flex;
-}
+        .glass-nav {
+            pointer-events: auto; 
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(150%);
+            -webkit-backdrop-filter: blur(25px) saturate(150%);
+            border: 1px solid var(--glass-border);
+            
+            width: 90%;
+            max-width: 420px;
+            min-width: 300px;
+            
+            padding: 10px 12px;
+            border-radius: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
 
-.nav__link {
-  flex-direction: column;
-  align-items: center;
-  row-gap: 4px;
-  color: #1C1B1F;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-}
+        /* --- 4. NAV ITEMS & ANIMATION (Navbar Logic) --- */
+        .nav-item {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            position: relative;
+            overflow: hidden;
+        }
 
-.nav__list {
-  justify-content: space-around;
-}
+        .nav-item i {
+            font-size: 1.25rem;
+            position: relative;
+            z-index: 2;
+        }
 
-.nav__name {
-  font-size: 0.625rem;
-}
+        .nav-text {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            max-width: 0;
+            opacity: 0;
+            margin-left: 0;
+            transition: all 0.4s ease;
+        }
 
-.nav__icon {
-  font-size: 1.5rem;
-}
+        /* Active State */
+        .nav-item.active {
+            background-color: var(--active-color);
+            color: #121212;
+            padding-right: 22px;
+            padding-left: 22px;
+        }
 
-.nav__list {
-  list-style: none;
-  justify-content: space-around;
-}
-
-.nav__item {
-  list-style: none;
-}
-
-ul {
-  list-style: none;
-}
-
-li {
-  list-style: none;
-}
-
-/*Active link - NO RED DOTS*/
-.active-link {
-  color: #3485ff;
-  transition: .3s;
-}
-
-/*=============== MEDIA QUERIES ===============*/
-@media screen and (max-width: 320px) {
-  .nav__name {
-    display: none;
-  }
-}
-
-@media screen and (min-width: 576px) {
-  .nav__list {
-    justify-content: center;
-    column-gap: 3rem;
-  }
-}
-
-/* Bottom nav stays at bottom even on large screens */
-@media screen and (min-width: 767px) {
-
-  
-  .nav__icon {
-    font-size: 1.5rem;
-  }
-  
-  .nav__name {
-    font-size: 1rem;
-  }
-  
-  .nav__link:hover {
-    color: #34d6ff;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .nav__list {
-    justify-content: center;
-    column-gap: 4rem;
-  }
-}
+        .nav-item.active .nav-text {
+            max-width: 100px;
+            opacity: 1;
+            margin-left: 10px;
+        }
 
    /* base theme setup */
 :root {
@@ -123,8 +94,12 @@ li {
 --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(12px);
-  --note-bg: rgb(240, 240, 178);
-  --list-bg: rgb(230, 142, 233);
+  --note-bg: rgb(255, 167, 3);
+  --list-bg: #f89494;
+             --safe-bottom: env(safe-area-inset-bottom, 20px); 
+                  --glass-bg: rgba(28, 28, 28, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --active-color: #FDCF6F;
 }
 
 /* dark theme */
@@ -134,7 +109,7 @@ li {
   --card-color: #1f1f1f;
     --sidebar-bg: black;
   --modal-bg: #000;
-  --button-hover: rgb(190, 190, 190); 
+  --button-hover: rgb(114, 114, 114); 
     --light-theme-fix: rgb(54, 54, 54);
     --footer-color: #353535;
     --footer-button: #000;
@@ -271,6 +246,8 @@ background: var(--bg-color);
 
      .modal-content button {
 width: 98%;
+display: flex;
+justify-content: space-between;
      }
 
       #deletePasswordModal {
@@ -315,8 +292,6 @@ font-family: 'Poppins', sans-serif;
   overflow: hidden;
   z-index: 1000;
   transition: all 0.4s ease;
-           touch-action: pan-y
-           overflow-x: hidden;
 }
 
 /* Active state: fill screen */
@@ -657,11 +632,11 @@ color: #333;
       }
 
       .modal-content {
-       color: var(--text-color);
+      color: #000;
         padding: 20px;
         border-radius: 15px;
         width: 350px;
-    background: rgba(255, 255, 255, 0.226); /* semi-transparent */
+    background: rgba(255, 255, 255, 0.664); /* semi-transparent */
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2); /* subtle border */
   backdrop-filter: blur(10px); /* blur the background behind the element */
@@ -681,15 +656,9 @@ color: #333;
       /* Modal Button Styles */
 .modal-button {
  
-     color: var(--text-color);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.15),
-    rgba(255, 255, 255, 0.05)
-  );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
+     color: #000;
+  background: white;
+ 
   border: 1px solid var(--text-color);
   border-radius: 50%;
   width: 56px;
@@ -1455,18 +1424,29 @@ font-weight: bolder;
   width: 100%;
   padding: 12px 16px;
   margin: 10px 0;
-  background-color: #0078d7;
-  color: white;
+  border: 2px solid black;
+  color: rgb(0, 0, 0);
   font-size: 1rem;
-  border: none;
-  border-radius: 10px;
+border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s ease;
   text-align: left;
+  background: white;
 }
 
 .settings-button:hover {
-  background-color: #005eb8;
+  background: white;
+   display: block;
+  width: 100%;
+  padding: 12px 16px;
+  margin: 10px 0;
+  border: 2px solid black;
+  color: rgb(255, 0, 0);
+  font-size: 1rem;
+border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  text-align: left;
 }
 
 .settings-input {
@@ -1586,18 +1566,16 @@ min-width: 240px;
 }
 
 .brand {
-  height: 40px; /* adjust as needed */
-  width: fit-content;
-  margin-right: 10px; /* space between icon and text */
+  height: 100px; /* adjust as needed */
+  width: max-content;
+
 }
 
 .brand-t {
   white-space: nowrap; /* prevent line-break */
 color: transparent;
-background: linear-gradient(to right, #ffae00, #f6ff77, #ffe600);
-background-clip: text;
--webkit-text-fill-color: transparent;
-min-width: 240px;
+width: 40px;
+height: 40px;
 }
 
     .icon.wifi { background-color: #007bff; }
@@ -2007,7 +1985,7 @@ font-family: 'Poppins', sans-serif;
 
       .modal-content h2 {
         margin: 0 0 20px;
-        color: var(--text-color);
+        color: #000;
       }
 
       .modal-content input {
@@ -2025,35 +2003,9 @@ font-family: 'Poppins', sans-serif;
 
   
 
-      .settings-button {
-        background: transparent;
-        /* Transparent background */
-        border: none;
-        /* No border */
-        color: var(--text-color);
-        font-size: 24px;
-        /* Size of the icon */
-        cursor: pointer;
-        /* Pointer cursor on hover */
-        position: j;
-        right: 20px;
-        /* Distance from the right */
-        top: 50%;
-        /* Center vertically */
-        transform: translateY(-50%);
-        /* Adjust for vertical centering */
-        transition: color 0.3s ease, background-color 0.3s ease;
-        /* Smooth transition for hover effect */
-      }
 
-      .settings-button:hover {
-        color: #ff6f61;
-        /* Change color on hover */
-     background: transparent;
-        /* Light background on hover with transparency */
-        border-radius: 5px;
-        /* Optional: rounded corners for the hover effect */
-      }
+
+ 
 
 
 .top-bar {
@@ -2089,20 +2041,6 @@ font-family: 'Poppins', sans-serif;
 
 .header{
 white-space: nowrap;
-
-}
-
-#searchInput{
-
-  position: relative;
-  padding: 17px;
-  font-size: 0.95rem;
-  color: #202124;
-  width: 97%;
-  margin-right: 40%;
-  margin-left: 2%;
-  border: 3px solid transparent;
-  border-radius: 30px; /* pill shape */
 background: #ebf2fd;
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
@@ -2110,7 +2048,41 @@ background: #ebf2fd;
   outline: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
-  animation: borderMove 4s linear infinite; /* Animate border */
+border-radius: 100px;
+padding: 9px;
+display: flex;
+align-items: center;
+}
+
+.header input {
+ 
+  border: 3px solid transparent;
+  border-radius: 30px; /* pill shape */
+background: none;
+  
+  font-size: 0.95rem;
+  color: #202124;
+ width: 77%;
+ 
+  border: 3px solid transparent;
+ 
+
+ 
+}
+
+#clearSearch {
+margin-left: 0px;
+display: none;
+}
+
+.header i {
+ align-items: center;
+ margin-left: 12px;
+ font-size: 17px;
+}
+
+#searchInput{
+color: #000;
  
 }
 
@@ -2772,6 +2744,7 @@ background: #E2DFD2;
     padding: 20px;
     font-family: 'Poppins', sans-serif;
     background: var(--bg-color);
+  overflow-x: hidden;
   }
 
   #combinedContainer h2 {
