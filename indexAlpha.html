@@ -42,8 +42,8 @@
                 <span class="nav-text">Settings</span>
             </a>
 
-            <a href="javascript:void(0)" class="nav-item" id="mainFab" 
-                onclick="updateNavbar(this);">
+            <a href="javascript:void(0)" class="nav-item" 
+                onclick="updateNavbar(this); showAddOptions();">
                 <i class="fas fa-plus"></i>
                 <span class="nav-text">Add</span>
             </a>
@@ -76,15 +76,59 @@
       
       
       
-<div class="sort-container">
-  <select id="sortSelect" onchange="applySortFilter()">
-    <option value="all">All</option>
-    <option value="note">Notes</option>
-    <option value="lists">Lists</option>
+
+
+<div class="custom-sort-wrapper">
+  <div class="filter-group" id="filterGroup">
+    <div class="filter-segment-glow" id="segmentGlow"></div>
     
-  </select>
+    <div class="filter-item active" onclick="handleFilterChange(this, 'all')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span>All</span>
+    </div>
+
+    <div class="filter-item" onclick="handleFilterChange(this, 'note')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+      </svg>
+      <span>Notes</span>
+    </div>
+
+    <div class="filter-item" onclick="handleFilterChange(this, 'lists')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <span>Lists</span>
+    </div>
+  </div>
 </div>
 
+<div id="addOptionsModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>What to add?</h3>
+       
+       <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
+          <i class="fas fa-sticky-note"></i> Note
+        </button>
+        <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
+          <i class="fas fa-list"></i> List
+        </button>
+       <button class="modal-btn-close" onclick="closeAddOptions()">
+        <i class="fas fa-xmark"></i>
+        Close</button>
+      </div>
+    </div>
 
 
       <div id="notesContainer"></div>
@@ -103,21 +147,9 @@
     </div>
     <div class="fab-container">
         
-        <button class="main-fab-style" id="mainab" style="display: none;">
-          Add   <i class="fas fa-plus fab-icon"></i> 
-        </button>
+    
         
-        <div class="fab-options">
-            
-            <button class="modal-btn note-option" id="addNoteButton" onclick="showAddNote()">
-                <i class="fas fa-sticky-note" style="margin-right: 8px;"></i> 
-            </button>
-            
-            <button class="modal-btn list-option" id="addListButton" onclick="showAddListSection()"">
-                <i class="fas fa-list-check" style="margin-right: 8px;"></i> 
-            </button>
-            
-        </div>
+    
     </div>
 
     </div>
@@ -289,7 +321,7 @@
       </div>
     </div>
 
-   <div class="modal " id="modal">
+   <div class="modal" id="modal">
   <div class="modal-content">
     <h2>Welcome to Notefull</h2>
     <p class="important" style="color: rgb(40, 66, 68);"> Welcome to Notefull 8 (Early Acess). This is a stable Release! </p>
@@ -299,7 +331,7 @@
       
    
 
-    <button id="closeModal">Continue <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
+    <button onclick="closeWelcomeModal()">Continue <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
 </button>
   </div>
 </div>
@@ -685,7 +717,7 @@
 <!-- TOAST HTML -->
 <div id="aiToast" class="toast">
   <div class="toast-content">
-    <strong>Welcome!</strong>
+    <strong>Quick Scan has Completed</strong>
    
   </div>
 </div>
