@@ -21,7 +21,12 @@
 
 
   <body>
-       <div class="nav-wrapper">
+<audio id="alertSound" src="t.mp3" preload="auto"></audio>
+<audio id="errorSound" src="e.mp3" preload="auto"></audio>
+<audio id="sucessSound" src="s.mp3" preload="auto"></audio>
+
+
+       <div id="nav" class="nav-wrapper">
         <nav class="glass-nav">
             
             <a href="javascript:void(0)" class="nav-item active" 
@@ -50,17 +55,13 @@
 
         </nav>
     </div>
-<!-- Combined Notes and Lists Section -->
-<!-- Add this somewhere in your HTML -->
-<audio id="alertSound" src="t.mp3" preload="auto"></audio>
-<audio id="errorSound" src="e.mp3" preload="auto"></audio>
 
 
 
-<div id="combinedContainer" class="container hidden">
+
       
 
-     
+         <div id="combinedContainer" class="container hidden">
        <div class="header">
         <i class="fas fa-search"></i>
       <input
@@ -115,7 +116,7 @@
 </div>
 
 <div id="addOptionsModal" class="modal hidden">
-      <div class="modal-content">
+      <div class="modal-content2">
         <h3>What to add?</h3>
        
        <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
@@ -135,22 +136,17 @@
       <div id="listsSection">
         <div id="listsContainerContent"></div>
       </div>
-     <div id="noListsMessage" class="hidden empty-state">
+     <div id="noListsMessage" class="hidden">
       <i class="fas fa-inbox empty-icon"></i>
       <p>No lists yet</p>
       <span>Tap + to create your first list</span>
     </div>
-    <div id="noNotesMessage" class="hidden empty-state">
+    <div id="noNotesMessage" class="hidden">
       <i class="fas fa-note-sticky empty-icon"></i>
       <p>This space is lonely</p>
       <span>Tap + to add your first note</span>
     </div>
-    <div class="fab-container">
-        
-    
-        
-    
-    </div>
+   
 
     </div>
 
@@ -166,45 +162,37 @@
   <p>Restoring backup...</p>
 </div>
 
-<div id="addItemSection" class="container hidden">
+
   
   <!-- Full Screen Add Note Modal Style -->
-  <div class="add-note-fullscreen">
-    
-    <!-- Header -->
-    <div class="add-note-header">
+  <div id="addNoteSection" class="container hidden">
+  
+    <!-- Note Panel -->
+   
+        <div class="add-note-header">
         <div id="itemText">
       <h2>Create a new item</h2>
      
        
-    </div>    <div id="ubtn" ><button type="button" class="action-btn" id="undoButton" onclick="undo()">
+    </div>    <div id="ubtn">
+      <button type="button" class="action-btn" id="undoButton" onclick="undo()">
             <i class="fas fa-undo"></i>
           </button>
           <button type="button" class="action-btn" id="redoButton" onclick="redo()">
             <i class="fas fa-redo"></i>
-          </button></div>
-      <div class="header-tabs">
-        <button type="button" id="note-tab" onclick="switchTab('note')" class="tab-btn-header active">
-          <i class="fas fa-sticky-note"></i> Note
-        </button>
-        <button type="button" id="checklist-tab" onclick="switchTab('checklist')" class="tab-btn-header">
-          <i class="fas fa-check"></i> Checklist
-        </button>
-      </div>
+          </button>
+        </div>
+ 
     </div>
-
-    <!-- Note Panel -->
-    <div id="addNoteSection" class="container hidden">
-      
       <!-- Top Toolbar for Note -->
       <div class="toolbar-secondary">
-        <button type="button" class="tool-btn" id="changePasswordButton" onclick="showNotePassword()">
+        <button class="tool-btn" id="changePasswordButton" onclick="showNotePassword()">
           <i class="fas fa-key"></i> Password
         </button>
-        <button type="button" class="tool-btn" id="summarize-btn" onclick="fixNote()">
+        <button class="tool-btn" id="summarize-btn" onclick="fixNote()">
           <i class="fas fa-magic"></i> Fix
         </button>
-                  <button type="button" class="save-btn-bottom" onclick="saveNote()">
+                  <button class="save-btn-bottom" onclick="saveNote()">
             <i class="fas fa-save"></i> Save
           </button>
       </div>
@@ -240,13 +228,17 @@
 
     <!-- Checklist Panel -->
     <div id="addListSection" class="container hidden">
-      
+      <div class="add-list-header">
+        <div id="itemTextl">
+      <h2>Create a new item</h2>
+     </div>   
+ </div>
       <!-- Top Toolbar for Checklist -->
       <div class="toolbar-secondary">
-        <button type="button" class="tool-btn" onclick="showList()">
-          <i class="fas fa-key"></i> Password
+        <button class="tool-btn" onclick="showList()">
+          <i class="fas fa-lock"></i> 
         </button>
-        <button type="button" class="save-btn-bottom" onclick="saveList()">
+        <button class="save-btn-bottom" onclick="saveList()">
             <i class="fas fa-save"></i> Save
           </button>
       </div>
@@ -258,23 +250,22 @@
             id="listTitle" 
             class="note-title-input" 
             placeholder="List Title"
-          />
+          /> <hr>
           
-        <div id="list-input">
-            <input 
-              id="newItem" 
-              type="text" 
-              class="list-item-input" 
-              placeholder="Add item..." 
-            />
-            <button type="button" class="add-item-btn" onclick="addItem()">
-              <i class="fas fa-plus"></i>
-            </button>
-    </div>
+
+  
 
           <div id="checklistContainer" class="checklist-items"></div>
+          <div id="items-no" class="hidden">
+<i class="fa-solid fa-triangle-exclamation"></i>
+      <p>No Items yet</p>
+      <span>Tap + to create your first item</span>
+    </div>
+            <button class="add-item-btn" onclick="addItem()">
+              <i class="fas fa-plus"></i> Add New Item
+            </button>
         </div>
-      </div>
+    
 
       <!-- Bottom Toolbar for Checklist -->
      
@@ -397,9 +388,7 @@
       
       
         
-    <button class="modal-button" onclick="showSection('combinedContainer')">
-        <i class="fas fa-arrow-left back-icon"></i>
-      </button> <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
+     <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
      <br>
     <div class="card" onclick="showSection('creditSection')">
   <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
@@ -536,7 +525,7 @@
     <i class="fas fa-arrow-left back-icon"></i> 
   </button>
   <div class="section-card">
-  <div class="info-box"><img class="brand-t" src="icon.png"><h4>App Version: 8.1</h4></div>
+  <div class="info-box"><img class="brand-t" src="icon.png"><h4>App Version: 8.2</h4></div>
 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
   <button>App Updates</button>
 </a> 
@@ -549,30 +538,12 @@
   <div class="info-box"><h3>Shield Version: <span id="currentVersion"></span></h3></div>
   <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
 </div>
+</div>
 
 
-  </div>
-<div id="tSection" class="container hidden">
-    <button class="modal-button" onclick="showSection('settingsSection')">
-    <i class="fas fa-arrow-left back-icon"></i> 
-  </button>
-  <div class="section-card">
-<h3>Personalize your experience!</h3>
-      <span class="toggle-label" id="themeLabel"> </span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="themeToggle">
-        <span class="toggle-slider"></span>
-      </label> <br>
-
-<span>Current Theme: ☀️ Light Mode</span>
-<p>Dark Theme has been put under maintaince. Sorry for the inconvenience.</p>
-    
-    </div>
 
       
 
-</div>
-</div>
   
    
 
@@ -654,9 +625,7 @@
     
 
       <div id="aiSection" class="container hidden">
-        <button class="modal-button" onclick="showSection('combinedContainer')">
-        <i class="fas fa-arrow-left back-icon"></i>
-      </button>
+       
       <div id="infoContainer2">
   <div class="info-box">
     <div class="info-icon">i</div>
