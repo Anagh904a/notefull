@@ -5,17 +5,17 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+
     <meta name="description" content="This is a notes app built by anagh , its completely free" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css"/>
 <link rel="icon" href="icon.png" type="image/x-icon">
     <link rel="manifest" href="manifest.json">
    
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="fonts/Poppins-Regular.ttf" rel="stylesheet">
     <title>Notefull - Home</title>
   
     <link rel="stylesheet" href="compressed-style.css" />
-   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
 
   </head>
 
@@ -84,32 +84,32 @@
     <div class="filter-segment-glow" id="segmentGlow"></div>
     
     <div class="filter-item active" onclick="handleFilterChange(this, 'all')">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <i class="fa-solid fa-grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="3" width="7" height="7"></rect>
         <rect x="14" y="3" width="7" height="7"></rect>
         <rect x="14" y="14" width="7" height="7"></rect>
         <rect x="3" y="14" width="7" height="7"></rect>
-      </svg>
+      </i>
       <span>All</span>
     </div>
 
     <div class="filter-item" onclick="handleFilterChange(this, 'note')">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <i class="fas fa-sticky-note viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
-      </svg>
+      </i>
       <span>Notes</span>
     </div>
 
     <div class="filter-item" onclick="handleFilterChange(this, 'lists')">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <i class="fas fa-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="8" y1="6" x2="21" y2="6"></line>
         <line x1="8" y1="12" x2="21" y2="12"></line>
         <line x1="8" y1="18" x2="21" y2="18"></line>
         <line x1="3" y1="6" x2="3.01" y2="6"></line>
         <line x1="3" y1="12" x2="3.01" y2="12"></line>
         <line x1="3" y1="18" x2="3.01" y2="18"></line>
-      </svg>
+      </i>
       <span>Lists</span>
     </div>
   </div>
@@ -170,6 +170,9 @@
     <!-- Note Panel -->
    
         <div class="add-note-header">
+           <button class="modal-button" onclick="cancelNote()">
+    <i class="fas fa-arrow-left back-icon"></i>
+  </button>
         <div id="itemText">
       <h2>Create a new item</h2>
      
@@ -229,6 +232,9 @@
     <!-- Checklist Panel -->
     <div id="addListSection" class="container hidden">
       <div class="add-list-header">
+                 <button class="modal-button" onclick="cancelList()">
+    <i class="fas fa-arrow-left back-icon"></i>
+  </button>
         <div id="itemTextl">
       <h2>Create a new item</h2>
      </div>   
@@ -315,9 +321,8 @@
    <div class="modal" id="modal">
   <div class="modal-content">
     <h2>Welcome to Notefull</h2>
-    <p class="important" style="color: rgb(40, 66, 68);"> Welcome to Notefull 8 (Early Acess). This is a stable Release! </p>
-    <p>What's new <br>->Bug Fixes <br>->UI/UFX corrections </p>
-
+    <p class="important" style="color: rgb(0, 110, 255); font-weight: bolder;"> Welcome to Notefull official Store Release Version. This is an Early Version. If you encounter any issues, kindly report to anaghmanglick@gmail.com. Enjoy! </p>
+    
     
       
    
@@ -391,20 +396,15 @@
      <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
      <br>
     <div class="card" onclick="showSection('creditSection')">
-  <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
+  <div class="icon wifi"><i class="fa-brands fa-dev"></i>
+</div>
   <div class="text-box">
     <div class="title2">Credits</div>
     <div class="subtitle">Developer · About Dev</div>
   </div>
 </div>
 
-    <div class="card" onclick="showSection('profileSection')">
-  <div class="icon wifi"><span class="material-icons">manage_accounts</span></div>
-  <div class="text-box">
-    <div class="title2">Profile</div>
-    <div class="subtitle">Account Management · Profile info</div>
-  </div>
-</div>
+  
 
 
 
@@ -413,7 +413,8 @@
 
 <div class="card" onclick="showSection('privacySection')">
   <div class="icon privacy">
-    <div class="icon privacy"><span class="material-icons">privacy_tip</span></div>
+    <div class="icon privacy"><i class="fa-solid fa-shield-halved"></i>
+</div>
   </div>
   <div class="text-box">
     <div class="title2">Privacy</div>
@@ -422,17 +423,20 @@
 </div>
 
 <div class="card" onclick="showSection('backupTab')">
-  <div class="icon device"><span class="material-icons">backup</span></div>
+  <div class="icon device"><i class="fa-solid fa-cloud-arrow-down"></i>
+</div>
   <div class="text-box">
-    <div class="title2">Secondary Storage</div>
-    <div class="subtitle">Restore · Status · Sync</div>
+    <div class="title2">Backup Storage</div>
+    <div class="subtitle">Restore · Status · Auto-Backup</div>
   </div>
 </div>
 
 
 
 <div class="card" onclick="showSection('ecSection')">
-  <div class="icon modes"><span class="material-icons">security</span></div>
+  <div class="icon modes">
+    <i class="fa-solid fa-shield-halved"></i>
+  </div>
   <div class="text-box">
     <div class="title2">Data Management</div>
     <div class="subtitle">Factory Reset</div>
@@ -441,7 +445,7 @@
 
 <div class="card" onclick="showSection('cSection')">
 <div class="icon modes">
-  <span class="material-icons">mail</span>
+  <i class="fa-solid fa-envelope"></i>
 </div>
   <div class="text-box">
     <div class="title2">Developer Email</div>
@@ -451,7 +455,7 @@
 
 <div class="card" onclick="openAntithreat()">
 <div class="icon modes">
-  <span class="material-icons">info</span>
+<i class="fas fa-info"></i>
 </div>
   <div class="text-box">
     <div class="title2">About</div>
@@ -471,15 +475,15 @@
 
   <div class="section-card">
 
-<h2>Secondary Storage Settings</h2>
-<p>Manage your secondary storage which prevents data loss</p><br>
+<h2>Backup Settings</h2>
+<p>Manage your backup storage which prevents data loss</p><br>
       <button class="settings-button" onclick="restoreFromIndexedDB()">
-        🔄 Restore 
+        🔄 Restore Backup
       </button>
-      <span id="syncStatus">🔄 Sync is OFF</span>
+      <span id="syncStatus">🔄 Auto-Backup is OFF. See quick fix!</span>
 
     <div class="toggle-container">
-      <span class="toggle-label">Enable Sync</span>
+      <span class="toggle-label">Enable Auto-Backup</span>
       <label class="toggle-switch">
         <input type="checkbox" id="syncToggle" onchange="toggleSync(this)">
         <span class="toggle-slider"></span>
@@ -574,7 +578,7 @@
     <br>
 
    <div class="info-box"><p>anaghmanglick@gmail.com</p></div><br>
-    <p>Any data related bugs? Report them to this email ID given above:</p>
+    <p>Any bugs? Report them to this email ID given above:</p>
    </div>
 </div>
 
@@ -630,6 +634,13 @@
   <div class="info-box">
     <div class="info-icon">i</div>
     <div class="info-text" id="infoText">You can safely leave this page while the scan is done</div>
+  </div>
+</div>
+
+<div id="warning">
+  <div class="info-boxw">
+    <div class="info-iconw">i</div>
+    <div class="info-textw">Definations are Outdated. Update from Settings</div>
   </div>
 </div>
         <h2>Quick Shield Scan</h2>
