@@ -5,20 +5,21 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width">
-
-    <meta name="description" content="Notefull is a free and open-source notes and lists management app." />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <meta name="description" content="This is a notes app built by anagh , its completely free" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
 <link rel="icon" href="icon.png" type="image/x-icon">
     <link rel="manifest" href="manifest.json">
    
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <title>Notefull - Home</title>
   
-    <link rel="stylesheet" href="compressed-style.css" />
-  
-
+    <link rel="stylesheet" href="style.css" />
+   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://unpkg.com/localforage/dist/localforage.min.js"></script>
+<!-- Add to your HTML head -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
+<script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
   </head>
 
 
@@ -86,32 +87,32 @@
     <div class="filter-segment-glow" id="segmentGlow"></div>
     
     <div class="filter-item active" onclick="handleFilterChange(this, 'all')">
-      <i class="fa-solid fa-grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="3" width="7" height="7"></rect>
         <rect x="14" y="3" width="7" height="7"></rect>
         <rect x="14" y="14" width="7" height="7"></rect>
         <rect x="3" y="14" width="7" height="7"></rect>
-      </i>
+      </svg>
       <span>All</span>
     </div>
 
     <div class="filter-item" onclick="handleFilterChange(this, 'note')">
-      <i class="fas fa-sticky-note viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
-      </i>
+      </svg>
       <span>Notes</span>
     </div>
 
     <div class="filter-item" onclick="handleFilterChange(this, 'lists')">
-      <i class="fas fa-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="8" y1="6" x2="21" y2="6"></line>
         <line x1="8" y1="12" x2="21" y2="12"></line>
         <line x1="8" y1="18" x2="21" y2="18"></line>
         <line x1="3" y1="6" x2="3.01" y2="6"></line>
         <line x1="3" y1="12" x2="3.01" y2="12"></line>
         <line x1="3" y1="18" x2="3.01" y2="18"></line>
-      </i>
+      </svg>
       <span>Lists</span>
     </div>
   </div>
@@ -143,6 +144,7 @@
       <p>No lists yet</p>
       <span>Tap + to create your first list</span>
     </div>
+    
     <div id="noNotesMessage" class="hidden">
       <i class="fas fa-note-sticky empty-icon"></i>
       <p>This space is lonely</p>
@@ -172,8 +174,8 @@
     <!-- Note Panel -->
    
         <div class="add-note-header">
-           <button class="modal-button" onclick="cancelNote()">
-    <i class="fas fa-arrow-left back-icon"></i>
+          <button class="modal-button" onclick="cancelNote()">
+    <i class="fas fa-arrow-left back-icon"></i> 
   </button>
         <div id="itemText">
       <h2>Create a new item</h2>
@@ -210,11 +212,12 @@
             id="noteTitle" 
             placeholder="Title"
           />
-          <textarea 
+          <div
             class="note-content-input" 
             id="noteContent" 
+            contenteditable="true" 
             placeholder="Start typing your note..."
-          ></textarea>
+          ></div>
    
 
       <!-- Bottom Toolbar for Note -->
@@ -234,8 +237,8 @@
     <!-- Checklist Panel -->
     <div id="addListSection" class="container hidden">
       <div class="add-list-header">
-                 <button class="modal-button" onclick="cancelList()">
-    <i class="fas fa-arrow-left back-icon"></i>
+                <button class="modal-button" onclick="showSection('combinedContainer')">
+    <i class="fas fa-arrow-left back-icon"></i> 
   </button>
         <div id="itemTextl">
       <h2>Create a new item</h2>
@@ -319,18 +322,36 @@
         <button onclick="closeDeletePasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
-
-   <div class="modal" id="modal">
+<div class="modal" id="modal">
   <div class="modal-content">
-    <h2>Welcome to Notefull</h2>
-    <p class="important" style="color: rgb(0, 110, 255); font-weight: bolder;"> Welcome to Notefull official Store Release Version. This is an Early Version. If you encounter any issues, kindly report to anaghmanglick@gmail.com. Enjoy! </p>
     
-    
-      
+      <span class="version-badge">v9.1 BETA</span>
+      <h2>Welcome to Notefull</h2>
+      <h3>🏗️ FOUNDATION UPDATE - PART 1</h3>
    
+    
+  
+     
+        <p class="update-type" style="color: red; font-weight: bolder;">YOUR NOTES ARE WIPED!</p>
+      
+     
+     
+      
+      <div class="whats-new">
+        <h4>What's New</h4>
+        <ul>
+          <li><i class="fas fa-database"></i> New Storage System for Notes</li>
+          <li><i class="fas fa-code-branch"></i> UI/UFX Improvements and Bug Fixes</li>
+          <li><i class="fas fa-wrench"></i> Core Architecture Improvements </li>
+        </ul>
+      </div> 
 
-    <button onclick="closeWelcomeModal()">Continue <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
-</button>
+    <button class="continue-btn" onclick="closeWelcomeModal()">
+      Continue to App <i class="fas fa-arrow-right"></i>
+    </button>
+    <button class="continue-btn" onclick="recoverNotes()">
+      Recover Notes <i class="fas fa-cloud"></i>
+    </button>
   </div>
 </div>
 
@@ -398,15 +419,20 @@
      <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
      <br>
     <div class="card" onclick="showSection('creditSection')">
-  <div class="icon wifi"><i class="fa-brands fa-dev"></i>
-</div>
+  <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
   <div class="text-box">
     <div class="title2">Credits</div>
     <div class="subtitle">Developer · About Dev</div>
   </div>
 </div>
 
-  
+    <div class="card" onclick="showSection('profileSection')">
+  <div class="icon wifi"><span class="material-icons">manage_accounts</span></div>
+  <div class="text-box">
+    <div class="title2">Profile</div>
+    <div class="subtitle">Account Management · Profile info</div>
+  </div>
+</div>
 
 
 
@@ -415,8 +441,7 @@
 
 <div class="card" onclick="showSection('privacySection')">
   <div class="icon privacy">
-    <div class="icon privacy"><i class="fa-solid fa-shield-halved"></i>
-</div>
+    <div class="icon privacy"><span class="material-icons">privacy_tip</span></div>
   </div>
   <div class="text-box">
     <div class="title2">Privacy</div>
@@ -425,20 +450,17 @@
 </div>
 
 <div class="card" onclick="showSection('backupTab')">
-  <div class="icon device"><i class="fa-solid fa-cloud-arrow-down"></i>
-</div>
+  <div class="icon device"><span class="material-icons">backup</span></div>
   <div class="text-box">
-    <div class="title2">Backup Storage</div>
-    <div class="subtitle">Restore · Status · Auto-Backup</div>
+    <div class="title2">Secondary Storage</div>
+    <div class="subtitle">Restore · Status · Sync</div>
   </div>
 </div>
 
 
 
 <div class="card" onclick="showSection('ecSection')">
-  <div class="icon modes">
-    <i class="fa-solid fa-shield-halved"></i>
-  </div>
+  <div class="icon modes"><span class="material-icons">security</span></div>
   <div class="text-box">
     <div class="title2">Data Management</div>
     <div class="subtitle">Factory Reset</div>
@@ -447,7 +469,7 @@
 
 <div class="card" onclick="showSection('cSection')">
 <div class="icon modes">
-  <i class="fa-solid fa-envelope"></i>
+  <span class="material-icons">mail</span>
 </div>
   <div class="text-box">
     <div class="title2">Developer Email</div>
@@ -457,7 +479,7 @@
 
 <div class="card" onclick="openAntithreat()">
 <div class="icon modes">
-<i class="fas fa-info"></i>
+  <span class="material-icons">info</span>
 </div>
   <div class="text-box">
     <div class="title2">About</div>
@@ -477,15 +499,15 @@
 
   <div class="section-card">
 
-<h2>Backup Settings</h2>
-<p>Manage your backup storage which prevents data loss</p><br>
+<h2>Secondary Storage Settings</h2>
+<p>Manage your secondary storage which prevents data loss</p><br>
       <button class="settings-button" onclick="restoreFromIndexedDB()">
-        🔄 Restore Backup
+        🔄 Restore 
       </button>
-      <span id="syncStatus">🔄 Auto-Backup is OFF. See quick fix!</span>
+      <span id="syncStatus">🔄 Sync is OFF</span>
 
     <div class="toggle-container">
-      <span class="toggle-label">Enable Auto-Backup</span>
+      <span class="toggle-label">Enable Sync</span>
       <label class="toggle-switch">
         <input type="checkbox" id="syncToggle" onchange="toggleSync(this)">
         <span class="toggle-slider"></span>
@@ -580,7 +602,7 @@
     <br>
 
    <div class="info-box"><p>anaghmanglick@gmail.com</p></div><br>
-    <p>Any bugs? Report them to this email ID given above:</p>
+    <p>Any data related bugs? Report them to this email ID given above:</p>
    </div>
 </div>
 
@@ -638,13 +660,6 @@
     <div class="info-text" id="infoText">You can safely leave this page while the scan is done</div>
   </div>
 </div>
-
-<div id="warning">
-  <div class="info-boxw">
-    <div class="info-iconw">i</div>
-    <div class="info-textw">Definations are Outdated. Update from Settings</div>
-  </div>
-</div>
         <h2>Quick Shield Scan</h2>
         <div class="scan-container">
           <div class="scan-circle" id="scanCircle"></div>
@@ -697,14 +712,22 @@
 
    <!-- Modal to show scan results -->
 <!-- TOAST HTML -->
-<div id="aiToast" class="toast">
+<div id="aiToast" class="toast hidden">
   <div class="toast-content">
     <strong>Quick Scan has Completed</strong>
    
   </div>
 </div>
 <script src="storage.js"></script>
-    <script src="compressed-script.js"></script>
+<scipt src="storage-config.js"></scipt>
+ <script src="script.js"></script>
+<script src="notes.js"></script>
+<script src="lists.js"></script>
+<script src="ai.js"></script>
+<script src="ui.js"></script>
+<script src="settings.js"></script>
+<script src="page-load.js"></script>
+   
      
    </body>
 </html>
