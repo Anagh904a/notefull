@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+  <meta name="description" content="This is a notes app built by anagh , its completely free" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+  <link rel="icon" href="icon.png" type="image/x-icon">
+  <link rel="manifest" href="manifest.json">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Notefull - Home</title>
+  <!---
+<link rel="stylesheet" href="css/reset.css">
+
+
+<link rel="stylesheet" href="css/gui.css">
+<link rel="stylesheet" href="css/utilities.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/componets.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/overrides.css">
+
+
+
+<link rel="stylesheet" href="css/notes.css">
+<link rel="stylesheet" href="css/lists.css">
+ -->
+<link rel="stylesheet" href="style.css">
+
+
+
+
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://unpkg.com/localforage/dist/localforage.min.js"></script>
+  <!-- Add to your HTML head -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
+</head>
+
+
+<body>
+  <audio id="alertSound" src="sounds/t.mp3" preload="auto"></audio>
+  <audio id="errorSound" src="sounds/e.mp3" preload="auto"></audio>
+  <audio id="sucessSound" src="sounds/s.mp3" preload="auto"></audio>
+
+
+  <div id="nav" class="nav-wrapper">
+    <nav class="glass-nav">
+
+      <a href="javascript:void(0)" class="nav-item active"
+        onclick="updateNavbar(this); showSection('combinedContainer');">
+        <i class="fa-solid fa-house"></i>
+        <span class="nav-text">Home</span>
+      </a>
+
+      <a href="javascript:void(0)" class="nav-item" onclick="updateNavbar(this); showSection('aiSection');">
+        <i class="fas fa-shield-alt"></i>
+        <span class="nav-text">Nshield</span>
+      </a>
+
+      <a href="javascript:void(0)" class="nav-item" onclick="updateNavbar(this); showSection('settingsSection');">
+        <i class="fas fa-cog"></i>
+        <span class="nav-text">Settings</span>
+      </a>
+
+      <a href="javascript:void(0)" class="nav-item" onclick="updateNavbar(this); showAddOptions();">
+        <i class="fas fa-plus"></i>
+        <span class="nav-text">Add</span>
+      </a>
+
+    </nav>
+  </div>
+
+
+
+
+
+
+  <div id="combinedContainer" class="container hidden">
+    <div class="header">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Ask Notefull AI..." oninput="searchNotes()">
+
+      <i class="fa-solid fa-xmark" onclick="clearSearch()" id="clearSearch"></i>
+      <div id="account-icon" class="account-icon" style="display: none;">A</div>
+    </div>
+
+
+
+
+
+    <div class="custom-sort-wrapper">
+      <div class="filter-group" id="filterGroup">
+        <div class="filter-segment-glow" id="segmentGlow"></div>
+
+        <div class="filter-item active" onclick="handleFilterChange(this, 'all')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>All</span>
+        </div>
+
+        <div class="filter-item" onclick="handleFilterChange(this, 'note')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>Notes</span>
+        </div>
+
+        <div class="filter-item" onclick="handleFilterChange(this, 'lists')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          <span>Lists</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="addOptionsModal" class="modal hidden">
+      <div class="modal-content2">
+        <h3>What to add?</h3>
+
+        <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
+          <i class="fas fa-sticky-note"></i> Note
+        </button>
+        <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
+          <i class="fas fa-list"></i> List
+        </button>
+        <button class="modal-btn-close" onclick="closeAddOptions()">
+          <i class="fas fa-xmark"></i>
+          Close</button>
+      </div>
+    </div>
+
+
+    <div id="notesContainer"></div>
+    <div id="listsSection">
+      <div id="listsContainerContent"></div>
+    </div>
+    <div id="noListsMessage" class="hidden">
+      <i class="fas fa-inbox empty-icon"></i>
+      <p>No lists yet</p>
+      <span>Tap + to create your first list</span>
+    </div>
+
+    <div id="noNotesMessage" class="hidden">
+      <i class="fas fa-note-sticky empty-icon"></i>
+      <p>This space is lonely</p>
+      <span>Tap + to add your first note</span>
+    </div>
+
+
+  </div>
+
+
+
+
+
+  </div>
+
+  <div id="globalToast" class="toast"></div>
+  <div id="restoreOverlay">
+    <div class="spinner"></div>
+    <p>Restoring backup...</p>
+  </div>
+
+
+
+  <!-- Full Screen Add Note Modal Style -->
+  <div id="addNoteSection" class="container hidden">
+
+    <!-- Note Panel -->
+
+    <div class="add-note-header">
+      <button class="modal-button" onclick="cancelNote()">
+       <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <div id="itemText">
+        <h2>Create a new item</h2>
+
+
+      </div>
+      <div id="ubtn">
+        <button type="button" class="action-btn" id="undoButton" onclick="undo()">
+          <i class="fas fa-undo"></i>
+        </button>
+        <button type="button" class="action-btn" id="redoButton" onclick="redo()">
+          <i class="fas fa-redo"></i>
+        </button>
+      </div>
+
+    </div>
+    <!-- Top Toolbar for Note -->
+    <div class="toolbar-secondary">
+      <button class="tool-btn" id="changePasswordButton" onclick="showNotePassword()">
+        <i class="fas fa-key"></i> Password
+      </button>
+      <button class="save-btn-bottom" onclick="saveNote()">
+        <i class="fas fa-save"></i> Save
+      </button>
+    </div>
+
+
+
+    <input type="text" class="note-title-input" id="noteTitle" placeholder="Title" />
+    <div class="note-content-input" id="noteContent" contenteditable="true" placeholder="Start typing your note...">
+    </div>
+
+
+
+
+    <!-- Note Password Modal -->
+    <div id="notePasswordModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Enter Password</h3>
+        <input type="password" id="notePassword" placeholder="Enter New Password.." />
+        <button type="button" onclick="closeNotePassword()">Close <i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Checklist Panel -->
+  <div id="addListSection" class="container hidden">
+    <div class="add-list-header">
+      <button class="modal-button" onclick="showSection('combinedContainer')">
+       <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <div id="itemTextl">
+        <h2>Create a new item</h2>
+      </div>
+    </div>
+    <!-- Top Toolbar for Checklist -->
+    <div class="toolbar-secondary">
+      <button class="tool-btn" onclick="showList()">
+        <i class="fas fa-lock"></i>
+      </button>
+      <button class="save-btn-bottom" onclick="saveList()">
+        <i class="fas fa-save"></i> Save
+      </button>
+    </div>
+
+
+
+    <input type="text" id="listTitle" class="note-title-input" placeholder="List Title" />
+    <hr>
+
+
+
+
+    <div id="checklistContainer" class="checklist-items"></div>
+    <div id="items-no" class="hidden">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <p>No Items yet</p>
+      <span>Tap + to create your first item</span>
+    </div>
+    <button class="add-item-btn" onclick="addItem()">
+      <i class="fas fa-plus"></i> Add New Item
+    </button>
+  </div>
+
+
+  <!-- Bottom Toolbar for Checklist -->
+
+
+  <!-- List Password Modal -->
+  <div id="listPasswordModalr" class="modal hidden">
+    <div class="modal-content">
+      <h3>Enter Password</h3>
+      <input type="password" id="listPassword" placeholder="Enter New Password.." />
+      <button type="button" onclick="closeListPassword()">Close <i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+  </div>
+
+  </div>
+  </div>
+
+
+  <!-- Add Options Modal -->
+
+
+  <div id="passwordModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Enter Password</h3>
+      <input type="password" id="passwordInput" placeholder="Password">
+      <button onclick="verifyPassword()">Go <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
+      </button>
+      <button onclick="closePasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+  <!-- Delete Password Modal -->
+  <div id="deletePasswordModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Enter Password</h3>
+      <input type="password" id="deletePasswordInput" placeholder="Password" />
+      <button onclick="deleteVerifyPassword()">Go <i class="fas fa-arrow-right"></i> <!-- Best for a Go button -->
+      </button>
+      <button onclick="closeDeletePasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+  <div class="modal" id="modal">
+    <div class="modal-content">
+
+      <span class="version-badge">v3.0 BETA</span>
+      <h2>Welcome to Notefull</h2>
+      <h3>🏗️ FOUNDATION UPDATE - PART 2</h3>
+
+
+
+
+      
+
+
+
+
+      <div class="whats-new">
+        <h4>What's New</h4>
+        <ul>
+          <li><i class="fas fa-database"></i> New Storage System for Lists</li>
+          <li><i class="fas fa-code-branch"></i> UI/UFX Improvements and Bug Fixes</li>
+          <li><i class="fas fa-wrench"></i> Settings Section Revamped </li>
+        </ul>
+      </div>
+
+      <button class="continue-btn" onclick="closeWelcomeModal()">
+        Continue to App <i class="fas fa-arrow-right"></i>
+      </button>
+      <button class="continue-btn" onclick="recoverAllData()">
+        Recover All <i class="fas fa-cloud"></i>
+      </button>
+    </div>
+  </div>
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+  <div id="settingsSection" class="container hidden">
+
+
+
+
+
+
+    <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
+    <br>
+    <div class="card" onclick="showSection('creditSection')">
+      <div class="icon wifi"><span class="material-icons">workspace_premium</span></div>
+      <div class="text-box">
+        <div class="title2">Information and Credits</div>
+        <div class="subtitle">Developer · Version</div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+    <div class="card" onclick="showSection('privacySection')">
+      <div class="icon privacy">
+        <div class="icon privacy"><span class="material-icons">privacy_tip</span></div>
+      </div>
+      <div class="text-box">
+        <div class="title2">Legal Center</div>
+        <div class="subtitle">Policies · Permissions Manager</div>
+      </div>
+    </div>
+
+    
+
+
+
+    <div class="card" onclick="showSection('ecSection')">
+      <div class="icon modes"><span class="material-icons">security</span></div>
+      <div class="text-box">
+        <div class="title2">Data Management</div>
+        <div class="subtitle">Factory Reset</div>
+      </div>
+    </div>
+
+
+
+    <div class="card" onclick="openAntithreat()">
+      <div class="icon modes">
+        <span class="material-icons">shield</span>
+      </div>
+      <div class="text-box">
+        <div class="title2">Nshield Settings</div>
+        <div class="subtitle">Shield Version · Shield· Updates</div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+
+  <div class="update-modal" id="updateModal">
+  <div class="update-container">
+    <div class="shield-icon">🛡️</div>
+    <h1 id="mainHeading">Updating Shield</h1>
+    <div class="status-text" id="statusText">Initializing update...</div>
+    <div class="percentage" id="percentage">0%</div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="step-info" id="stepInfo">Step 1 of 5</div>
+  </div>
+</div>
+
+  <div id="antithreatSection" class="container hidden">
+    <button class="modal-button" onclick="showSection('settingsSection')">
+     <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    
+    <div class="section-card">
+      <h2>Nshield Updater</h2>
+      <p>Protect yourself against threats and vulnerabilities in data in Notefull</p>
+      <div class="info-box">
+        <h3>Release Code: <span id="lastUpdated"></span></h3>
+      </div>
+      <div class="info-box">
+        <h3>Nshield Version: <span id="currentVersion"></span></h3>
+      </div>
+      <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
+    </div>
+  </div>
+
+
+
+  <div id="privacySection" class="container hidden">
+    <button class="modal-button" onclick="showSection('settingsSection')">
+     <i class="fa-solid fa-chevron-left"></i>
+    </button>
+
+    <div class="section-card">
+      <h2>Our Privacy Policy</h2>
+      <a
+        href="https://docs.google.com/document/d/1cAsN4hexlf5bXj6hRMURkGX9vYadIkCA9axixYQjswY/edit?addon_store&tab=t.0#heading=h.4o4shqu4d9pj">Click
+        Me To View</a>
+    </div>
+
+
+    <div class="section-card">
+      <h2>Permission Manager for Notefull</h2>
+
+
+      <div class="info-box">
+        <h4>0 Apps are allowed to acess your data in Notefull</h4>
+      </div>
+    </div>
+
+
+
+
+  </div>
+
+  </div>
+
+
+
+  <div id="creditSection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+   <i class="fa-solid fa-chevron-left"></i>
+  </button>
+  
+  <div class="section-card">
+    <h2>Credits and links</h2>
+    
+     <div class="info-box">
+    
+      <p>Developed by <strong>Anagh Manglick</strong></p>
+  
+    </div>
+
+    <div class="info-box">
+    
+      <p>This is an open-source project available on GitHub</p>
+      <a href="https://github.com/Anagh904a/notefull" target="_blank">
+        View Source Code →
+      </a>
+    </div>
+    <div class="info-box">
+      <p>Report bugs to <a href="https://github.com/Anagh904a/notefull/issues" target="_blank">GitHub Issues</a><p>
+    </div>
+    </div>
+    
+    <div class="section-card">
+      <h2>About App</h2>
+      <div class="info-box"><img class="brand-t" src="icon.png">
+        <h4>App Version: 3.0</h4>
+      </div>
+      <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en">
+        <button>App Updates</button>
+      </a>
+
+    </div>
+    
+
+</div>
+
+<div id="ecSection" class="container hidden">
+  <button class="modal-button" onclick="showSection('settingsSection')">
+   <i class="fa-solid fa-chevron-left"></i>
+  </button>
+<div class="section-card">
+<h2>App reset</h2>
+<button class="modal-btn-close" onclick="clearData()">CLEAR ALL DATA</button>
+</div>
+</div>
+
+
+
+
+
+  <div id="aiSection" class="container hidden">
+
+    <div id="infoContainer2">
+      <div class="info-box">
+        <div class="info-icon">i</div>
+        <div class="info-text" id="infoText">You can safely leave this page while the scan is done</div>
+      </div>
+    </div>
+    <h2>Quick Nshield Scan</h2>
+    <div class="scan-container">
+      <div class="scan-circle" id="scanCircle"></div>
+      <p id="scanStatus" class="toggle-container">Click the button to start scanning...</p>
+    </div>
+
+    <div class="counters">
+      <p>Total Notes scanned: <span id="notesCount">0</span></p>
+
+    </div>
+
+    <div class="stat-box red">
+      <p>Threats Found</p>
+      <span id="threatsCount">0</span>
+    </div>
+
+
+
+    <button onclick="startAiScan()" id="startScanButton">Start Quick Scan</button>
+    <div id="resultsContainer"></div>
+  </div>
+
+
+
+
+
+  <!-- List Password Modal -->
+  <div id="listPasswordModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Enter Password</h3>
+      <input type="password" id="listPasswordInput" placeholder="Password" />
+      <button onclick="verifyListPassword()">Go <i class="fas fa-arrow-right"></i></button>
+      <button onclick="closeListPasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+  <!-- Delete List Password Modal -->
+  <div id="deleteListPasswordModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Enter Password</h3>
+      <input type="password" id="deleteListPasswordInput" placeholder="Password" />
+      <button onclick="deleteListVerifyPassword()">Go <i class="fas fa-arrow-right"></i></button>
+      <button onclick="closeDeleteListPasswordModal()">Close <i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+  <!-- Modal to show scan results -->
+  <!-- TOAST HTML -->
+  <div id="aiToast" class="toast hidden">
+    <div class="toast-content">
+      <strong>Quick Scan has Completed</strong>
+
+    </div>
+  </div>
+  <script src="js/storage.js"></script>
+  <scipt src="js/storage-config.js"></scipt>
+  <script src="js/script.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/lists.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/page-load.js"></script>
+
+
+</body>
+</html>
