@@ -11,7 +11,7 @@
 [![Status](https://img.shields.io/badge/status-active%20development-success.svg)]()
 [![Users](https://img.shields.io/badge/users-1000%2B-orange.svg)]()
 
-[🌐 Live Demo](https://notefull.netlify.app) • [📱 Download on Play Store](https://play.google.com/store/apps/details?id=app.notefull.com&hl=en_IN)
+[🌐 Live Demo](https://notefull.netlify.app) • [📱 Download on Play Store](https://play.google.com/store/apps/details?id=app.notefull.com)
 
 </div>
 
@@ -59,7 +59,7 @@
 ### 📱 Mobile App
 Download Notefull on the Play Store and start taking notes immediately!
 
-[📥 Get it on Google Play](https://play.google.com/store/apps/details?id=your.app.id)
+[📥 Get it on Google Play](https://play.google.com/store/apps/details?id=app.notefull.com)
 
 ### 🌐 Web Version
 Visit our [live demo](https://notefull.netlify.app) to try Notefull in your browser.
