@@ -142,6 +142,8 @@ function openList(index) {
       index;
     document.getElementById("listPasswordModal").style.display = "flex";
     document.getElementById("listPasswordInput").value = "";
+     
+ document.getElementById('ubtn').style.display = "none";
   } else {
     // If no password is required, proceed to open the list
     document.getElementById("listTitle").value = list.title;
@@ -150,10 +152,11 @@ function openList(index) {
     editingListIndex = index;
     showAddListSection(); // Show the add list section
     document.getElementById("listPassword").value = list.password;
+      showSection('addListSection');
+ document.getElementById('ubtn').style.display = "none";
   }
   const itemText = document.getElementById("itemTextl");
-  showSection('addListSection');
- document.getElementById('ubtn').style.display = "none";
+
 
   // Change the heading and paragraph
   itemText.querySelector("h2").textContent = "Manage your List";
@@ -248,7 +251,7 @@ document.getElementById('ubtn').style.display = "none";
     const itemText = document.getElementById("itemTextl");
 
   itemText.querySelector("h2").textContent = "Create a new CheckList";
- closeAddOptions();
+ closeModal('addOptionsModal');
     document.getElementById("nav").classList.add("hidden");
 }
 
@@ -348,33 +351,25 @@ await localforage.setItem("lists", lists);
 function verifyListPassword() {
   const password = document.getElementById("listPasswordInput").value;
   const listIndex =
-    document.getElementById("listPasswordModal").dataset.listIndex; // Assuming you set this when opening the modal
-  const list = lists[listIndex]; // Get the list being accessed
+    document.getElementById("listPasswordModal").dataset.listIndex; 
+  const list = lists[listIndex]; 
 
   if (password === list.password) {
-    document.getElementById("listPasswordModal").style.display = "none"; // Close the modal
+closeModal('listPasswordModal');  
     document.getElementById("listTitle").value = list.title;
-    currentItems = list.items.slice(); // Copy items to currentItems
-    displayChecklist(); // Display the checklist with items
-    editingListIndex = listIndex; // Update the editing list index
-    showAddListSection(); // Implement this function to display the list content
+    currentItems = list.items.slice(); 
+    displayChecklist(); 
+    editingListIndex = listIndex;
+    showAddListSection(); 
     document.getElementById("listPassword").value = list.password;
   } else {
-     showToastError("Incorrect password!"); // Show an error message
+     showToastError("Incorrect password!"); 
          const sound = document.getElementById("errorSound");
   sound.play();
   }
 }
 
 
-
-
-// Function to show the delete password modal
-
-// Function to close the delete list password mod
-
-// Function to verify the password for deleting the list
-// Function to verify the password for deleting the list
 async function deleteListVerifyPassword() {
   const passwordInput = document.getElementById(
     "deleteListPasswordInput"
