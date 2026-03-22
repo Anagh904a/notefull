@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("keydown", function (event) {
   if (event.key === "Escape") {
-    closePasswordModal(); // Close the modal
+    closeModal(modal); // Close the modal
   }
 });
 
@@ -77,30 +77,15 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
             document.addEventListener('keydown', function(event) {
-  // Check the 'key' property (Modern, preferred approach)
+ 
   const key = event.key;
 
   if (key === 'Enter') {
-    // Prevent the default browser action (like submitting a form)
-    // event.preventDefault(); 
-   addItem();
-    
-  } else if (key === 'Escape') {
-    // Prevent the default browser action (like closing an active pop-up)
-    // event.preventDefault(); 
-    closeDeleteListPasswordModal();
-    closeDeletePasswordModal();
-    closeListPassword();
-    closePasswordModal();
-    closeAddOptions();
-    closeWelcomeModal();
-    cancelNote();
-    cancelList();
-    
+  addItem();
+     } else if (key === 'Escape') {
+    cancelModal(modal);  
   } else if (event.ctrlKey && key === 's') {
-    // Example: Handling Ctrl + S (for saving)
-    event.preventDefault(); // Prevents the browser's default 'Save Page' dialog
+   event.preventDefault(); 
     saveNote()
-    // quickSaveFunction();
   }
 });
