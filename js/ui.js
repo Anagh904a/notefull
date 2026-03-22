@@ -18,14 +18,7 @@ function showInfo(message) {
 
   document.getElementById(sectionId).classList.remove("hidden");
 
-  if (historyStack[historyStack.length - 1] !== sectionId) {
-    historyStack.push(sectionId);
   }
-
-  currentSection = sectionId;
-
-closeAddOptions();
-}
 
  function updateNavbar(element) {
             // Remove 'active' class from all nav items
@@ -250,37 +243,42 @@ function applySortFilter(filterValue) {
   const combinedContainer = document.getElementById("combinedContainer");
   
   // Helper to safely check if an element exists before manipulating it
-  const check = (el) => el !== null;
-
-  console.log(`Applying Filter: ${filterValue}`);
-  
-  // --- Filtering Logic ---
 
   if (filterValue === "note") {
     // 1. Clear Lists and hide list-related messages
-    if (check(listsContainerContent)) listsContainerContent.innerHTML = "";
-    if (check(noListsMessage)) noListsMessage.classList.add("hidden");
-    
-    // 2. Display Notes
-    displayNotes(); // Assumes this function re-renders notes into notesContainer
+
+    listsContainerContent.innerHTML = "";
+    if (notes.length === 0) {
+    noNotesMessage.classList.remove("hidden");
+  } else {
+    noNotesMessage.classList.add("hidden");
+  }
+
+  
+noListsMessage.classList.add("hidden");
+  displayNotes(); // Assumes this function re-renders notes into notesContainer
     
     // 3. Show the main content area
-    if (check(combinedContainer)) showSection("combinedContainer");
+ showSection("combinedContainer");
     
-    console.log("Displaying only notes");
-
   } else if (filterValue === "lists") {
     // 1. Clear Notes and hide note-related messages
-    if (check(notesContainer)) notesContainer.innerHTML = "";
-    if (check(noNotesMessage)) noNotesMessage.classList.add("hidden");
+    notesContainer.innerHTML = "";
+    noNotesMessage.classList.add("hidden");
+    if (lists.length === 0) {
+      noListsMessage.classList.remove("hidden");
+    } else {
+      noListsMessage.classList.add("hidden");
+    } 
+    noNotesMessage.classList.add("hidden");
     
     // 2. Display Lists
     displayLists(); // Assumes this function re-renders lists into listsContainerContent
     
     // 3. Show the main content area
-    if (check(combinedContainer)) showSection("combinedContainer");
+   showSection("combinedContainer");
     
-    console.log("Displaying only lists");
+   
 
   } else if (filterValue === "all") {
     // Display both Notes and Lists
@@ -288,17 +286,26 @@ function applySortFilter(filterValue) {
     displayLists();
     
     // Ensure 'no message' elements are handled (e.g., re-shown if data is empty)
-    if (check(noNotesMessage)) noNotesMessage.classList.remove("hidden");
-    if (check(noListsMessage)) noListsMessage.classList.remove("hidden");
+    if (notes.length === 0) {
+      noNotesMessage.classList.remove("hidden");
+    } else {
+      noNotesMessage.classList.add("hidden");
+    }
 
-    if (check(combinedContainer)) showSection("combinedContainer");
-    
-    console.log("Displaying all notes and lists");
+    if (lists.length === 0) {
+      noListsMessage.classList.remove("hidden");
+    } else {
+      noListsMessage.classList.add("hidden");
 
-  } else if (filterValue === "date_newest" || filterValue === "date_oldest") {
+    }
+  
+  }
+
+
+   else if (filterValue === "date_newest" || filterValue === "date_oldest") {
     // Preserving the existing 'disabled' behavior for sorting
     alert("Sorting by date is disabled in this mode.");
-  }
+  } 
 }
 
 function handleFilterChange(element, filterValue) {
@@ -367,6 +374,9 @@ setInterval(() => {
   index = (index + 1) % placeholders.length; // loop back to start
 }, 5000); // change every 5000ms (5 second)
 
-function closeAddOptions() {
-  document.getElementById('addOptionsModal').classList.add('hidden');
+
+
+function closeModal(modal) {
+  const modalId = document.getElementById(modal);
+  modalId.classList.add('hidden');
 }
