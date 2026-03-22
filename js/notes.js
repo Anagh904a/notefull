@@ -162,7 +162,7 @@ function showAddNote() {
   // ✅ NEW: Reset undo/redo history when opening note
   resetHistory();
   
-  closeAddOptions();
+  closeModal('addOptionsModal');
 }
 
 
@@ -324,21 +324,21 @@ function verifyPassword() {
 }
 
 function deleteVerifyPassword() {
-  const passwordInput = document.getElementById(
-    "deletePasswordInput"
-  ).innerHTML;
-  const index = document.getElementById("deletePasswordModal").dataset
-    .noteIndex; // Get the index of the note being deleted
-  const note = notes[index]; // Get the note being deleted
+  console.log("deleteVerifyPassword called");
+  const passwordInput = document.getElementById("deletePasswordInput").value;
+  const index = document.getElementById("deletePasswordModal").dataset.noteIndex; // Get the index of the note being deleted
+  const note = notes[index]; // Get the note being deleted\
+
+
 
   if (passwordInput === note.password) {
     // If the password is correct, delete the note
     notes.splice(index, 1);
       localforage.setItem("notes", notes).then(() => {
-  console.log("Notes saved");
+
 }); // Update local storage
     displayNotes(); // Refresh the displayed notes
-    closeDeletePasswordModal(); // Close the modal
+    closeModal('deletePasswordModal'); // Close the modal
   } else {
      showToastError("Incorrect password!"); // Show an error message
          const sound = document.getElementById("errorSound");
@@ -383,18 +383,6 @@ function deleteNote(index) {
   }
 
   displayNotes();
-}
-
-
-function closeDeletePasswordModal() {
-  document.getElementById("deletePasswordModal").style.display = "none"; // Hide the modal
-  document.getElementById("deletePasswordInput").value = ""; // Clear the input
-  document.getElementById('passwordModal').style.display = 'none';
-}
-
-function closePasswordModal() {
-  document.getElementById("passwordModal").style.display = "none";
-  document.getElementById("passwordInput").value = ""; // Clear the password input field
 }
 
 async function recoverNotes() {
