@@ -8,10 +8,10 @@
 
   border-radius: 22px;
 
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(232, 232, 232, 0.85);
   backdrop-filter: blur(14px);
 
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(250, 250, 250, 0.6);
 
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.06),
@@ -49,7 +49,7 @@
   font-size: 16px;
   font-weight: 500;
   letter-spacing: 0.2px;
-
+width: 94%;
   color: #1e293b;
   caret-color: #2563eb;
 }
@@ -1956,13 +1956,15 @@ border-radius: 10px;
   height: 40px;
   border-radius: 50%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ccc;
+  align-items: stretch;
   flex-shrink: 0;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  align-content: flex-end;
+  flex-direction: column;
 }
 
-.icon .material-icons {
+.icon i {
   color: white;
   font-size: 22px;
 }
