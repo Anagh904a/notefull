@@ -296,7 +296,7 @@ function openNote(index) {
 
   if (note.password) {
     const modal = document.getElementById('passwordModal');
-    modal.style.display = 'flex';
+    modal.classList.remove("hidden");
     modal.dataset.noteIndex = index;
     document.getElementById('passwordInput').value = "";
   } else {
