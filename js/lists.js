@@ -115,8 +115,7 @@ async function deleteList(index) {
   // Check if the list has a password
   if (list.password) {
     // Show the password modal for deletion
-    document.getElementById("deleteListPasswordModal").style.display =
-      "flex";
+    document.getElementById("deleteListPasswordModal").classList.remove("hidden");
     document.getElementById("deleteListPasswordModal").dataset.listIndex =
       index; // Set the index here
   } else {
@@ -140,7 +139,7 @@ function openList(index) {
     // Store the index of the list being accessed in the modal
     document.getElementById("listPasswordModal").dataset.listIndex =
       index;
-    document.getElementById("listPasswordModal").style.display = "flex";
+    document.getElementById("listPasswordModal").classList.remove("hidden");
     document.getElementById("listPasswordInput").value = "";
      
  document.getElementById('ubtn').style.display = "none";
