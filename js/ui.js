@@ -1,8 +1,5 @@
 function closeNotePassword() {
-
-  document.getElementById("notePasswordModal").style.display = "none";
-
- 
+ document.getElementById("notePasswordModal").style.display = "none";
 }
 
 function showInfo(message) {
@@ -98,7 +95,7 @@ window.showToastWarn = function(message, duration = 2500) {
     if (confirm("Are you sure you want to continue without recovering your data?")) {
     modal.style.display = 'none';
      } else {
-      modal.style.display = 'flex';
+      modal.classList.remove("hiddem");
      }
 } else {
     modal.style.display = 'none';
@@ -215,13 +212,13 @@ function showAiToast() {
 
 
 function showNotePassword() {
-  document.getElementById("notePasswordModal").style.display = "flex";
+  document.getElementById("notePasswordModal").classList.remove("hidden");
 }
 
 
 
 function showList() {
-  document.getElementById("listPasswordModalr").style.display = "flex";
+  document.getElementById("listPasswordModalr").classList.remove("hidden");
 }
 
 function closeListPassword() {
@@ -347,36 +344,5 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 }
 
-const placeholders = [
-  "Search any data...",
-  "Find notes by keyword...",
-  "Find meeting notes fast...",
-  "Quick search your notes...",
-  "Find related notes fast...",
-  "Search by keyword or phrase...",
-  "Instantly find any note..."
-];
 
 
-
-let index = 0; // start from first placeholder
-const debouncedSearch = debounce(searchNotes, 1000);
-
-document.getElementById('searchInput').addEventListener('input', debouncedSearch);
-
-
-
-const input = document.getElementById("searchInput");
-
-// Function to update placeholder every second
-setInterval(() => {
-  input.placeholder = placeholders[index];
-  index = (index + 1) % placeholders.length; // loop back to start
-}, 5000); // change every 5000ms (5 second)
-
-
-
-function closeModal(modal) {
-  const modalId = document.getElementById(modal);
-  modalId.classList.add('hidden');
-}
