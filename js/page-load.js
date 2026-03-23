@@ -76,16 +76,28 @@ document.addEventListener("DOMContentLoaded", function () {
     displayLists();
 });
 
-            document.addEventListener('keydown', function(event) {
+            function closeModal(modal) { 
+  const modalId = document.getElementById(modal); 
+  modalId.classList.add('hidden'); 
+}
+
+
+document.addEventListener('keydown', function(event) {
  
   const key = event.key;
 
   if (key === 'Enter') {
   addItem();
      } else if (key === 'Escape') {
-    cancelModal(modal);  
+   closeNotePassword();
+   closeListPassword();
+   closeNotePassword();
+   closeDeleteListPasswordModal();
+   closeWelcomeModal();
+   
   } else if (event.ctrlKey && key === 's') {
    event.preventDefault(); 
     saveNote()
   }
 });
+
