@@ -1,4 +1,4 @@
-const VERSION = "v1.2"; // Simulate new version
+const VERSION = "v1.2"; 
 
 function openAntithreat() {
 showSection('antithreatSection');
@@ -17,47 +17,6 @@ showSection('antithreatSection');
     document.getElementById("updateButton").classList.add("hidden");
   }
 }
-
-// Update the account icon
-function updateAccountIcon() {
-  const username = localStorage.getItem('notesAppUser');
-  const accountIcon = document.getElementById('account-icon');
-
-  if (username && accountIcon) {
-    const firstLetter = username.trim().charAt(0).toUpperCase();
-    accountIcon.textContent = firstLetter;
-
-    accountIcon.onclick = () => {
-      alert(`Account: ${username}\n`);
-    };
-
-    // Fill the input with current username
-    const usernameInput = document.getElementById('usernameInput');
-    if (usernameInput) usernameInput.value = username;
-  }
-}
-
-// Save updated profile
-function saveProfile() {
-  const usernameInput = document.getElementById('usernameInput');
-  const profileMsg = document.getElementById('profile-msg');
-
-  if (usernameInput && usernameInput.value.trim() !== '') {
-    const newName = usernameInput.value.trim();
-    localStorage.setItem('notesAppUser', newName);
-    updateAccountIcon();
-    profileMsg.textContent = 'Profile updated successfully!';
-    setTimeout(() => profileMsg.textContent = '', 3000);
-  } else {
-    profileMsg.textContent = 'Please enter a valid name.';
-  }
-}
-
-// Show section helper (like in your credits section)
-
-
-// Initialize profile on load
-document.addEventListener('DOMContentLoaded', updateAccountIcon);
 
 
 function openAntithreat() {
