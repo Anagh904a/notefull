@@ -1,6 +1,7 @@
 # 🚀 Foundation Update: Full Release
 
 *(Features are subject to change)*
+*Under Devlopment upate, will be released soon later*
 
 ---
 
@@ -78,6 +79,7 @@
 * Trash / advanced recovery system
 * Continued performance improvements
 * Better alignment between web and Android versions
+* Firstly, before release of this update, we will release the backup systemn update to (main branch) so that users export their data. 
 
 ---
 
