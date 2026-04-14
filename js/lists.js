@@ -283,9 +283,6 @@ async function  saveList() {
     const date = new Date();
     const formattedDate = formatDate(date);
 
-    // Validation: Check if title exists. 
-    // We allow currentItems to be saved even if empty items exist, 
-    // but we filter out completely empty strings to keep the data clean.
     const sanitizedItems = currentItems.filter(item => item.name.trim() !== "");
 
     if (title === "" || sanitizedItems.length === 0) {
