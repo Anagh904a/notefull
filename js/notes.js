@@ -312,7 +312,7 @@ function verifyPassword() {
   const note = notes[index];
 
   if (input === note.password) {
-    modal.style.display = "none";
+    modal.classList.add("hidden");
     showNoteContent(note, index);
   } else {
     showToastError("Incorrect password");
