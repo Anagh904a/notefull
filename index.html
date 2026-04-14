@@ -317,25 +317,23 @@
   <div class="modal" id="modal">
     <div class="modal-content">
 
-      <span class="version-badge">v3.1 BETA</span>
-      <h2>Welcome to Notefull</h2>
-      <h3>🏗️ Stability Update</h3>
+      
+     
+      <h3>🚨 NOTICE!</h3>
 
-      <div class="whats-new">
-        <h4>What's New</h4>
-        <ul>
-          <li><i class="fas fa-wrench"></i> Major Bug fixes</li>
-          <li><i class="fas fa-code-branch"></i> Minor UI improvements</li>
-          <li><i class="fas fa-database"></i> Several Technical Improvements</li>
-        </ul>
-        <p>A teaser: Foundation Update Full version will be released as next major update</p>
-      </div>
+     
+      
+          <p style="font-weight: bolder;">Dear user, <br> Notefull will soon get a new update which might result in data losses, we strongly recommmend to use backup feature then next April month update when rekleased will come with recover feature, the app would guide you for getting your cuirrent data into new update ! Sorry for inconvinence, we needed to take this step to improve our app and provide you best experinnce </p>
+   
+        
+     
 
-      <button class="continue-btn" onclick="closeWelcomeModal()">
-        Continue to App <i class="fas fa-arrow-right"></i>
+     
+      <button class="continue-btn" onclick="openRecovery()">
+       Manage data recovery  <i class="fas fa-cloud"></i>
       </button>
-      <button class="continue-btn" onclick="recoverAllData()">
-        Recover All <i class="fas fa-cloud"></i>
+       <button class="continue-btn-close" onclick="closeWelcomeModal()">
+        Continue Anyway <i class="fas fa-arrow-right"></i>
       </button>
     </div>
   </div>
@@ -352,6 +350,16 @@
   <div class="text-box">
     <div class="title2">Information and Credits</div>
     <div class="subtitle">Developer · Version</div>
+  </div>
+</div>
+
+ <div class="card" onclick="showSection('recoverySection')">
+  <div class="icon wifi">
+    <i class="fa-solid fa-cloud-download-alt"></i>
+  </div>
+  <div class="text-box">
+    <div class="title2">Migration and Recovery</div>
+    <div class="subtitle">Recover · Export</div>
   </div>
 </div>
 
@@ -384,9 +392,18 @@
     <div class="subtitle">Shield Version · Shield · Updates</div>
   </div>
 </div>
-
-
-
+</div>
+  <div class="container hidden" id="recoverySection">
+    <div class="section-card">
+     <h3>Recovery</h3>
+      <p>Use this button to recover any old motes remains, one month back we had implemented a new storage system, this will recover any notes/lists remianing. Use this before backup!</p>
+    <button onclick="recoverAllData()">Recover Old Notes/Lists</button>
+    </div>
+    <div class="section-card">
+      <h3>Export </h3>
+      <p>This button backups every note and list currently present in the storage and exports as .json file</p>
+    <button onclick="exportDataNiotron()">Export</button>
+    </div>
   </div>
 
 
