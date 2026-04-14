@@ -92,7 +92,7 @@ window.showToastWarn = function(message, duration = 2500) {
      const modal = document.getElementById('modal');
    const obj = localStorage.getItem("notesRecoveryCompleted");
    if (obj === null || obj ==="false") { 
-    if (confirm("Are you sure you want to continue without recovering your data?")) {
+    if (confirm("Are you sure you want to continue without recovering your data? Next update will wipe your data! If you wish to protect your data from being deleted, kindly backup your data!")) {
     modal.style.display = 'none';
      } else {
       modal.classList.remove("hiddem");
@@ -102,6 +102,137 @@ window.showToastWarn = function(message, duration = 2500) {
 
 }
   }
+
+  function openRecovery() {
+         closeModal('modal');
+         showSection('recoverySection');
+  }
+
+async function exportDataNiotron() {
+  console.log("📦 Export triggered");
+
+  try {
+    const data = await exportData();
+
+    // 📱 If running inside Niotron
+    if (window.AppInventor) {
+      console.log("📱 Sending data to Niotron");
+      window.AppInventor.setWebViewString(data);
+    } 
+    // 🌐 If running in browser
+    else {
+      console.log("🌐 Downloading in browser");
+
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "notefull-backup.nfbackup";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+  } catch (err) {
+    console.error("❌ Export failed:", err);
+  }
+}
+
+  async function exportData() {
+  try {
+    console.log("📦 Starting export...");
+
+    // 🟢 1. Get data
+    const notes = await localforage.getItem("notes") || [];
+    const lists = await localforage.getItem("lists") || [];
+
+    // 🟢 2. Get localStorage
+    const localStorageData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      localStorageData[key] = localStorage.getItem(key);
+    }
+
+    // 🟢 3. Create export object
+    const exportObject = {
+      _meta: {
+        app: "Notefull",
+        version: "v4",
+        exportedAt: new Date().toISOString(),
+        note: "Auto-generated backup file.",
+        warning: "⚠️ Sensitive data. Do not share."
+      },
+      data: {
+        notes,
+        lists,
+        localStorage: localStorageData
+      }
+    };
+
+    // 🔐 4. Encrypt before export
+    const encrypted = await encryptData(JSON.stringify(exportObject));
+
+    // 🟢 5. Save file
+    const blob = new Blob([encrypted], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "notefull-backup.nfbackup";
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    showToast("Encrypted backup exported 🔐");
+
+  } catch (err) {
+    console.error(err);
+    showToast("Export failed ❌");
+  }
+}
+
+async function encryptData(data) {
+  const password = "notefull-secret-key"; // later: user PIN or derived key
+
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: enc.encode("notefull-salt"),
+      iterations: 100000,
+      hash: "SHA-256"
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt"]
+  );
+
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(data)
+  );
+
+  // combine iv + encrypted
+  const result = {
+    iv: Array.from(iv),
+    data: Array.from(new Uint8Array(encrypted))
+  };
+
+  return JSON.stringify(result);
+}
 
 async function recoverAllData() {
   try {
