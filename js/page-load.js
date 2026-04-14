@@ -70,7 +70,7 @@ document.addEventListener('keydown', function(event) {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-   updateAccountIcon();
+
     startAiScan();
     displayNotes();
     displayLists();
