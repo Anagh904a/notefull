@@ -6,6 +6,10 @@ localforage.getItem("notes").then(storedNotes => {
   notes = storedNotes || [];
   displayNotes();
 });
+
+showToast("URL: " + window.location.href);
+showToast("Origin: " + window.location.origin);
+
 let editingNoteIndex = null;
 let currentNoteId = null;
 let currentDeleteNoteId = null;
