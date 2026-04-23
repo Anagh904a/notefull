@@ -55,6 +55,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Load notes and lists from local storage
   displayNotes();
   displayLists();
+  showToast("URL: " + window.location.href);
+showToast("Origin: " + window.location.origin);
+
   
 });
 
