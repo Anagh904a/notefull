@@ -9,8 +9,7 @@ window.onload = function () {
 
   }
 };
-alert("URL: " + window.location.href);
-alert("Origin: " + window.location.origin);
+
 
 
 displayLists();
