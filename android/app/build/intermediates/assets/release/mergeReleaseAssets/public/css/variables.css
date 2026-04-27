@@ -1,0 +1,49 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --card-color: #f4f4f4;
+    --sidebar-bg: white;
+    --modal-bg: #fff;
+    --button-hover: rgb(85, 85, 85);
+    --light-theme-fix: rgb(172, 172, 172);
+    --footer-color: #bebebe;
+    --footer-button: #fff;
+    --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(12px);
+    --note-bg: rgb(255, 167, 3);
+    --list-bg: #f89494;
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+    --glass-bg: rgba(28, 28, 28, 0.75);
+
+    --active-color: #FDCF6F;
+    --glass: rgba(255, 255, 255, 0.383);
+    --glass-heavy: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --accent: #6366f1;
+    --text: #0f172a;
+    --sub-text: #475569;
+    --grad: linear-gradient(45deg, #eef2ff 0%, #fce7f3 100%);
+}
+
+/* dark theme */
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --card-color: #1f1f1f;
+    --sidebar-bg: black;
+    --modal-bg: #000;
+    --button-hover: rgb(114, 114, 114);
+    --light-theme-fix: rgb(54, 54, 54);
+    --footer-color: #353535;
+    --footer-button: #000;
+    --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(8px);
+    --note-bg: rgb(255, 255, 94);
+    --list-bg: rgb(142, 192, 233);
+}
+
+.hidden {
+  display: none;
+}

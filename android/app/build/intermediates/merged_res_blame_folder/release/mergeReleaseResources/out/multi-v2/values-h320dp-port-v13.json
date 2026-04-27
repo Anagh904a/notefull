@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "app.notefull.com.app-mergeReleaseResources-36:/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+            "map": [
+                {
+                    "source": "/home/anagh/.gradle/caches/9.3.1/transforms/5500fca686a0de917c5b41b41c14b700/transformed/material-1.13.0/res/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "63",
+                        "endOffsets": "114"
+                    }
+                }
+            ]
+        }
+    ]
+}

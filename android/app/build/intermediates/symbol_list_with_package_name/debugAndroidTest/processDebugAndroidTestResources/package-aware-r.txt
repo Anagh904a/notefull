@@ -1,0 +1,3 @@
+app.notefull.com.test
+style WhiteBackgroundDialogTheme
+style WhiteBackgroundTheme

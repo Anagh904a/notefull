@@ -1,0 +1,55 @@
+input[type="password"] {
+  width: 97%;
+  border-radius: 20px;
+  font-weight: bold;
+  padding: 10px;
+  color: #000;
+}
+
+
+button {
+  padding: 10px 15px;
+   margin: 5px 0;
+  cursor: pointer;
+  border: none;
+  color: var(--bg-color);
+  background: var(--text-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-weight: bolder;
+  border-radius: 20px;
+  text-align: center;
+}
+
+button:hover {
+  background: var(--button-hover);
+}
+
+input {
+  font-size: large;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+  border-bottom: 2px solid #007AFF;
+}
+
+label {
+  cursor: pointer;
+  user-select: none;
+  font-weight: bolder;
+  color: var(--text-color);
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}

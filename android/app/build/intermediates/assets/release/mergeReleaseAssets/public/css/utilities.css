@@ -1,0 +1,99 @@
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--text-color);
+  border-top: 5px solid #0078D7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+
+
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ccc;
+  flex-shrink: 0;
+}
+
+.icon .material-icons {
+  color: white;
+  font-size: 22px;
+}
+
+.highlight {
+  background-color: rgb(255, 30, 0);
+  font-weight: bold;
+}
+
+.brand-l {
+  display: flex;
+  align-items: center;
+
+  font-weight: bolder;
+  padding: 10px;
+  font-size: 25px;
+  /* responsive font size */
+  min-width: 240px;
+}
+
+.brand {
+  height: 100px;
+  /* adjust as needed */
+  width: max-content;
+
+}
+
+.brand-t {
+  white-space: nowrap;
+  /* prevent line-break */
+  color: transparent;
+  width: 40px;
+  height: 40px;
+}
+
+.icon.wifi {
+  background-color: #007bff;
+}
+
+.icon.device {
+  background-color: #00bcd4;
+}
+
+.icon.ai {
+  background-color: #3f51b5;
+}
+
+.icon.modes {
+  background-color: #673ab7;
+}
+
+.icon.sound {
+  background-color: #9c27b0;
+}
+
+.icon.notif {
+  background-color: #ff5722;
+}
+
+.icon.display {
+  background-color: #4caf50;
+}
+
+.icon.privacy {
+  background-color: #ffc107;
+}
+
+.text-box {
+  flex-grow: 1;
+}
+
+.hidden {
+  display: none;
+}

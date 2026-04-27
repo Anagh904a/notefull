@@ -1,0 +1,193 @@
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: var(--bg-color);
+        margin: 0;
+        padding: 0;
+        transition: background-color 0.6s ease, color 0.6s ease;
+        transition: 0.4s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    
+
+    h1 {
+        background-clip: text;
+        color: var(--text-color);
+        text-align: center;
+        padding: 10px;
+        margin: 0;
+    }
+
+    h2 {
+  text-align: center;
+  color: var(--text-color);
+  background-clip: text;
+
+
+  align-items: center;
+  gap: 0.5em;
+  font-weight: bold;
+}
+
+.modal-content {
+  animation: fadeIn 0.3s ease forwards;
+  color: white;
+}
+
+ .filter-item:hover:not(.active) {
+     color: #334155;
+ }
+
+ .filter-item:hover .filter-segment-glow {
+     width: 100%;
+ }
+
+ .info-text {
+  font-size: 15px;
+}
+
+#infoContainer {
+  display: none;
+}
+
+#deletePasswordModal {
+  display: none;
+}
+
+.container {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.modal.hidden {
+  display: none;
+  /* Hide elements with this class */
+}
+
+#syncStatus {
+  color: var(--text-color);
+}
+
+h4 {
+  color: var(--text-color);
+}
+
+.close-button {
+  background: linear-gradient(135deg, #f89494, #d80000);
+  /* Red background for close button */
+}
+
+.close-button:hover {
+  background: #aa1b1b;
+  /* Darker red on hover */
+}
+
+input[type="password"] {
+  font-family: 'Poppins', sans-serif;
+  /* Ensure consistent font for password input */
+}
+
+h3 {
+  color: var(--text-color);
+}
+
+#undoButton,
+#redoButton {
+  transition: all 0.3s ease;
+
+  /* Smooth transition for hover effects */
+}
+
+#undoButton:disabled,
+#redoButton:disabled {
+  color: #757575;
+  cursor: not-allowed;
+
+  /* Shows not-allowed cursor */
+}
+
+#undoButton i,
+#redoButton i {
+  margin-right: 5px;
+}
+
+.stat-box {
+  background: var(--card-color);
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+  margin: 0 5px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  color: var(--text-color);
+}
+
+.stat-box span {
+  display: block;
+  font-size: 28px;
+  margin-top: 5px;
+}
+
+.stat-box.green {
+  border-left: 5px solid #4CAF50;
+}
+
+.stat-box.red {
+  border-left: 5px solid #0059ff;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #f89494, #d80000);
+  color: var(--text-color);
+  border: none;
+  font-weight: bolder;
+  font-size: 14px;
+
+  cursor: pointer;
+
+}
+
+.delete-btn:hover {
+  background: #971212;
+}
+
+#itemText {
+  text-align: center;
+  font-size: 15px;
+
+}
+
+/* Mobile-friendly iziToast styling */
+.mobile-friendly-toast {
+  border-radius: 8px !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15) !important;
+  font-size: 14px !important;
+}
+
+
+
+.action-button {
+  background-color: #007bff;
+  /* Blue background for action buttons */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#settingsSection.container {
+  padding: 20px;
+ background: #E2DFD2;
+  font-family: 'Poppins', sans-serif;
+}
+
+.hidden {
+  display: none;
+}

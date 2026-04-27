@@ -1,0 +1,205 @@
+#list-input {
+  display: flex;
+}
+
+/* Checklist specific styles */
+.add-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+
+
+.list-item-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.list-item-input:focus {
+  border-color: #667eea;
+  background: white;
+}
+
+.add-item-btn {
+  border: 1px solid #667eea79;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 99%;
+}
+
+.add-item-btn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transition: all 0.2s;
+}
+
+.add-item-btn:active {
+  transform: scale(0.95);
+}
+
+#noListsMessage {
+  padding: 30px 60px;
+  max-width: 80%;
+  text-align: center;
+  font-size: 2.5em;
+  font-weight: 800;
+  color: #858585;
+line-height: 1.2;
+    background-color: #ffffff;
+  transition: transform 0.3s ease-in-out;
+}
+
+#items-no {
+  padding: 30px 60px;
+   max-width: 80%;
+ text-align: center;
+ font-size: 20px;
+ font-weight: 800;
+   color: #858585;
+line-height: 1.2;
+ background-color: #ffffff;
+transition: transform 0.3s ease-in-out;
+}
+
+.checklist-item {
+  background: rgba(255, 255, 255, 0.1);
+  /* translucent white */
+  backdrop-filter: blur(8px);
+  /* glass blur effect */
+  -webkit-backdrop-filter: blur(8px);
+  /* Safari support */
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* subtle white border */
+  border-radius: 12px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  color: var(--text-color);
+}
+
+.checklist-item input[type="text"] {
+  background: transparent;
+  border: none;
+  outline: none;
+  flex-grow: 1;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.checklist-item:hover {
+
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--text-color);
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checklist-item button {
+  margin-left: auto;
+  /* Push the button to the right */
+  background: linear-gradient(135deg, #f89494, #d80000);
+  /* Darker orange for the button */
+  color: var(--text-color);
+  /* Pointer cursor on hover */
+  display: flex;
+  /* Smooth transition for hover effect */
+}
+
+.checklist-item button:hover {
+  background: #ce4027;
+  /* Lighter orange on hover */
+  color: var(--text-color);
+}
+
+.list-date {
+  display: block;
+  font-size: 15px;
+  color: grey;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+.list h4 {
+  margin: 0;
+
+  font: bolder;
+  font-size: large;
+}
+
+.list:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+
+}
+
+
+
+.list .delete-btn {
+  margin-top: 10px;
+}
+
+.list-progress {
+  margin-top: 5px;
+  width: 98%;
+}
+
+#list-bar {
+  width: 100%;
+  height: 12px;
+  /* Slightly taller for better visibility */
+  background: linear-gradient(135deg, #48eff8, #00c3ff);
+  border-radius: 12px;
+  /* Fully rounded corners */
+  overflow: hidden;
+  /* Clip the inner bar’s corners */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  /* subtle glow */
+  position: relative;
+  justify-content: space-around;
+}
+
+.list {
+  border-radius: 20px;
+  padding: 20px 25px;
+  margin: 16px auto;
+  background: var(--list-bg);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: calc(100% - 32px);
+  color: var(--text-color);
+
+}
+
+.hidden {
+  display: none;
+}
