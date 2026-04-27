@@ -1,0 +1,31 @@
+{
+  "name": "app.notefull.com",
+  "version": "3.2.0",
+  "description": "A simple and open-source notes-taking app",
+  "keywords": [
+    "notes",
+    "productivity",
+    "app"
+  ],
+  "license": "ISC",
+  "author": "Anagh Manglick",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^10.0.0",
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/toast": "^8.0.1",
+    "izitoast": "^1.4.0",
+    "localforage": "^1.10.0",
+    "puppeteer-core": "^24.42.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.3.0"
+  }
+}
