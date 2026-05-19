@@ -12,7 +12,7 @@ Modern • Offline • Secure • Android-Native
 </p>
 
 <p align="center">
-  <a href="YOUR_PLAYSTORE_LINK">
+  <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en_IN">
     <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" width="220">
   </a>
 </p>
