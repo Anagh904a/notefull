@@ -1,123 +1,139 @@
-## Notefull (Android Branch)
+# Notefull
 
-Welcome to the official **Android branch** of Notefull.
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Android-green?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Offline-Supported-blue?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Open%20Source-Yes-orange?style=for-the-badge">
+</p>
 
-This branch contains the source code for the native Android version of the app, built using Capacitor. It is directly linked to the Play Store release of Notefull.
+<p align="center">
+A modern, privacy-focused and offline-first notes & productivity app built for Android.
+</p>
 
----
-
-## 📱 About This Branch
-
-This repository is structured into two main branches:
-
-* **main branch** → Web version of Notefull
-* **android branch (this branch)** → Native Android app (Capacitor-based)
-
-These branches are built on different platforms and may have different features, behaviors, and update cycles.
-
----
-
-## 🔧 Migration Overview
-
-With **Notefull v4 (Foundation Update)**, the app has undergone a major architectural transformation.
-
-Previously, Notefull was essentially running the website directly inside a basic WebView wrapper, which resulted in limited capabilities and a less integrated app experience.
-
-The app has now been migrated to a modern architecture using Capacitor.
-
-This allows us to:
-
-* Package web technologies (HTML, CSS, JavaScript) into a structured native app
-* Access native device features directly
-* Improve performance, stability, and responsiveness
-* Enable full offline functionality
+<p align="center">
+  <a href="YOUR_PLAYSTORE_LINK">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" width="220">
+  </a>
+</p>
 
 ---
 
-## 🚀 Key Benefits
+## 📱 About Notefull
 
-* ⚡ Better performance and smoother experience
-* 📱 Improved native integration and system behavior
-* 🔌 Access to device features (system bars, lifecycle, etc.)
-* 💾 Full offline support
-* 🔓 Open-source availability
-* 🔮 Scalable architecture for future updates
+**Notefull** is a modern Android productivity app designed for fast note-taking, organization, and privacy.
 
----
+Built using **Capacitor**, Notefull combines the flexibility of web technologies with deep Android integration to deliver a smooth and native app experience.
 
-## 🔄 Platform Strategy
+The app is designed to be:
 
-We aim to keep both the **web** and **Android** versions aligned in terms of core functionality.
-
-However:
-
-* Some features may be **Android-only** due to platform capabilities
-* The web version is being optimized for **desktops and broader platform support**
-* Adjustments are made to ensure better responsiveness across devices
+- ⚡ Fast and lightweight
+- 💾 Completely offline
+- 🔒 Privacy-focused
+- 📱 Naturally integrated with Android
+- 🔓 Open-source
 
 ---
 
-## 🌐 Web App & PWA Support
+## 🚀 Core Features
 
-The web version of Notefull supports installation as a Progressive Web App (PWA).
+### ⚡ Performance & Native Experience
 
-* Users can install Notefull directly from supported browsers
-* This allows the app to run like a native application across platforms
+Notefull uses a modern Capacitor-based architecture that allows web technologies to work seamlessly with Android.
 
-> ⚠️ Note: PWA support depends on browser compatibility.
-> It has been tested primarily on Google Chrome and may not be available on some older or unsupported browsers.
+This enables:
 
----
-
-## ⚙️ Platform Potential
-
-Capacitor also opens the possibility of extending Notefull to additional platforms in the future, including other mobile and desktop environments.
+- Better responsiveness
+- Improved stability
+- Native Android behavior
+- Device-level integration
+- Scalable architecture for future updates
 
 ---
 
-## 📱 Device Requirements
+## 💾 Full Offline Support
 
-Notefull is designed to be lightweight and accessible:
+Notefull works **completely offline**.
 
-* Works on most modern Android devices
-* No specific hardware requirements
-* App size may increase as you store more notes and lists
+Your notes and content remain available without requiring an internet connection.
 
-> ⚠️ Note: Devices running **Android versions below 7** may not support Notefull v4 (currently under development).
+This allows:
+
+- Reliable note access anytime
+- Faster loading
+- Greater privacy
+- Reduced dependency on cloud services
 
 ---
 
-## ⚠️ Important Notes
+## 🔒 Privacy & Security
 
-* The Android and Web versions are now **separate platforms**
-* Features and updates may differ between versions
-* Some updates may be **Android-focused**
+Security is a major focus of Notefull.
 
-> Due to the architectural shift, major feature development is currently focused on the Android version.
+Features include:
+
+- 🔐 App Lock support
+- 🛡️ Advanced security protections
+- 🔒 Local-first storage approach
+- Privacy-focused design
+
+Your data stays under your control.
+
+---
+
+## 🤖 Smart Suggestions System
+
+Notefull includes an AI-driven smart content detection system called **Suggestions**.
+
+Suggestions helps improve productivity by intelligently recognizing content patterns and assisting with note creation and organization.
+
+This system is designed to:
+
+- Detect useful content patterns
+- Improve workflow efficiency
+- Make note management smarter and faster
+
+---
+
+## 📱 Android Integration
+
+Notefull is deeply integrated with Android using Capacitor.
+
+This allows access to native capabilities including:
+
+- System UI behavior
+- Lifecycle handling
+- Native app experience
+- Better responsiveness and platform consistency
 
 ---
 
 ## 📄 Changelog
 
-You can view the full changelog here:
+View the full changelog here:
+
 👉 [View Changelog](./changelog.md)
 
 ---
 
-## 📌 Additional Notes
+## 📌 Important Notes
 
-* This branch reflects the **production Android app**
-* Updates here are directly related to Play Store releases
-* Due to major internal changes, some updates may require data reset
+- This repository contains the production version of Notefull
+- Updates are directly related to app releases
+- Some updates may require data reset during major architectural changes
+- Features and behavior may evolve over time
+
+---
+
+## 🚀 Future Vision
+
+Notefull continues to evolve with:
+
+- Stability improvements
+- New productivity tools
+- Smarter experiences
+- Better Android integration
+- Stronger cross-platform possibilities
 
 ---
 
-## 🚀 What's Next
-
-The **Foundation Update (Full Version)** will continue to evolve with:
-
-* Stability improvements
-* New features
-* Better cross-platform consistency
-
----
+Made with ❤️ for productivity and privacy.
