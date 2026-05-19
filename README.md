@@ -123,11 +123,18 @@ This helps users manage information more safely and securely.
 
 ---
 
-# 📄 Changelog
+# 💜 Accessibility & User Experience
 
-View the full changelog here:
+Notefull is designed to stay simple and accessible.
 
-👉 [View Changelog](./changelog.md)
+Features include:
+
+- 🚫 Completely ad-free
+- 🔓 No premium subscription required
+- 💙 Full experience without paywalls
+- 📱 Privacy and usability first
+
+The goal is to provide a clean and distraction-free productivity experience for everyone.
 
 ---
 
