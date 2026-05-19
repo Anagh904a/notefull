@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An Open-source notes-taking app built just for productivity. No ads, no distractions." />
+    <link rel="stylesheet" href="libs/fontawesome/all.min.css" />
+    <link rel="icon" href="icon.png" type="image/x-icon">
+    <title>Notefull - Home</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="libs/localforage/localforage.min.js"></script>
+    <!-- Add to your HTML head -->
+    <link rel="stylesheet" href="libs/iziToast/iziToast.min.css">
+    <script src="libs/iziToast/iziToast.min.js"></script>
+    <script type="module" src="js/capacitor.js"></script>
+</head>
+
+<body>
+    <audio id="alertSound" src="sounds/t.mp3" preload="auto"></audio>
+    <audio id="errorSound" src="sounds/e.mp3" preload="auto"></audio>
+    <audio id="sucessSound" src="sounds/s.mp3" preload="auto"></audio>
+    <div id="nav" class="nav-wrapper">
+        <nav class="glass-nav">
+            <a href="javascript:void(0)" class="nav-item active" onclick="updateNavbar(this); showSection('combinedContainer');">
+                <i class="fa-solid fa-house"></i>
+                <span class="nav-text">Home</span>
+            </a>
+          <a href="javascript:void(0)" class="nav-item" onclick="updateNavbar(this); showSection('trashSection');">
+                <i class="fas fa-trash"></i>
+                <span class="nav-text">Trash</span>
+            </a>
+             <a href="javascript:void(0)" class="nav-item" onclick="updateNavbar(this); showSection('aiSection');">
+               <i class="fa-solid fa-lightbulb"></i>
+                <span class="nav-text">Suggestiions</span>
+            </a>
+             <a href="javascript:void(0)" class="nav-item" onclick="updateNavbar(this); showSection('settingsSection');">
+                <i class="fas fa-cog"></i>
+                <span class="nav-text">Settings</span>
+            </a>
+        </nav>
+    </div>
+    <div id="privacyOverlay" class="hidden"></div>
+
+
+    <div id="combinedContainer" class="container hidden">
+        <div class="header" id="header">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Quickly find any data..." oninput="searchNotes()">
+            <i class="fa-solid fa-xmark" onclick="clearSearch()" id="clearSearch"></i>
+     <i style="display: none;" class="fa-solid fa-ellipsis-vertical" onclick="showMenu()" id="three-dot"></i>
+        </div>
+       <div class="menu hidden" id="menu">
+ <button onclick="showSelectionMode()">Multi-Select </button>
+</div>
+          <div class="selection-toolbar" id="toolbar">
+            <div class="toolbar-elements">
+<button onclick="closeSelectionMode()"><i class="fas fa-close"></i></button>
+<h3>Seleted</h3>
+ <button onclick="selectAll()">Select All</button>
+                <button onclick="deleteSelected()"><i class="fas fa-trash"></i></button>
+            </div>
+            
+        </div>
+        <div class="custom-sort-wrapper" id="sort">
+            <div class="filter-group" id="filterGroup">
+                <div class="filter-segment-glow" id="segmentGlow"></div>
+                <div class="filter-item active" onclick="handleFilterChange(this, 'all')">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>All</span>
+                </div>
+                <div class="filter-item" onclick="handleFilterChange(this, 'note')">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>Notes</span>
+                </div>
+                <div class="filter-item" onclick="handleFilterChange(this, 'lists')">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <span>Lists</span>
+                </div>
+            </div>
+        </div>
+        <div id="addOptionsModal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Choose to create</h3>
+                <div class="add-group">
+                    <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
+                        <i class="fas fa-sticky-note"></i> Note
+                    </button>
+                    <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
+                        <i class="fas fa-list"></i> List
+                    </button>
+                </div>
+            
+            </div>
+        </div>
+        <div id="notesContainer"></div>
+        <div id="listsSection">
+            <div id="listsContainerContent"></div>
+        </div>
+        <div id="noListsMessage" class="hidden">
+            <i class="fas fa-inbox empty-icon"></i>
+            <p>No lists yet</p>
+            <span>Tap + to create your first list</span>
+        </div>
+        <div id="noNotesMessage" class="hidden">
+            <i class="fas fa-note-sticky empty-icon"></i>
+            <p>This space is lonely</p>
+            <span>Tap + to add your first note</span>
+        </div>
+        <button id="add" class="add-button" onclick="showAddOptions()">
+            <i class="fa-solid fa-plus"></i> Add
+        </button>
+      
+    </div>
+  
+
+    <div id="addNoteSection" class="container hidden">
+        <!-- Note Panel -->
+        <div class="add-note-header">
+            <div class="btn-group-left">
+                <button type="button" class="action-btn" onclick="cancelNote()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button type="button" class="action-btn">
+                    <img src="ai.png" onclick="correctNote()" class="btn-icon">
+                </button>
+            </div>
+            <div class="btn-group-right">
+                <button type="button" id="undoButton" class="action-btn" onclick="undo()">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button type="button" id="redoButton" class="action-btn" onclick="redo()">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+        </div>
+        <div class="toolbar-secondary">
+            <button class="save-btn-bottom" onclick="saveNote()">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button id="changePasswordButton" onclick="showNotePassword()">
+                    <i class="fas fa-key"></i> Password
+                </button>
+                </div>
+        <input type="text" class="note-title-input" id="noteTitle" placeholder="Title" />
+        <div class="note-content-input" id="noteContent" contenteditable="true" data-placeholder="Enter your note here....">
+        </div>
+        <!-- Note Password Modal -->
+        <div id="notePasswordModal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="note-password-text">Unlock Note 🔒</h3>
+                <input type="password" id="notePassword" placeholder="Enter New Password.." />
+                <button type="button" onclick="closeModal('notePasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+    </div>
+   
+    <!--Add list section-->
+    <div id="addListSection" class="container hidden">
+        <div class="add-list-header">
+            <div class="btn-group-center">
+            <button class="action-btn" onclick="cancelList()">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div id="itemTextl">
+                <h2>Create a new item</h2>
+            </div>
+            </div>
+        </div>
+        <!-- Top Toolbar for Checklist -->
+        <div class="toolbar-secondary">
+            <button class="save-btn-bottom" onclick="saveList()">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <button class="tool-btn" onclick="showList()">
+                <i class="fas fa-lock"></i> Password
+            </button>
+        </div>
+        <input type="text" id="listTitle" class="note-title-input" placeholder="List Title" />
+        <div id="checklistContainer" class="checklist-items"></div>
+        <div id="items-no" class="hidden">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <p>No Items yet</p>
+            <span>Tap + to create your first item</span>
+        </div>
+        <button class="add-item-btn" onclick="addItem()">
+            <i class="fas fa-plus"></i> Add New Item
+        </button>
+    </div>
+    <!-- Bottom Toolbar for Checklist -->
+    <!-- List Password Modal -->
+    <div id="listPasswordModalr" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="list-password-text">Set Password</h3>
+            <input type="password" id="listPassword" placeholder="Enter New Password.." />
+            <button type="button" onclick="closeModal('listPasswordModalr')">Close <i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    <!-- Add Options Modal -->
+    <div id="passwordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Unlock note 🔓</h3>
+            <input type="password" id="passwordInput" placeholder="Password">
+            <button onclick="verifyPassword()">Go <i class="fas fa-arrow-right"></i>
+                <!-- Best for a Go button -->
+            </button>
+            <button onclick="closeModal('passwordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+    <!-- Delete Password Modal -->
+    <div id="deletePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Delete Note 🔓</h3>
+            <input type="password" id="deletePasswordInput" placeholder="Password" />
+            <button onclick="deleteVerifyPassword()">Go <i class="fas fa-arrow-right"></i>
+                <!-- Best for a Go button -->
+            </button>
+            <button onclick="closeModal('deletePasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+    
+    <div id="settingsSection" class="container hidden">
+        <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
+        <br>
+        <div class="card" onclick="showSection('creditSection')">
+            <div class="icon wifi">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <div class="text-box">
+                <div class="title2">Information and Credits</div>
+                <div class="subtitle">Developer · Version</div>
+            </div>
+        </div>
+        <div class="card" onclick="showSection('privacySection')">
+            <div class="icon privacy">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div class="text-box">
+                <div class="title2">Legal Center</div>
+                <div class="subtitle">Policies · Permissions Manager</div>
+            </div>
+        </div>
+        <div class="card" onclick="showSection('lockSection')">
+            <div class="icon modes">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div class="text-box">
+                <div class="title2">Security Settings</div>
+                <div class="subtitle">App Lock · Advanced Settings </div>
+            </div>
+        </div>
+        <div class="card" onclick="openAntithreat()">
+            <div class="icon modes">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="text-box">
+                <div class="title2">Notefull AI Settings</div>
+                <div class="subtitle">Version · Shield · Updates</div>
+            </div>
+        </div>
+    </div>
+    <div id="trashSection" class="container hidden">
+        <div class="section-card">
+            <h2>Trash</h2>
+           <h3>Coming Very Soon!</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="updateModal">
+        <div class="modal-content">
+         <h2 id="heading">Updating Notefull AI</h2>
+            <div class="percentage" id="percentage">0%</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="step-info" id="stepInfo">Step 1 of 5</div>
+        </div>
+    </div>
+    <div id="antithreatSection" class="container hidden">
+        <button class="modal-button" onclick="showSection('settingsSection')">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="section-card">
+            <h2>Notefull AI Updater</h2>
+            <p>This updates the Notefull AI through learning.</p>
+            <div class="info-box">
+                <h3>Release Code: <span id="lastUpdated"></span></h3>
+            </div>
+            <div class="info-box">
+                <h3>Notefull AIs Version: <span id="currentVersion"></span></h3>
+            </div>
+            <button id="updateButton" class="hidden" onclick="startUpdate()">Update Now</button>
+        </div>
+    </div>
+    <div id="privacySection" class="container hidden">
+        <button class="modal-button" onclick="showSection('settingsSection')">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="section-card">
+            <h2>Our Privacy Policy</h2>
+            <a href="https://docs.google.com/document/d/1cAsN4hexlf5bXj6hRMURkGX9vYadIkCA9axixYQjswY/edit?addon_store&amp;tab=t.0#heading=h.4o4shqu4d9pj">Click
+        Me To View</a>
+        </div>
+        <div class=" section-card">
+            <h2>Permission Manager for Notefull</h2>
+            <div class="info-box">
+                <h4>0 Apps are allowed to acess your data in Notefull</h4>
+            </div>
+        </div>
+    </div>
+    <div id="creditSection" class="container hidden">
+        <button class="modal-button" onclick="showSection('settingsSection')">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="section-card">
+            <h2>Credits and links</h2>
+            <div class="info-box">
+                <p>Developed by <strong>Anagh Manglick</strong></p>
+            </div>
+            <div class="info-box">
+                <p>This is an open-source project available on GitHub</p>
+                <a href="https://github.com/Anagh904a/notefull" target="_blank">
+        View Source Code →
+      </a>
+            </div>
+            <div class=" info-box">
+                <p>Report bugs to <a href="https://github.com/Anagh904a/notefull/issues" target="_blank">GitHub Issues</a>
+            </div>
+        </div>
+        <div class=" section-card">
+            <h2>About App</h2>
+            <div class="info-box"><img class="brand-t" src="icon.png">
+                <h4>App Version: 26.5.0</h4>
+            </div>
+            <a href="https://play.google.com/store/apps/details?id=app.notefull.com&amp;hl=en">
+                <button>App Updates</button>
+                </a>
+        </div>
+    </div>
+    <div id=" ecSection" class="container hidden">
+        <button class="modal-button" onclick="showSection('settingsSection')">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="section-card">
+            <h2>App reset</h2>
+            <button class="modal-btn-close" onclick="clearData()">CLEAR ALL DATA</button>
+        </div>
+    </div>
+    <div id="lockSection" class="container hidden">
+        <button class="modal-button" onclick="showSection('settingsSection')"> <i class="fa-solid fa-chevron-left"></i></button>
+        <div class="section-card">
+            <h3 id="appLockStatus">App Lock</h3>
+            <p>This uses andorid authentication(System pin, password, fingerprint, etc.)</p>
+            <div class="toggle-container">
+                <span class="toggle-label">Enable Lock</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="appLock" onchange="toggleSync(this)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="section-card">
+            <h3 id="advSecurityStatus">Advanced Security</h3>
+            <p>This disables screenshots and recording. This also hides app when in background.</p>
+         <div class="toggle-container">
+                <span class="toggle-label">Enable Advanced Security</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="advSecurity" onchange="toggleAdv(this)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div id="aiSection" class="container hidden">
+  <div class="outdated-banner hidden" id="updateWarn">
+    <div class="outdated-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="outdated-body">
+      <div class="outdated-title">Notefull AI is outdated</div>
+      <div class="outdated-desc">A newer version is available with improved privacy detection. Update to get the best results. It takes a few seconds only!</div>
+      <div class="outdated-link" onclick="openAntithreat();">Update in Settings →</div>
+    </div>
+  </div>
+    
+ <div class="section">
+    <div class="section-label">Security Score</div>
+    <div class="score-card">
+      <div class="score-top-row">
+        <div class="score-num-wrap">
+          <div class="score-number" id="score-num">—</div>
+          <div class="score-denom" id="score-denom"></div>
+        </div>
+        <div class="score-right">
+          <div class="score-grade" id="score-grade">Not scanned</div>
+          <div class="score-desc" id="score-desc">Run a scan to see results</div>
+        </div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-track">
+          <div class="score-bar-fill" id="score-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+       <div class="section">
+    <div class="section-label">Scan Progress</div>
+    <div class="progress-card">
+      <div class="progress-top">
+        <div class="progress-left">
+          <div class="pulse-dot" id="pulse-dot"></div>
+          <div class="progress-label" id="prog-label">Idle — press Start Scan</div>
+        </div>
+        <div class="progress-pct" id="prog-pct">0%</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill"></div>
+      </div>
+      <div class="phase-text" id="phase-text"></div>
+    </div>
+  </div>
+
+  <!-- Counters -->
+  <div class="counter-row">
+    <div class="cnt">
+      <div class="cnt-num" id="cnt-notes">0</div>
+      <div class="cnt-lbl">Notes<br>Scanned</div>
+    </div>
+    <div class="cnt">
+      <div class="cnt-num" id="cnt-lists">0</div>
+      <div class="cnt-lbl">Lists<br>Scanned</div>
+    </div>
+    <div class="cnt alert" id="cnt-vuln-wrap">
+      <div class="cnt-num" id="cnt-vuln">0</div>
+      <div class="cnt-lbl">Sensitive<br>Items Found</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="section">
+    <div class="section-label">Scan Results</div>
+    <div class="results-card">
+      <div class="results-head">
+        <div class="results-head-left">
+          <span class="results-title">Sensitive Content Found</span>
+          <span class="results-badge" id="res-badge">0</span>
+        </div>
+        <span class="results-all">All</span>
+      </div>
+      <div id="results-list">
+        <div class="empty-state">
+          <p>No results yet.<br>Start a scan to detect sensitive content.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Button -->
+  <div class="btn-wrap">
+    <button class="scan-btn" id="scan-btn" onclick="startAiScan()">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start Scan
+    </button>
+  </div>
+       </div>
+
+
+    <!-- List Password Modal -->
+    <div id="listPasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Unlock List 🔒</h3>
+            <input type="password" id="listPasswordInput" placeholder="Password" />
+            <button onclick="verifyListPassword()">Go <i class="fas fa-arrow-right"></i></button>
+            <button onclick="closeModal('listPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+    <!-- Delete List Password Modal -->
+    <div id="deleteListPasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Delete List 🔒</h3>
+            <input type="password" id="deleteListPasswordInput" placeholder="Password" />
+            <button onclick="deleteListVerifyPassword()">Go <i class="fas fa-arrow-right"></i></button>
+            <button onclick="closeModal('deleteListPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <script src="js/storage-confg.js"></script>
+    <script src="js/script.js"></script>
+        <script src="js/selectionManager.js"></script>
+    <script src="js/notes.js"></script>
+    <script src="js/lists.js"></script>
+<script src="js/ai.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/page-load.js"></script>
+</body>
+
+</html>
