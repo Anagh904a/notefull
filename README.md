@@ -11,11 +11,7 @@
 Modern • Offline • Secure • Android-Native
 </p>
 
-<p align="center">
-  <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en_IN">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" width="220">
-  </a>
-</p>
+
 
 ---
 
@@ -133,6 +129,7 @@ Features include:
 - 🔓 No premium subscription required
 - 💙 Full experience without paywalls
 - 📱 Privacy and usability first
+- 💙 Local Storage only, no cloud data collection
 
 The goal is to provide a clean and distraction-free productivity experience for everyone.
 
@@ -159,6 +156,12 @@ Notefull continues to evolve with:
 - Stronger offline experiences
 
 ---
+
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=app.notefull.com&hl=en_IN">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" width="220">
+  </a>
+</p>
 
 <p align="center">
 Built with ❤️ for privacy, productivity and simplicity.
