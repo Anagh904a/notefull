@@ -1,123 +1,69 @@
-## Notefull (Android Branch)
+# Notefull
 
-Welcome to the official **Android branch** of Notefull.
-
-This branch contains the source code for the native Android version of the app, built using Capacitor. It is directly linked to the Play Store release of Notefull.
+Notefull is a free, open-source notes and lists app for Android — built to be simple, private, and lightweight. No accounts, no ads, no tracking. Just your notes, on your device.
 
 ---
 
-## 📱 About This Branch
+## ✨ What's New in v6 (Summer Update)
 
-This repository is structured into two main branches:
-
-* **main branch** → Web version of Notefull
-* **android branch (this branch)** → Native Android app (Capacitor-based)
-
-These branches are built on different platforms and may have different features, behaviors, and update cycles.
-
----
-
-## 🔧 Migration Overview
-
-With **Notefull v4 (Foundation Update)**, the app has undergone a major architectural transformation.
-
-Previously, Notefull was essentially running the website directly inside a basic WebView wrapper, which resulted in limited capabilities and a less integrated app experience.
-
-The app has now been migrated to a modern architecture using Capacitor.
-
-This allows us to:
-
-* Package web technologies (HTML, CSS, JavaScript) into a structured native app
-* Access native device features directly
-* Improve performance, stability, and responsiveness
-* Enable full offline functionality
+Notefull has been overhauled. It now adds full AI search, a full reminder system, trash system (recycle bin), and more. This means:
+* A smoother, faster experience overall with revmaped entire UIs
+* Smarter Search
+* A overhauled experience with new trash and reminder systems
+* A lot of bugs are now fixed
 
 ---
 
-## 🚀 Key Benefits
+## ⏰ Reminders
 
-* ⚡ Better performance and smoother experience
-* 📱 Improved native integration and system behavior
-* 🔌 Access to device features (system bars, lifecycle, etc.)
-* 💾 Full offline support
-* 🔓 Open-source availability
-* 🔮 Scalable architecture for future updates
+Set a reminder on any note or list, and Notefull will notify you right on your device when it's time. No accounts, no cloud sync needed — it all runs locally on your phone. (They maybe slighly delayed due to android restrictions to prevent wastage of battery)
 
 ---
 
-## 🔄 Platform Strategy
+## Trash
 
-We aim to keep both the **web** and **Android** versions aligned in terms of core functionality.
-
-However:
-
-* Some features may be **Android-only** due to platform capabilities
-* The web version is being optimized for **desktops and broader platform support**
-* Adjustments are made to ensure better responsiveness across devices
+Deleted some notes/lists bymistakely or want to multiple notes/lists for bulk deletion? Now it's possible, now you can recover deleted notes/lists, think twice before deleting your data, or just empty space for new thoughts! Introducing Trash a.k Recycle Bin Feature.
 
 ---
 
-## 🌐 Web App & PWA Support
+## 🤖 Smart AI Search *(Optional)*
 
-The web version of Notefull supports installation as a Progressive Web App (PWA).
+Notefull now includes an optional smart search feature. Instead of just matching keywords, you can ask it things in plain language — like *"when is my meeting tomorrow?"* — and it'll find the answer directly from your notes.
 
-* Users can install Notefull directly from supported browsers
-* This allows the app to run like a native application across platforms
+A few things worth knowing about it:
 
-> ⚠️ Note: PWA support depends on browser compatibility.
-> It has been tested primarily on Google Chrome and may not be available on some older or unsupported browsers.
+* **It's optional.** This feature isn't part of the base app install — you choose to turn it on, and it downloads a small AI model only when you do. This keeps the regular app small for everyone who doesn't need it.
+* **It's fully private.** Everything runs directly on your phone. Nothing is ever sent to a server, no internet needed once it's downloaded, and no data about your notes ever leaves your device. 
+* **It's fully Free** You don't have to worry about credits. This model is 100% free and unlimted usage. As it is an on-device-AI, when using this feature on very large notes/lists, it may lead to performance issues that are beyong our control. 
+* **It's still early.** This feature is new and being actively improved, so you might run into rough edges. Feedback is always welcome.
 
----
-
-## ⚙️ Platform Potential
-
-Capacitor also opens the possibility of extending Notefull to additional platforms in the future, including other mobile and desktop environments.
+**Credit where it's due:** this feature is powered by the open-source [DistilBERT](https://huggingface.co/distilbert/distilbert-base-cased-distilled-squad) model (Sanh, Debut, Chaumond & Wolf, 2019), trained on the SQuAD dataset, and runs using [Transformers.js](https://github.com/huggingface/transformers.js) by Hugging Face. Both are open-source and licensed under Apache 2.0.
 
 ---
 
-## 📱 Device Requirements
+## 📱 Will it work on my phone?
 
-Notefull is designed to be lightweight and accessible:
+Notefull is built to run well on most Android phones, not just high-end ones.
 
-* Works on most modern Android devices
-* No specific hardware requirements
-* App size may increase as you store more notes and lists
-
-> ⚠️ Note: Devices running **Android versions below 7** may not support Notefull v4 (currently under development).
-
----
-
-## ⚠️ Important Notes
-
-* The Android and Web versions are now **separate platforms**
-* Features and updates may differ between versions
-* Some updates may be **Android-focused**
-
-> Due to the architectural shift, major feature development is currently focused on the Android version.
+* Works on Android 7 and up (Android 10+ recommended for the best experience)
+* No special hardware needed
+* The base app is small and lightweight — it only grows as you add more notes and lists
+* The optional AI search feature requires a one-time download if you choose to enable it and that's we have optimuized that it can run on all low-mid range devices. Slight performace issues maybe faced. 
 
 ---
 
-## 📄 Changelog
+## 🔓 Open Source
 
-You can view the full changelog here:
-👉 [View Changelog](./changelog.md)
+Notefull is fully open-source. You're welcome to look through the code, suggest improvements, or report issues.
 
 ---
 
-## 📌 Additional Notes
+## 📄 About me
 
-* This branch reflects the **production Android app**
-* Updates here are directly related to Play Store releases
-* Due to major internal changes, some updates may require data reset
+Notefull is developed by a class 9 student solo dev that's me. I developed Notefull for best user experience, modern day apps are bloated with ads, premium, and sometimes AI. So, i created Notefull to be the best-notes app that is transparent, not annoying but also modern with completely optional AI features too that are also 100% free.
 
 ---
 
 ## 🚀 What's Next
 
-The **Foundation Update (Full Version)** will continue to evolve with:
-
-* Stability improvements
-* New features
-* Better cross-platform consistency
-
----
+Notefull is actively being improved, with more stability fixes, new features, and a smoother experience on the way.
