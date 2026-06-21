@@ -1,3 +1,2 @@
 node_modules/
-www/AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx
-www/libs/transformers/ort-wasm-simd-threaded.asyncify.wasm
+

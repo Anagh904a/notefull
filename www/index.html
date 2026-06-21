@@ -102,7 +102,8 @@
     <div id="combinedContainer" class="container hidden">
         <div class="header" id="header">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Ask anything related to notes and lists..." oninput="searchNotes()">
+            <input type="text" id="searchInput" placeholder="Ask anything related to notes and lists..."
+                oninput="searchNotes()">
             <i class="fa-solid fa-xmark" onclick="clearSearch()" id="clearSearch"></i>
         </div>
 
@@ -135,7 +136,7 @@
                 <span class="r-tag med">BETA</span>
             </div>
             <div id="aiResponseText"></div>
-            <p class="r-desc"><i class="fas fa-circle-info"></i>  AI can make mistakes in responses</p>
+            <p class="r-desc"><i class="fas fa-circle-info"></i> AI can make mistakes in responses</p>
         </div>
         <div id="search-result" class="hidden"></div>
 
@@ -360,10 +361,10 @@
     </div>
     <div class="modal hidden" id="model-progress-modal">
         <div class="modal-content">
-  
-<h2>AI is loading...</h2>
-                <h3 id="ai-status-text">Initializing AI Engine...</h3>
- 
+
+            <h2>AI is loading...</h2>
+            <h3 id="ai-status-text">Initializing AI Engine...</h3>
+
         </div>
     </div>
     <!-- Delete Password Modal -->
@@ -435,6 +436,15 @@
                 <div class="text-box">
                     <div class="title2">Notifications Settings</div>
                     <div class="subtitle">Grant Permission · Manage Reminders</div>
+                </div>
+            </div>
+            <div class="card" onclick="showSection('files')">
+                <div class="icon privacy">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="text-box">
+                    <div class="title2">AI Manager</div>
+                    <div class="subtitle">AI Features · Download files</div>
                 </div>
             </div>
         </div>
@@ -600,131 +610,162 @@
             </div>
 
         </div>
+        <div class="container hidden" id="files">
+            <button class="modal-button" onclick="showSection('settingsSection')"> <i
+                    class="fa-solid fa-chevron-left"></i></button>
+            <div class="section-card">
+                <h2>Manage AI features</h2>
+                <p>Downloads AI features from official github repo</p>
+                <div class="toggle-container">
+                    <span class="toggle-label">Allow all type of downloading of assests</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" disabled checked>
 
-        <div id="aiSection" class="container hidden">
-            <div class="outdated-banner hidden" id="updateWarn">
-                <div class="outdated-icon">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
+                        <span class="toggle-slider"></span>
+                    </label>
                 </div>
-                <div class="outdated-body">
-                    <div class="outdated-title">Analytics Engine is outdated</div>
-                    <div class="outdated-desc">A newer version is available with new detection. Update to get
-                        the best results. It takes a few seconds only!</div>
-                    <div class="outdated-link" onclick="openAntithreat();">Update in Settings →</div>
-                </div>
+                <p>This permission is managed by Notefull itself, this is required to load UI correctly</p>
+
+                <button onclick="showDownloaderModal()">Download AI files</button>
             </div>
-            <div class="section">
-                <div class="section-label">Analysis Score</div>
-                <div class="score-card">
-                    <div class="score-top-row">
-                        <div class="score-num-wrap">
-                            <div class="score-number" id="score-num">—</div>
-                            <div class="score-denom" id="score-denom"></div>
-                        </div>
-                        <div class="score-right">
-                            <div class="score-grade" id="score-grade">Not scanned</div>
-                            <div class="score-desc" id="score-desc">Run a scan to see Analytics</div>
-                        </div>
-                    </div>
-                    <div class="score-bar-wrap">
-                        <div class="score-bar-track">
-                            <div class="score-bar-fill" id="score-bar"></div>
-                        </div>
-                    </div>
-                </div>
+
+        </div>
+
+    </div>
+    <div id="assetsDownloader" class="modal hidden">
+        <div class="modal-content">
+            <h2>Notefull Assests Downloader</h2>
+            <h3 id="sizeTracker">Size to be downloaded</h3>
+            <p id="downloadStaus">Click start button to start downloading</p>
+            <div id="download-progress" class="download-progress"></div>
+            <button class="startBtn" onclick="startDownload()" id="startBtn">Start</button>
+
+        </div>
+    </div>
+    <div id="aiSection" class="container hidden">
+        <div class="outdated-banner hidden" id="updateWarn">
+            <div class="outdated-icon">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
             </div>
-            <div class="section">
-                <div class="section-label">Analysis Progress</div>
-                <div class="progress-card">
-                    <div class="progress-top">
-                        <div class="progress-left">
-                            <div class="pulse-dot" id="pulse-dot"></div>
-                            <div class="progress-label" id="prog-label">Idle — press Start Analysis</div>
-                        </div>
-                        <div class="progress-pct" id="prog-pct">0%</div>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill" id="prog-fill"></div>
-                    </div>
-                    <div class="phase-text" id="phase-text"></div>
-                </div>
-            </div>
-            <!-- Counters -->
-            <div class="counter-row">
-                <div class="cnt">
-                    <div class="cnt-num" id="cnt-notes">0</div>
-                    <div class="cnt-lbl">Notes<br>Scanned</div>
-                </div>
-                <div class="cnt">
-                    <div class="cnt-num" id="cnt-lists">0</div>
-                    <div class="cnt-lbl">Lists<br>Scanned</div>
-                </div>
-                <div class="cnt alert" id="cnt-vuln-wrap">
-                    <div class="cnt-num" id="cnt-vuln">0</div>
-                    <div class="cnt-lbl">Vulnerabilities<br>Found</div>
-                </div>
-            </div>
-            <!-- Results -->
-            <div class="section">
-                <div class="section-label">Analysis</div>
-                <div class="results-card">
-                    <div class="results-head">
-                        <div class="results-head-left">
-                            <span class="results-title">Vulnerabilities Found</span>
-                            <span class="results-badge" id="res-badge">0</span>
-                        </div>
-                        <span class="results-all">All</span>
-                    </div>
-                    <div id="results-list">
-                        <div class="empty-state">
-                            <p>Not analyzed yet.<br>Start a analysis to see vulnerabilities</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Button -->
-            <div class="btn-wrap">
-                <button class="scan-btn" id="scan-btn" onclick="startAiScan()">
-                    <svg viewBox="0 0 24 24">
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                    Start Analyisis
-                </button>
+            <div class="outdated-body">
+                <div class="outdated-title">Analytics Engine is outdated</div>
+                <div class="outdated-desc">A newer version is available with new detection. Update to get
+                    the best results. It takes a few seconds only!</div>
+                <div class="outdated-link" onclick="openAntithreat();">Update in Settings →</div>
             </div>
         </div>
-        <!-- List Password Modal -->
-        <div id="listPasswordModal" class="modal hidden">
-            <div class="modal-content">
-                <h3 id="listPasswordModalText">Unlock List 🔒</h3>
-                <input type="password" id="listPasswordInput" placeholder="Password" />
-                <button onclick="verifyListPassword()">Go <i class="fas fa-arrow-right"></i></button>
-                <button onclick="closeModal('listPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        <div class="section">
+            <div class="section-label">Analysis Score</div>
+            <div class="score-card">
+                <div class="score-top-row">
+                    <div class="score-num-wrap">
+                        <div class="score-number" id="score-num">—</div>
+                        <div class="score-denom" id="score-denom"></div>
+                    </div>
+                    <div class="score-right">
+                        <div class="score-grade" id="score-grade">Not scanned</div>
+                        <div class="score-desc" id="score-desc">Run a scan to see Analytics</div>
+                    </div>
+                </div>
+                <div class="score-bar-wrap">
+                    <div class="score-bar-track">
+                        <div class="score-bar-fill" id="score-bar"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- Delete List Password Modal -->
-        <div id="deleteListPasswordModal" class="modal hidden">
-            <div class="modal-content">
-                <h3 id="deleteListPasswordModalText">Delete List 🔒</h3>
-                <input type="password" id="deleteListPasswordInput" placeholder="Password" />
-                <button onclick="deleteListVerifyPassword()">Go <i class="fas fa-arrow-right"></i></button>
-                <button onclick="closeModal('deleteListPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        <div class="section">
+            <div class="section-label">Analysis Progress</div>
+            <div class="progress-card">
+                <div class="progress-top">
+                    <div class="progress-left">
+                        <div class="pulse-dot" id="pulse-dot"></div>
+                        <div class="progress-label" id="prog-label">Idle — press Start Analysis</div>
+                    </div>
+                    <div class="progress-pct" id="prog-pct">0%</div>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="prog-fill"></div>
+                </div>
+                <div class="phase-text" id="phase-text"></div>
             </div>
         </div>
-        <script type="module" src="js/capacitor.js"></script>
-        <script src="js/storage-confg.js"></script>
-        <script src="js/script.js"></script>
-        <script src="js/selectionManager.js"></script>
-        <script src="js/notes.js"></script>
-        <script src="js/lists.js"></script>
-        <script src="js/reaminders.js"></script>
-        <script src="js/page-load.js"></script>
-        <script src="js/ai.js"></script>
-        <script src="js/ui.js"></script>
-        <script src="js/settings.js"></script>
+        <!-- Counters -->
+        <div class="counter-row">
+            <div class="cnt">
+                <div class="cnt-num" id="cnt-notes">0</div>
+                <div class="cnt-lbl">Notes<br>Scanned</div>
+            </div>
+            <div class="cnt">
+                <div class="cnt-num" id="cnt-lists">0</div>
+                <div class="cnt-lbl">Lists<br>Scanned</div>
+            </div>
+            <div class="cnt alert" id="cnt-vuln-wrap">
+                <div class="cnt-num" id="cnt-vuln">0</div>
+                <div class="cnt-lbl">Vulnerabilities<br>Found</div>
+            </div>
+        </div>
+        <!-- Results -->
+        <div class="section">
+            <div class="section-label">Analysis</div>
+            <div class="results-card">
+                <div class="results-head">
+                    <div class="results-head-left">
+                        <span class="results-title">Vulnerabilities Found</span>
+                        <span class="results-badge" id="res-badge">0</span>
+                    </div>
+                    <span class="results-all">All</span>
+                </div>
+                <div id="results-list">
+                    <div class="empty-state">
+                        <p>Not analyzed yet.<br>Start a analysis to see vulnerabilities</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Button -->
+        <div class="btn-wrap">
+            <button class="scan-btn" id="scan-btn" onclick="startAiScan()">
+                <svg viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                Start Analyisis
+            </button>
+        </div>
+    </div>
+    <!-- List Password Modal -->
+    <div id="listPasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="listPasswordModalText">Unlock List 🔒</h3>
+            <input type="password" id="listPasswordInput" placeholder="Password" />
+            <button onclick="verifyListPassword()">Go <i class="fas fa-arrow-right"></i></button>
+            <button onclick="closeModal('listPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+    <!-- Delete List Password Modal -->
+    <div id="deleteListPasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="deleteListPasswordModalText">Delete List 🔒</h3>
+            <input type="password" id="deleteListPasswordInput" placeholder="Password" />
+            <button onclick="deleteListVerifyPassword()">Go <i class="fas fa-arrow-right"></i></button>
+            <button onclick="closeModal('deleteListPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+    <script type="module" src="js/capacitor.js"></script>
+    <script src="js/storage-confg.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/selectionManager.js"></script>
+    <script src="js/notes.js"></script>
+    <script src="js/lists.js"></script>
+    <script src="js/reaminders.js"></script>
+    <script src="js/page-load.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/settings.js"></script>
 
 </body>
 

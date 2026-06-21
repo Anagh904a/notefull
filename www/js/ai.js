@@ -477,3 +477,136 @@ showToastWarn('AI is a beta feature and may contain some bugs');
 
   return aiWorker;
 }
+
+function showDownloaderModal() {
+    document.getElementById('assetsDownloader').classList.remove('hidden');
+}
+
+// ---- AI asset download config ----
+const AI_CACHE_NAME = 'notefull-ai-assets-v1';
+
+const AI_ASSETS = [
+    {
+        url: 'https://github.com/Anagh904a/notefull/releases/download/notefull-ai-modules/model_quantized.onnx',
+        path: '/AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx',
+        sizeMB: 65
+    },
+    {
+        url: 'https://github.com/Anagh904a/notefull/releases/download/notefull-ai-modules/ort-wasm-simd-threaded.asyncify.wasm',
+        path: '/libs/transformers/ort-wasm-simd-threaded.asyncify.wasm',
+        sizeMB: 23
+    }
+];
+
+const AI_TOTAL_SIZE_MB = AI_ASSETS.reduce((sum, a) => sum + a.sizeMB, 0);
+
+async function startDownload() {
+    const modal = document.getElementById('assetsDownloader');
+    const sizeTracker = document.getElementById('sizeTracker');
+    const status = document.getElementById('downloadStaus');
+    const progressBar = document.getElementById('download-progress');
+    const startBtn = document.getElementById('startBtn');
+
+    let fill = progressBar.querySelector('.progress-fill');
+    if (!fill) {
+        fill = document.createElement('div');
+        fill.className = 'progress-fill';
+        progressBar.appendChild(fill);
+    }
+
+    startBtn.disabled = true;
+    progressBar.classList.remove('idle', 'complete');
+
+    try {
+        const cache = await caches.open(AI_CACHE_NAME);
+
+        // 1. Already downloaded? skip straight to done
+        let alreadyHave = true;
+        for (const asset of AI_ASSETS) {
+            const existing = await cache.match(asset.path);
+            if (!existing) { alreadyHave = false; break; }
+        }
+
+        if (alreadyHave) {
+            status.textContent = 'AI files already downloaded.';
+            fill.style.width = '100%';
+            progressBar.classList.add('complete');
+            setTimeout(() => modal.classList.add('hidden'), 600);
+            startBtn.disabled = false;
+            return;
+        }
+
+        // 2. Connecting phase
+        sizeTracker.textContent = `Size to be downloaded: ${AI_TOTAL_SIZE_MB} MB`;
+        status.textContent = 'Connecting to server…';
+        progressBar.classList.add('active');
+        fill.style.width = '0%';
+
+        let totalBytesDownloaded = 0;
+
+        const headInfos = [];
+        for (const asset of AI_ASSETS) {
+            try {
+                const headRes = await fetch(asset.url, { method: 'HEAD' });
+                const len = parseInt(headRes.headers.get('content-length') || '0', 10);
+                headInfos.push(len || asset.sizeMB * 1024 * 1024);
+            } catch {
+                headInfos.push(asset.sizeMB * 1024 * 1024);
+            }
+        }
+        const totalBytesExpected = headInfos.reduce((a, b) => a + b, 0);
+
+        status.textContent = 'Connection established. Downloading…';
+
+        // 3. Download each file with real byte progress, write to exact path
+        for (const asset of AI_ASSETS) {
+            const response = await fetch(asset.url);
+            if (!response.ok || !response.body) {
+                throw new Error(`Failed to download ${asset.path} (${response.status})`);
+            }
+
+            const reader = response.body.getReader();
+            const chunks = [];
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                chunks.push(value);
+                totalBytesDownloaded += value.length;
+
+                const percent = Math.min(100, Math.round((totalBytesDownloaded / totalBytesExpected) * 100));
+                fill.style.width = percent + '%';
+                status.textContent = `Downloading ${asset.path.split('/').pop()}… ${percent}%`;
+                sizeTracker.textContent = `${(totalBytesDownloaded / (1024 * 1024)).toFixed(1)} MB of ${AI_TOTAL_SIZE_MB} MB`;
+            }
+
+            const fullBlob = new Blob(chunks);
+            const finalResponse = new Response(fullBlob, {
+                headers: { 'Content-Type': 'application/octet-stream' }
+            });
+            await cache.put(asset.path, finalResponse);
+
+            const verify = await cache.match(asset.path);
+            if (!verify) {
+                throw new Error(`Failed to write ${asset.path} to storage`);
+            }
+        }
+
+        // 4. Done
+        fill.style.width = '100%';
+        progressBar.classList.remove('active');
+        progressBar.classList.add('complete');
+        status.textContent = 'Download complete!';
+        setTimeout(() => modal.classList.add('hidden'), 600);
+
+    } catch (err) {
+        console.error('AI asset download failed:', err);
+        status.textContent = 'Download failed: ' + err.message;
+        startBtn.disabled = false;
+        startBtn.textContent = 'Retry';
+        return;
+    }
+
+    startBtn.disabled = false;
+}

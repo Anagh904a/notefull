@@ -2358,6 +2358,120 @@ p {
     font-weight: bold;
 }
 
+/* Windows-style progress bar for the AI assets downloader modal.
+   Scoped entirely to #assetsDownloader .download-progress —
+   does not touch .modal or .modal-content. */
+
+#assetsDownloader .download-progress {
+    width: 100%;
+    height: 16px;
+    margin: 14px 0;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+
+    /* idle default: just an outline, fully transparent inside */
+    background: transparent;
+    border: 1px solid #c7c7c7;
+    box-sizing: border-box;
+}
+
+#assetsDownloader .download-progress .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    position: relative;
+    background: transparent; /* idle: no fill color at all */
+    transition: width 0.2s linear;
+}
+
+/* ---- ACTIVE state: green fill grows, glowing edge travels with it ---- */
+#assetsDownloader .download-progress.active {
+    border-color: #b7d9b9;
+}
+
+#assetsDownloader .download-progress.active .progress-fill {
+    background: linear-gradient(180deg, #4fd167 0%, #2fb344 50%, #28a23c 100%);
+    box-shadow:
+        0 0 6px rgba(47, 179, 68, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* the glowing leading edge — a soft bright pulse at the front of the fill */
+#assetsDownloader .download-progress.active .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -6px;
+    height: 100%;
+    width: 14px;
+    background: radial-gradient(circle, rgba(170, 255, 180, 0.95) 0%, rgba(79, 209, 103, 0) 75%);
+    filter: blur(1.5px);
+    animation: progressGlowPulse 1.1s ease-in-out infinite;
+}
+
+@keyframes progressGlowPulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+}
+
+/* classic Windows-style scanning shimmer across the whole filled portion */
+#assetsDownloader .download-progress.active .progress-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(
+        100deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.25) 45%,
+        rgba(255, 255, 255, 0.45) 50%,
+        rgba(255, 255, 255, 0.25) 55%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: progressShimmer 1.6s linear infinite;
+}
+
+@keyframes progressShimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+}
+
+/* ---- COMPLETE state: solid green, glow settles down ---- */
+#assetsDownloader .download-progress.complete {
+    border-color: #2fb344;
+}
+
+#assetsDownloader .download-progress.complete .progress-fill {
+    width: 100%;
+    background: linear-gradient(180deg, #4fd167 0%, #2fb344 50%, #28a23c 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+#assetsDownloader .download-progress.complete .progress-fill::after,
+#assetsDownloader .download-progress.complete .progress-fill::before {
+    display: none; /* no glow/shimmer once finished — calm, settled fill */
+}
+
+/* ---- IDLE state: explicit reset, just the outline, nothing inside ---- */
+#assetsDownloader .download-progress.idle {
+    border-color: #c7c7c7;
+}
+
+#assetsDownloader .download-progress.idle .progress-fill {
+    width: 0%;
+    background: transparent;
+    box-shadow: none;
+}
+
+#assetsDownloader .download-progress.idle .progress-fill::after,
+#assetsDownloader .download-progress.idle .progress-fill::before {
+    display: none;
+}
+
 @keyframes slide-in {
     from {
         transform: translateX(100%);
