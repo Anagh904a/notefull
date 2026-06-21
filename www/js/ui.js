@@ -6,26 +6,97 @@ function showInfo(message) {
   document.getElementById('infoText').textContent = message;
   infoBox.style.display = 'flex';
 }
-function showSection(sectionId) {
-  document.querySelectorAll(".container").forEach((section) => {
-    section.classList.add("hidden");
-  });
-  document.getElementById(sectionId).classList.remove("hidden");
-}
-function showMenu() {
-  document.getElementById('menu').classList.toggle('hidden');
-}
-function updateNavbar(element) {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  element.classList.add('active');
-}
-window.onload = function () {
-  startAiScan();
-  // System setting flagged
+function showSection(sectionId) { 
+  document.querySelectorAll(".container").forEach((section) => { 
+    section.classList.add("hidden"); }); 
+    document.getElementById(sectionId).classList.remove("hidden"); 
+  }
 
-};
+   
+
+async function openLockSection() {
+try {
+    await authUser();
+  
+} catch(err) {
+    console.error(err);
+}
+  showSection('lockSection', 'left');
+}
+
+function movePill(el) {
+    const pill = document.getElementById('pill');
+    const navRect = document.getElementById('navBar').getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    pill.style.left = (elRect.left - navRect.left) + 'px';
+    pill.style.width = elRect.width + 'px';
+  }
+
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    movePill(el);
+  }
+
+  window.addEventListener('load', () => {
+    const active = document.querySelector('.nav-item.active');
+    if (active) {
+      const pill = document.getElementById('pill');
+      pill.style.transition = 'none';
+      movePill(active);
+      requestAnimationFrame(() => { pill.style.transition = ''; });
+    }
+  });
+
+  window.addEventListener('resize', () => {
+  const active = document.querySelector('.nav-item.active');
+  if (active) movePill(active);
+});
+
+function showMenu(el) {
+    const menu = document.getElementById("menu-notes");
+ if (menu.classList.contains('show')) {
+      menu.classList.remove("show");
+    menu.classList.add("hide-animation");
+
+    setTimeout(() => {
+        menu.classList.remove("hide-animation");
+    }, 220);
+    return;
+    }
+    menu.classList.remove("hide-animation");
+    requestAnimationFrame(() => {
+        menu.classList.add("show");
+    });
+
+   
+}
+
+function hideMenu() {
+    const menu = document.getElementById("menu-notes");
+
+    if (!menu.classList.contains("show")) return;
+
+    menu.classList.remove("show");
+    menu.classList.add("hide-animation");
+
+    setTimeout(() => {
+        menu.classList.remove("hide-animation");
+    }, 220);
+
+}
+
+document.addEventListener("click", function (e) {
+    const menu = document.getElementById("menu-notes");
+
+    if (
+        !menu.contains(e.target) &&
+        !e.target.closest(".menu-trigger")
+    ) {
+        hideMenu();
+    }
+});
+
 window.showToast = function (message, duration = 2500) {
   iziToast.success({
     message: message,
@@ -57,104 +128,77 @@ window.showToastWarn = function (message, duration = 2500) {
 }
 function closeWelcomeModal() {
   const modal = document.getElementById('modal');
-  
     modal.classList.add('hidden');
-  
 }
-async function recoverAllData() {
-  try {
-    const notesRecovered = localStorage.getItem("notesRecoveryCompleted") === "true";
-    const listsRecovered = localStorage.getItem("listsRecoveryCompleted") === "true";
-    if (notesRecovered && listsRecovered) {
-      showToastError("All data already recovered!");
-      const sound = document.getElementById("errorSound");
-      sound.play();
-      return;
-    }
-    let recoveredNotes = 0;
-    let recoveredLists = 0;
-    if (!notesRecovered) {
-      const oldNotes = localStorage.getItem("notes");
-      if (oldNotes) {
-        const parsedNotes = JSON.parse(oldNotes);
-        if (Array.isArray(parsedNotes) && parsedNotes.length > 0) {
-          const existingNotes = await localforage.getItem("notes") || [];
-          const mergedNotes = [...existingNotes];
-          parsedNotes.forEach(oldNote => {
-            const exists = mergedNotes.find(n => n.id === oldNote.id);
-            if (!exists) {
-              mergedNotes.push(oldNote);
-              recoveredNotes++;
-            }
-          });
-          await localforage.setItem("notes", mergedNotes);
-          notes = mergedNotes;
-          localStorage.setItem("notesRecoveryCompleted", "true");
-        }
-      }
-    }
-    if (!listsRecovered) {
-      const oldLists = localStorage.getItem("lists");
-      if (oldLists) {
-        const parsedLists = JSON.parse(oldLists);
-        if (Array.isArray(parsedLists) && parsedLists.length > 0) {
-          const existingLists = await localforage.getItem("lists") || [];
-          const mergedLists = [...existingLists];
-          parsedLists.forEach(oldList => {
-            const exists = mergedLists.find(l => l.listId === oldList.listId);
-            if (!exists) {
-              mergedLists.push(oldList);
-              recoveredLists++;
-            }
-          });
-          await localforage.setItem("lists", mergedLists);
-          lists = mergedLists;
-          localStorage.setItem("listsRecoveryCompleted", "true");
-        }
-      }
-    }
-    displayNotes();
-    displayLists();
-    if (recoveredNotes > 0 && recoveredLists > 0) {
-      showToast(`All data recovered! ${recoveredNotes} notes & ${recoveredLists} lists`);
-      const sound = document.getElementById("sucessSound");
-      sound.play();
-    } else if (recoveredNotes > 0) {
-      showToast(`Notes recovered! ${recoveredNotes} note${recoveredNotes !== 1 ? 's' : ''}`);
-      const sound = document.getElementById("sucessSound");
-      sound.play();
-    } else if (recoveredLists > 0) {
-      showToast(`Lists recovered! ${recoveredLists} list${recoveredLists !== 1 ? 's' : ''}`);
-      const sound = document.getElementById("sucessSound");
-      sound.play();
-    } else {
-      showToastError("No data found to recover!");
-    }
-  } catch (error) {
-    console.error("Recovery error:", error);
-    showToastError("Recovery failed!");
-  }
-}
+
 function toggleSync(el) {
   const enabled = el.checked;
   localStorage.setItem("appLockEnabled", enabled);
   showToast(enabled ? "App Lock Enabled 🔐" : "App Lock Disabled");
+  const status = document.getElementById("appLockStatus");
+    if (status) {
+      status.innerText = el.checked
+        ? "🔐 App Lock is ON"
+        : "🔓 App Lock is OFF";
+    }
   const sound = document.getElementById("sucessSound");
   sound.play();
+}
+
+function changeMode(mode) {
+  localStorage.setItem('mode', mode);
+  document.getElementById('modeStatus').textContent =
+    'Current Mode: ' + mode.charAt(0).toUpperCase() + mode.slice(1);
 }
 
 function toggleAdv(el) {
   const enabled = el.checked;
   localStorage.setItem("AdvSecurityEnabled", enabled);
   showToast(enabled ? "Advanced Security Enabled 🔐" : "Advanced Security Disabled");
+  const status = document.getElementById("advSecurityStatus");
+    if (status) {
+      status.innerText = el.checked
+        ? "🔐 Advanced Security is ON"
+        : "🔓 Advanced Security is OFF";
+    }
   const sound = document.getElementById("sucessSound");
   sound.play();
+}
+function forceUiLag(ms) {
+    const startTime = Date.now();
+    // This loop forces the CPU to work constantly, freezing the UI completely
+    while (Date.now() - startTime < ms) {
+        // Do nothing, just loop to block the thread
+    }
+}
+function toggleR(el) {
+setTimeout(() => {
+
+            
+            const startTime = Date.now();
+            while (Date.now() - startTime < 4000) {
+               }
+
+          const text = document.getElementById('scary');
+         text.classList.remove('hidden');
+
+            // 4. Force the input to stay CHECKED and make it DISABLED
+           el.checked = false;
+            el.disabled = true;
+
+            // 5. Trigger the app safety error alert
+            showToastWarn("Feature-crash detected caused by incompatible driver which is newer than supported one!");
+            
+        }, 500);
+     
+        showToastError("Freeze detected! Please wait, do not close app.");
 }
 function loadSettingsUI() {
   const enabled = localStorage.getItem("appLockEnabled") === "true";
   const enabled2 = localStorage.getItem("AdvSecurityEnabled") === "true";
   const lockToggle = document.getElementById("appLock");
   const advSecurity = document.getElementById("advSecurity");
+
   if (lockToggle) {
     lockToggle.checked = enabled;
   }
@@ -162,18 +206,12 @@ function loadSettingsUI() {
     advSecurity.checked = enabled;
   }
 }
-
-
-
-
-
 function showNotePassword() {
 const password = document.getElementById('notePassword').value.trim();
    const title = document.getElementById('noteTitle').value.trim();
    const passwordText = document.getElementById('note-password-text');
   const note = {title, password,};
 document.getElementById("notePasswordModal").classList.remove("hidden");
-
   if (note.title === "" && note.password === "") {
     passwordText.innerHTML = `Enter New Password for new note`;
   } else if (note.title !== "" && note.password === "") {
@@ -189,7 +227,6 @@ function showList() {
    const passwordText = document.getElementById('list-password-text');
   const list = { title,password,};
  modal.classList.remove("hidden");
-    
   if (list.title === "" && list.password === "") {
     passwordText.innerHTML = `Enter New Password for new list`;
   } else if (list.title !== "" && list.password === "") {
@@ -198,7 +235,6 @@ function showList() {
     passwordText.innerHTML = `Change Password of ${list.title}`;
   }
 }
-
 function closeListPassword() {
   document.getElementById("listPasswordModalr").classList.add("hidden");
 }
@@ -207,10 +243,14 @@ function showAddOptions() {
 }
 function applySortFilter(filterValue) {
   const notesContainer = document.getElementById("notesContainer");
+  const noteLabel = document.getElementById("noteS-label");
   const listsContainerContent = document.getElementById("listsContainerContent");
+ const listLabel = document.getElementById("listS-label");
   const noListsMessage = document.getElementById("noListsMessage");
   const noNotesMessage = document.getElementById("noNotesMessage");
   const combinedContainer = document.getElementById("combinedContainer");
+  
+  
   if (filterValue === "note") {
     listsContainerContent.innerHTML = "";
     if (notes.length === 0) {
@@ -219,6 +259,8 @@ function applySortFilter(filterValue) {
       noNotesMessage.classList.add("hidden");
     }
     noListsMessage.classList.add("hidden");
+    listLabel.classList.add("hidden");
+        noteLabel.classList.remove("hidden");
     displayNotes();
     showSection("combinedContainer");
   } else if (filterValue === "lists") {
@@ -230,11 +272,15 @@ function applySortFilter(filterValue) {
       noListsMessage.classList.add("hidden");
     }
     noNotesMessage.classList.add("hidden");
+    noteLabel.classList.add("hidden");
+        listLabel.classList.remove("hidden");
     displayLists();
     showSection("combinedContainer");
   } else if (filterValue === "all") {
     displayNotes();
     displayLists();
+    noteLabel.classList.remove('hidden');
+    listLabel.classList.remove('hidden');
     if (notes.length === 0) {
       noNotesMessage.classList.remove("hidden");
     } else {
@@ -251,16 +297,11 @@ function applySortFilter(filterValue) {
   }
 }
 function handleFilterChange(element, filterValue) {
-  const container = document.getElementById('filterGroup');
-  const glow = document.getElementById('segmentGlow');
-  const allItems = container.querySelectorAll('.filter-item');
-  allItems.forEach(item => item.classList.remove('active'));
-  element.classList.add('active');
-  const rect = element.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-  glow.style.width = `${rect.width}px`;
-  glow.style.left = `${rect.left - containerRect.left}px`;
+  const buttons = document.querySelector('.filter-item.active');
+  buttons.classList.remove('active');
+element.classList.add('active');
   applySortFilter(filterValue);
+
 }
 window.addEventListener('DOMContentLoaded', () => {
   const activeItem = document.querySelector('.filter-item.active');
@@ -276,3 +317,43 @@ function debounce(func, delay) {
     timeout = setTimeout(() => func.apply(context, args), delay);
   };
 }
+
+function syncDataWithUpdates() {
+  const synced = localStorage.getItem("syncState");
+  if (synced === "26.6.0") return;
+  notes.forEach((note) => {
+    if (note.remainderEnabled === undefined) {
+      note.remainderEnabled = false;
+
+    } if (note.remainderTime === undefined) {
+      note.remainderTime = null;
+    } if (note.repeatType === undefined) {
+      note.repeatType = "once";
+    } if (note.notificationId === undefined) {
+      note.notificationId = null;
+    }
+
+  });
+
+  lists.forEach((list) => {
+    if (list.remainderEnabled === undefined) {
+      list.remainderEnabled = false;
+    }
+
+    if (list.remainderTime === undefined) {
+      list.remainderTime = null;
+    }
+
+    if (list.repeatType === undefined) {
+      list.repeatType = "once";
+    }
+
+    if (list.notificationId === undefined) {
+      list.notificationId = null;
+    }
+
+  });
+
+localStorage.setItem("syncState", "26.6.0")
+  showToast('Sucessfully updated Notefull! Welcome to Notefull 26.6.0 Update!');
+} 

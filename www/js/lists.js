@@ -3,37 +3,27 @@ let currentListId = null;
 let lists = [];
 let listsTrash = [];
 let selectedLists = [];
-
-localforage.getItem("lists").then(storedLists => {
-  lists = storedLists || [];
-
-  listsMap = {};
-  lists.forEach(list => {
-    listsMap[list.id] = list;
-  });
-
-  displayLists(); // optional but usually needed
-});
-
-async function initLists() {
-  lists = await localforage.getItem("lists") || [];
-  displayLists();
-}
-initLists();
-
 function rebuildLists() {
 listsMap = {};
 lists.forEach(l => listsMap[l.id] = l);
+updateAllPillsDynamically();
 }
 function displayChecklist() {
   const checklistContainer = document.getElementById("checklistContainer");
   const noItemsMessage = document.getElementById("items-no");
+  const buttonAdd = document.getElementById("orignal-add-item-btn");
   if (currentItems.length === 0) {
     noItemsMessage.classList.remove("hidden");
   } else {
     noItemsMessage.classList.add("hidden");
   }
-  checklistContainer.innerHTML = "";
+
+  if (currentItems.length >= 2 ) {
+    buttonAdd.classList.remove("hidden");
+} else {
+  buttonAdd.classList.add('hidden');
+}
+   checklistContainer.innerHTML = "";
   currentItems.forEach((item) => {
   const itemDiv = document.createElement("div");
   itemDiv.innerHTML = `
@@ -41,14 +31,12 @@ function displayChecklist() {
   <input type="checkbox"
     ${item.checked ? "checked" : ""}
     onchange="toggleCheck('${item.id}')">
-
   <input type="text"
   id="text-${item.id}"
     value="${item.name}"
     oninput="updateItemName('${item.id}', this.value)"
     placeholder="Type your task here..."
     style="${item.checked ? 'text-decoration: line-through; color: #94a3b8;' : ''}">
-
   <button onclick="removeItem('${item.id}')"><i class="fas fa-trash"></i></button>
 </div>
 `;
@@ -59,11 +47,8 @@ function toggleCheck(itemId) {
   const item = currentItems.find(i => i.id === itemId);
   if (!item) return;
 item.checked = !item.checked;
- 
-
   const textInput = document.getElementById(`text-${itemId}`);
   if (!textInput) return;
-
   if (item.checked) {
     textInput.style.textDecoration = "line-through";
     textInput.style.color = "#94a3b8";
@@ -72,23 +57,14 @@ item.checked = !item.checked;
     textInput.style.color = "#0f172a";
   }
 }
-
 function updateItemName(itemId, value) {
   const item = currentItems.find(i => i.id === itemId);
   if (!item) return;
-
   item.name = value;
 }
-
 function removeItem(itemId) {
-const index = currentItems.findIndex(i => i.id === itemId);
-if (index !== -1) {
-  currentItems.splice(index, 1);
-  displayChecklist();
-} else {
-  showToastError('Corrupted')
-}
-
+currentItems = currentItems.filter(item => item.id !== itemId);
+displayChecklist();
 }
 function displayLists() {
   const container = document.getElementById("listsContainerContent");
@@ -99,9 +75,8 @@ function displayLists() {
   } else {
     noListsMessage.classList.add("hidden");
   }
-
     lists.forEach((list) => {
-      if (list.selected === undefined) {
+      if (list.selected === undefined || list.selected === true) {
         list.selected = false;
       }
       const listDiv = document.createElement("div");
@@ -120,55 +95,43 @@ function displayLists() {
  </div>
       `;
       }
+      const listRemainderElement = list.remainderEnabled
+      ? `<div class="remainder-pill" id="list-pill-${list.id}">
+      <i class="fa-solid fa-hourglass"></i> 
+         <span class="remainder-text" id="list-remainder-${list.id}">  ${getReminderText(list.remainderTime)}</span>
+       </div>`
+      : "";
       listDiv.innerHTML = `
+      <div class="list-wrapper" id="listWrapper" data-id="${list.id}">
+            <input type="checkbox" id="selectBoxList" onchange="selectList('${list.id}')" class="select-box hidden">
   <div class="list" onclick="openList('${list.id}')">   
    <i class="fas fa-list"></i>
-  <span class="list-date">${formattedDate}</span>
+  
+   <span class="note-date">${formattedDate}</span>
+   ${listRemainderElement}
+  
   <div class="note-header">
     <h4>${list.title}</h4>
     ${loclIndicator}
     </div>
   ${progressHTML} 
-  <button class="delete-btn" onclick="deleteList('${list.id}'); event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
+  
+  </div>
   </div>
   `;
       container.appendChild(listDiv);
-
-
-
     });
-
-   
-
 }
-async function deleteList(listId) {
-  const list = listsMap[listId];
-  const index = lists.findIndex(l => l.id === listId);
-  if (list.password) {
-    document.getElementById("deleteListPasswordModal").classList.remove("hidden");
-    document.getElementById("deleteListPasswordModal").dataset.listId =
-      list.id;
-  } else {
-    if (confirm("Are you sure you want to delete this list?")) {
-      lists.splice(index, 1);
-      await localforage.setItem("lists", lists);
-      displayLists();
-    }
-  }
-  rebuildLists();
-  displayLists();
-}
+
 function openList(listId) {
   const list = listsMap[listId];
-
   if(selectionMode === true) {
   return;
 }
-  
   if (list.password) {
     document.getElementById("listPasswordModal").dataset.listId =
       list.id;
-    document.getElementById("listPasswordModal").classList.remove("hidden");
+      document.getElementById("listPasswordModalText").innerHTML = "Unlock " + list.title + " List 🔓";    document.getElementById("listPasswordModal").classList.remove("hidden");
     document.getElementById("listPasswordInput").value = "";
   } else {
     document.getElementById("listTitle").value = list.title;
@@ -179,8 +142,7 @@ function openList(listId) {
     document.getElementById("listPassword").value = list.password;
     showSection('addListSection');
   }
-  const itemText = document.getElementById("itemTextl");
-  itemText.querySelector("h2").textContent = `Manage your ${list.title}`;
+  
 }
 document
   .getElementById("addListButton")
@@ -188,18 +150,15 @@ document
    currentListId = null;
     showAddListSection();
   });
-
 function addItem() {
   const newItem = {
     id: crypto.randomUUID(),
     name: "",
     checked: false
   };
-
   currentItems.push(newItem);
   displayChecklist();
 
-  // focus the newly added item
   setTimeout(() => {
     const input = document.querySelector(
       `input[oninput*="${newItem.id}"]`
@@ -208,7 +167,6 @@ function addItem() {
   }, 10);
 }
 function showAddListSection() {
-  document.getElementById("add").classList.add("hidden");
   document.getElementById("addListSection").classList.remove("hidden");
   document.getElementById("addNoteSection").classList.add("hidden");
   showSection('addListSection');
@@ -218,14 +176,13 @@ function showAddListSection() {
     currentItems = list.items.slice();
     displayChecklist();
   } else {
-    document.getElementById("listTitle").value = "";
+    document.getElementById("listTitle").value = "  Untitled List";
     currentItems = [];
     displayChecklist();
   }
-  const itemText = document.getElementById("itemTextl");
-  itemText.querySelector("h2").textContent = "Create a new List";
+ 
   closeModal('addOptionsModal');
-  document.getElementById("add").classList.add("hidden");
+  document.getElementById("navBar").classList.add("hidden");
 }
 function cancelList() {
   currentListId = null;
@@ -236,38 +193,43 @@ function cancelList() {
   displayNotes();
   displayLists();
   document.getElementById("listPasswordModalr").classList.add("hidden");
-  document.getElementById("add").classList.remove("hidden");
+  document.getElementById("navBar").classList.remove("hidden");
 }
 async function saveList() {
   const titleElem = document.getElementById("listTitle");
   const title = titleElem ? titleElem.value.trim() : "Untitled List";
   const passwordElem = document.getElementById("listPassword");
   const password = passwordElem ? passwordElem.value.trim() : "";
-  const date = new Date();
+  const date = Date.now()
   const formattedDate = formatDate(date);
   const sanitizedItems = currentItems.filter(item => item.name.trim() !== "");
+ 
+
+
   if (title === "" || sanitizedItems.length === 0) {
     showToastError("Enter Data!");
     const errorSound = document.getElementById("errorSound");
     if (errorSound) errorSound.play();
     return;
   }
-
 let id = currentListId || crypto.randomUUID();
   currentListId = id;
-
+   const existingList = listsMap[id];
   const listData = {
      id,
     title: title,
     items: JSON.parse(JSON.stringify(sanitizedItems)),
     password: password,
-    date: formattedDate
-  
+   remainderTime: existingList?.remainderTime || null,
+   repeatType: existingList?.repeatType || "once",
+    remainderEnabled: existingList?.remainderEnabled || false,
+    notificationId: existingList?.notificationId || null,
+    date
   };
-  const index = lists.findIndex(l => l.id === id);
-
-if (index !== -1) {
-  lists[index] = listData;
+  
+if (listsMap[id]) {
+  listsMap[id] = listData;
+      lists = lists.map(l => l.id === id ? listData : l);
   showToast('Updated');
    const alertSound = document.getElementById("sucessSound");
   if (alertSound) alertSound.play();
@@ -277,7 +239,6 @@ if (index !== -1) {
    const alertSound = document.getElementById("sucessSound");
   if (alertSound) alertSound.play();
 }
-  
   await localforage.setItem("lists", lists);
   rebuildLists();
   displayLists();
@@ -285,9 +246,7 @@ if (index !== -1) {
   currentListId = null;
   const modal = document.getElementById("listPasswordModalr");
   if (modal) modal.classList.add("hidden");
- 
-
-document.getElementById('add').classList.remove("hidden");
+document.getElementById('navBar').classList.remove("hidden");
 }
 function verifyListPassword() {
   const password = document.getElementById("listPasswordInput").value;
@@ -307,30 +266,4 @@ const listId = modal.dataset.listId;
     const sound = document.getElementById("errorSound");
     sound.play();
   }
-}
-async function deleteListVerifyPassword() {
-  const passwordInput = document.getElementById("deleteListPasswordInput").value;
-  const modal = document.getElementById("deleteListPasswordModal");
-const listId = modal.dataset.listId;
-
-const index = lists.findIndex(l => l.id === listId);
-  console.log("List Index:", index);
-  const list = listsMap[listId];
-  if (!list) {
-    console.error("List not found at index:", index);
-    return;
-  }
-  if (passwordInput === list.password) {
-    lists.splice(index, 1);
-    await localforage.setItem("lists", lists);
-    document.getElementById("deleteListPasswordModal").classList.add("hidden");
-    document.getElementById("listPasswordModal").classList.add("hidden");
-    rebuildLists();
-    displayLists();
-  } else {
-    showToastError("Incorrect password!");
-    const sound = document.getElementById("errorSound");
-    sound.play();
-  }
-
 }

@@ -1,49 +1,41 @@
 window.onload = function () {
   const lastUpdated = parseInt(localStorage.getItem("lastUpdated"), 10);
   const now = Date.now();
-  const UPDATE_INTERVAL = 3 * 24 * 60 * 60 * 1000;
+  const UPDATE_INTERVAL = 7 * 24 * 60 * 60 * 1000;
   if (!lastUpdated || now - lastUpdated > UPDATE_INTERVAL) {
-    showToast("New Definitions Available!");
+    showToast("New Engine Update Available!");
     const sound = document.getElementById("alertSound");
     sound.play();
     document.getElementById('updateWarn').classList.remove("hidden");
   }
 };
-
 document.addEventListener("DOMContentLoaded",()=>{
-
 const advSecurityState= localStorage.getItem("AdvSecurityEnabled");
 const appLockState= localStorage.getItem("appLockEnabled");
-
 if(advSecurityState===null || advSecurityState==="false") {
-
-
 injectThreat({
 title:"Advanced Security is Off",
 sev:"med",
-tip:"Enable now for screenshot/recording proetction and extra protection"
+tip:"Enable now for screenshot/recording protection and advanced privacy! RECOMMENDED ACTION"
 });
-
 }
-
 if(appLockState===null || appLockState==="false") {
-
 injectThreat({
 title:"App Protection is Off",
 sev:"med",
 tip:"Anyone can open Notefull on your device. Consider enabling App Lock"
 });
-
 }
-
 });
-
 function formatDate(date) {
-  const options = { day: "numeric", month: "long", year: "numeric" };
-  return date.toLocaleDateString("en-US", options);
+   date = new Date(date);
+  
+
+  const options = { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit" };
+  return date.toLocaleString("en-US", options);
+
 }
-displayLists();
-displayNotes();
+
 document.addEventListener("DOMContentLoaded", () => {
   const appLockToggle = document.getElementById("appLock");
   const appLockState = localStorage.getItem("appLockEnabled");
@@ -61,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
-
 document.addEventListener("DOMContentLoaded", () => {
   const advSecurity = document.getElementById("advSecurity");
   const advSecurityState = localStorage.getItem("AdvSecurityEnabled");
@@ -79,23 +70,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
-
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".container").forEach((section) => {
     section.classList.add("hidden");
   });
   showSection("combinedContainer");
-  displayNotes();
-  displayLists();
+  displayDeletedNotes();
+  displayDeletedLists();
+  syncDataWithUpdates();
+rescheduleAllActiveReminders();
 });
 document.addEventListener("DOMContentLoaded", function () {
   startAiScan();
-  displayNotes();
-  displayLists();
 });
 function closeModal(modal) {
   const modalId = document.getElementById(modal);
   modalId.classList.add('hidden');
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const saved = localStorage.getItem('mode') || 'balanced';
+  const options = document.querySelectorAll('.mode-option');
+  options.forEach(opt => {
+    const label = opt.querySelector('label').textContent.trim().toLowerCase();
+    if (label === saved) opt.querySelector('input').checked = true;
+  });
+  document.getElementById('modeStatus').textContent =
+    'Current Mode: ' + saved.charAt(0).toUpperCase() + saved.slice(1);
+  localStorage.setItem('mode', saved);
+});
 
 
