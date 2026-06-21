@@ -487,13 +487,13 @@ const AI_CACHE_NAME = 'notefull-ai-assets-v1';
 
 const AI_ASSETS = [
     {
-        url: 'https://github.com/Anagh904a/notefull/releases/download/notefull-ai-modules/model_quantized.onnx',
-        path: '/AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx',
+        url: 'https://anagh904a.github.io/notefull/aiFiles/model_quantized.onnx',
+        path: '../AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx',
         sizeMB: 65
     },
     {
-        url: 'https://github.com/Anagh904a/notefull/releases/download/notefull-ai-modules/ort-wasm-simd-threaded.asyncify.wasm',
-        path: '/libs/transformers/ort-wasm-simd-threaded.asyncify.wasm',
+        url: 'https://anagh904a.github.io/notefull/aiFiles/ort-wasm-simd-threaded.asyncify.wasm',
+        path: '../libs/transformers/ort-wasm-simd-threaded.asyncify.wasm',
         sizeMB: 23
     }
 ];
@@ -520,7 +520,7 @@ async function startDownload() {
     try {
         const cache = await caches.open(AI_CACHE_NAME);
 
-        // 1. Already downloaded? skip straight to done
+        /*/ 1. Already downloaded? skip straight to done
         let alreadyHave = true;
         for (const asset of AI_ASSETS) {
             const existing = await cache.match(asset.path);
@@ -534,7 +534,7 @@ async function startDownload() {
             setTimeout(() => modal.classList.add('hidden'), 600);
             startBtn.disabled = false;
             return;
-        }
+        } */
 
         // 2. Connecting phase
         sizeTracker.textContent = `Size to be downloaded: ${AI_TOTAL_SIZE_MB} MB`;
@@ -590,6 +590,9 @@ async function startDownload() {
             const verify = await cache.match(asset.path);
             if (!verify) {
                 throw new Error(`Failed to write ${asset.path} to storage`);
+               console.log('ERROR CANNOT WRITE TO SDTORAGE', asset.path)
+            } else {
+                console.log(`Succesfully wrote files to ${asset.path}`);
             }
         }
 
@@ -609,4 +612,5 @@ async function startDownload() {
     }
 
     startBtn.disabled = false;
+
 }
