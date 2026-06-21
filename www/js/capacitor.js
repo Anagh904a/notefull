@@ -3,7 +3,7 @@ const Toast = window.Capacitor.Plugins.Toast;
 const PrivacyScreen = window.Capacitor.Plugins.PrivacyScreen;
 const SystemBars = window.Capacitor.Plugins.SystemBars;
 const notifications = window.Capacitor.Plugins.LocalNotifications;
-
+const Filesystem = window.Capacitor.Plugins.Filesystem;
 
 
 async function callNotificationPopUp() {
@@ -21,6 +21,373 @@ if (permission.display !== 'granted') {
   showToast('Notification permisson succesfully granted!');
 }
 } 
+
+
+async function initAi() {
+  const aiWorker = new Worker('./js/ai-worker.js', { type: 'module' });
+
+  const statusText = document.getElementById('ai-status-text');
+  const modal = document.getElementById('model-progress-modal');
+
+  if (modal) modal.classList.remove("hidden");
+
+  aiWorker.onmessage = (event) => {
+    const { status, progress, error } = event.data;
+
+    if (status === 'initialized') {
+      // init handshake done — safe to warmup now (handled below, not here)
+      return;
+    }
+
+    if (status === 'progress' && progress) {
+      if (progress.status === 'progress') {
+        const percentage = Math.round(progress.progress || 0);
+        if (statusText) {
+          statusText.textContent = `Loading: ${percentage}%`;
+        }
+      }
+      return;
+    }
+
+    if (status === 'ready') {
+      if (statusText) statusText.textContent = 'AI System Ready!';
+      showToast('AI succesfully loaded. You may get slight performance issues');
+
+      setTimeout(() => {
+        if (modal) modal.classList.add("hidden");
+      }, 1500);
+      setTimeout(() => {
+        showToastWarn('AI is a beta feature and may contain some bugs');
+      }, 8000);
+      return;
+    }
+
+    if (status === 'failed') {
+      if (statusText) statusText.textContent = 'Failed to Load AI';
+      console.error("[AI Error]:", error);
+      return;
+    }
+  };
+
+  // ---- REQUIRED: convert native file paths and send init BEFORE warmup ----
+  // Model files live in native Filesystem storage (written by startDownload),
+  // not www/ — the worker has no fixed path to find them, so we have to
+  // resolve and hand it the real fetchable URLs first.
+  async function sendInitAndWarmup() {
+    try {
+      const Filesystem = window.Capacitor.Plugins.Filesystem;
+
+      const modelDirUri = await Filesystem.getUri({
+        path: 'AI/models',
+        directory: 'DATA'
+      });
+      const wasmDirUri = await Filesystem.getUri({
+        path: 'libs/transformers',
+        directory: 'DATA'
+      });
+
+      const modelDirUrl = window.Capacitor.convertFileSrc(modelDirUri.uri).replace(/\/+$/, '') + '/';
+      const wasmDirUrl = window.Capacitor.convertFileSrc(wasmDirUri.uri).replace(/\/+$/, '') + '/';
+
+      // Wait for the 'initialized' confirmation before sending warmup,
+      // otherwise warmup could race ahead of init in some edge cases.
+      const initDone = new Promise((resolve, reject) => {
+        const handler = (event) => {
+          if (event.data.id !== 'init-handshake') return;
+          aiWorker.removeEventListener('message', handler);
+          if (event.data.status === 'initialized') resolve();
+          else reject(new Error(event.data.error || 'init failed'));
+        };
+        aiWorker.addEventListener('message', handler);
+      });
+
+      aiWorker.postMessage({
+        id: 'init-handshake',
+        type: 'init',
+        modelDir: modelDirUrl,
+        wasmDir: wasmDirUrl
+      });
+
+      await initDone;
+
+      // NOW it's safe to warmup
+      aiWorker.postMessage({ id: 'onload-warmup', type: 'warmup' });
+
+    } catch (err) {
+      if (statusText) statusText.textContent = 'Failed to Load AI';
+      console.error('[AI Init Error]:', err);
+    }
+  }
+
+  const startTrigger = () => sendInitAndWarmup();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startTrigger);
+  } else {
+    startTrigger();
+  }
+
+  return aiWorker;
+}
+
+async function saveBlobToInternalStorage(blob, path) {
+    const Filesystem = window.Capacitor.Plugins.Filesystem;
+
+    // Clear any stale partial file from a previous failed attempt
+    try {
+        await Filesystem.deleteFile({ path, directory: 'DATA' });
+    } catch {
+        // didn't exist — fine
+    }
+
+    const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB per write — tune down if still tight on memory
+    const totalSize = blob.size;
+    let offset = 0;
+    let isFirstWrite = true;
+
+    while (offset < totalSize) {
+        const end = Math.min(offset + CHUNK_SIZE, totalSize);
+        const chunkBlob = blob.slice(offset, end);
+
+        const base64Chunk = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(chunkBlob);
+        });
+
+        await Filesystem.writeFile({
+            path,
+            data: base64Chunk,
+            directory: 'DATA',
+            recursive: true,
+            ...(isFirstWrite ? {} : { append: true })
+        });
+
+        isFirstWrite = false;
+        offset = end;
+        // base64Chunk and chunkBlob fall out of scope here each loop —
+        // nothing large is held across iterations.
+    }
+
+    // Verify the written file matches the expected size
+    const stat = await Filesystem.stat({ path, directory: 'DATA' });
+    if (!stat || stat.size !== totalSize) {
+        throw new Error(
+            `Write verification failed for ${path}: expected ${totalSize} bytes, got ${stat?.size}`
+        );
+    }
+
+    return stat;
+}
+
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            resolve(reader.result.split(',')[1]);
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+window.fileExists = async function (path) {
+    const Filesystem = window.Capacitor.Plugins.Filesystem;
+
+    try {
+        await Filesystem.stat({
+            path,
+            directory: 'DATA'
+        });
+
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+// ---- AI asset download config ----
+async function checkExistingFiles() {
+    for (const asset of AI_ASSETS) {
+        const exists = await window.fileExists(asset.path);
+
+        if (!exists) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+const AI_ASSETS = [
+    {
+        url: 'https://anagh904a.github.io/notefull/aiFiles/model_quantized.onnx',
+        path: 'AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx',
+        sizeMB: 65
+    },
+    {
+        url: 'https://anagh904a.github.io/notefull/aiFiles/ort-wasm-simd-threaded.asyncify.wasm',
+        path: 'libs/transformers/ort-wasm-simd-threaded.asyncify.wasm',
+        sizeMB: 23
+    }
+];
+
+const AI_TOTAL_SIZE_MB = AI_ASSETS.reduce((sum, a) => sum + a.sizeMB, 0);
+
+async function startDownload() {
+    const modal = document.getElementById('assetsDownloader');
+    const sizeTracker = document.getElementById('sizeTracker');
+    const status = document.getElementById('downloadStaus');
+    const progressBar = document.getElementById('download-progress');
+    const startBtn = document.getElementById('startBtn');
+
+    let fill = progressBar.querySelector('.progress-fill');
+    if (!fill) {
+        fill = document.createElement('div');
+        fill.className = 'progress-fill';
+        progressBar.appendChild(fill);
+    }
+
+    startBtn.disabled = true;
+    progressBar.classList.remove('idle', 'complete');
+
+    try {
+      const alreadyHave = await checkExistingFiles();
+
+if (alreadyHave) {
+    status.textContent = 'AI files already downloaded.';
+    fill.style.width = '100%';
+    progressBar.classList.add('complete');
+
+    setTimeout(() => modal.classList.add('hidden'), 600);
+
+    startBtn.disabled = false;
+    return;
+} 
+
+        // 2. Connecting phase
+        sizeTracker.textContent = `Size to be downloaded: ${AI_TOTAL_SIZE_MB} MB`;
+        status.textContent = 'Connecting to server…';
+        progressBar.classList.add('active');
+        fill.style.width = '0%';
+
+        let totalBytesDownloaded = 0;
+
+        const headInfos = [];
+        for (const asset of AI_ASSETS) {
+            try {
+                const headRes = await fetch(asset.url, { method: 'HEAD' });
+                const len = parseInt(headRes.headers.get('content-length') || '0', 10);
+                headInfos.push(len || asset.sizeMB * 1024 * 1024);
+            } catch {
+                headInfos.push(asset.sizeMB * 1024 * 1024);
+            }
+        }
+        const totalBytesExpected = headInfos.reduce((a, b) => a + b, 0);
+
+        status.textContent = 'Connection established. Downloading…';
+
+        // 3. Download each file with real byte progress, write to exact path
+      for (const asset of AI_ASSETS) {
+
+    // ---------- DOWNLOAD ----------
+    status.textContent =
+        `Downloading ${asset.path.split('/').pop()}...`;
+
+    fill.style.width = '0%';
+
+    const response = await fetch(asset.url);
+
+    if (!response.ok || !response.body) {
+        throw new Error(
+            `Failed to download ${asset.path}`
+        );
+    }
+
+    const reader = response.body.getReader();
+    const chunks = [];
+    let downloaded = 0;
+
+    const totalBytes =
+        Number(response.headers.get('content-length'))
+        || asset.sizeMB * 1024 * 1024;
+
+    while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) break;
+
+        chunks.push(value);
+        downloaded += value.length;
+
+        const percent = Math.round(
+            downloaded / totalBytes * 100
+        );
+
+        fill.style.width = percent + '%';
+
+        sizeTracker.textContent =
+    `${(downloaded / 1024 / 1024).toFixed(1)} MB of ${asset.sizeMB} MB`;
+    }
+
+    // ---------- CONVERT ----------
+    fill.style.width = '0%';
+    status.textContent =
+        `Converting ${asset.path.split('/').pop()}...`;
+        await new Promise(r => requestAnimationFrame(r));
+
+    const fullBlob = new Blob(chunks);
+
+    // give UI time to repaint
+    await new Promise(r => setTimeout(r, 50));
+
+    // ---------- SAVE ----------
+    fill.style.width = '0%';
+    status.textContent =
+        `Saving ${asset.path.split('/').pop()}...`;
+
+await saveBlobToInternalStorage(
+    fullBlob,
+    asset.path
+);
+chunks.length = 0;
+    fill.style.width = '100%';
+
+    // ---------- VERIFY ----------
+    const exists =
+        await window.fileExists(asset.path);
+
+    if (!exists) {
+        throw new Error(
+            `Failed to save ${asset.path}`
+        );
+    }
+
+    console.log(`Saved ${asset.path}`);
+}
+
+        // 4. Done
+        fill.style.width = '100%';
+        progressBar.classList.remove('active');
+        progressBar.classList.add('complete');
+        status.textContent = 'Download complete!';
+        setTimeout(() => modal.classList.add('hidden'), 600);
+
+    } catch (err) {
+        console.error('AI asset download failed:', err);
+        status.textContent = 'Download failed: ' + err.message;
+        startBtn.disabled = false;
+        startBtn.textContent = 'Retry';
+        return;
+    }
+
+    startBtn.disabled = false;
+
+}
 
 async function checkPermisson() {
 const permission = await notifications.checkPermissions();
@@ -73,7 +440,7 @@ async function registerNotification(item, type) {
                 channelId: 'notefull-reminders'
             }]
         });
-        showToast("registred succesfully");
+        console.log("registred succesfully");
         return id;
     } catch (err) {
         console.error("Failed to schedule notification", err);
@@ -86,10 +453,11 @@ async function deregisterNotification(notificationId) {
     if (!notificationId) return;
     try {
         await notifications.cancel({ notifications: [{ id: notificationId }] });
-          showToast("DEregistred succesfully");
+          console.log("DEregistred succesfully");
     } catch (err) {
         console.error("Failed to cancel notification", err);
     }
+    showToast('called');
 }
 
 
@@ -232,4 +600,6 @@ window.authUser = authUser;
 window.callNotificationPopUp = callNotificationPopUp;
 window.registerNotification = registerNotification;
 window.deregisterNotification = deregisterNotification;
+window.startDownload = startDownload;
+window.initAi = initAi;
 

@@ -318,6 +318,7 @@ async function saveRemainder() {
     note.remainderEnabled = true;
     note.remainderTime = resolvedTime;
     note.repeatType = repeatSelect.value;
+
     if (note.notificationId) {
         await deregisterNotification(note.notificationId);
     }

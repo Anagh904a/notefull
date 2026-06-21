@@ -1,15 +1,21 @@
 // www/js/ai-worker.js
 // Runs in a separate thread (Web Worker) so model loading + inference
 // never blocks the main UI thread / app responsiveness.
+//
+// IMPORTANT: model files are written via native Capacitor Filesystem
+// (not bundled in www/, not Cache Storage), so this worker CANNOT use
+// fixed '/AI/models/' style paths — those only resolve against www/
+// content and will silently find nothing in native storage.
+//
+// The main thread must send an 'init' message with the real,
+// Capacitor.convertFileSrc()-converted URLs BEFORE any warmup/ask
+// message will work. See ai-worker-init.js for that step.
 
 import { pipeline, env } from '../libs/transformers/transformers.min.js';
 
-// ---- Offline-only configuration ----
 env.allowRemoteModels = false;
 env.allowLocalModels = true;
 env.useBrowserCache = false;
-env.backends.onnx.wasm.wasmPaths = '/libs/transformers/';
-env.localModelPath = '/AI/models/';
 
 // Caps WASM threads safely to protect lower-end mobile chipsets
 env.backends.onnx.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 2);
@@ -21,11 +27,9 @@ const MAX_LOAD_RETRIES = 2;
 let answererPromise = null;
 let modelReady = false;
 let modelFailed = false;
-let isCurrentlyLoading = false; // Guard lock against concurrent message collision races
+let isCurrentlyLoading = false; // guard against concurrent warmup/ask races
+let initialized = false;
 
-/**
- * Instantiates the pipeline execution worker
- */
 function loadModelWithProgress(onProgress) {
     return pipeline('question-answering', MODEL_ID, {
         dtype: 'q8',
@@ -35,16 +39,11 @@ function loadModelWithProgress(onProgress) {
     });
 }
 
-/**
- * Thread-safe resolution wrapper for the ONNX/Transformers model instance
- */
 async function getAnswerer(onProgress) {
-    // If already fully operational, hand back the working instance instantly
     if (modelReady && answererPromise) {
         return answererPromise;
     }
-    
-    // Guard against race conditions when a warmup and query arrive simultaneously
+
     if (isCurrentlyLoading && answererPromise) {
         return answererPromise;
     }
@@ -54,21 +53,20 @@ async function getAnswerer(onProgress) {
 
     while (attempt <= MAX_LOAD_RETRIES) {
         try {
-            // Assign execution instance to our shared memory slot
             answererPromise = loadModelWithProgress(onProgress);
             const result = await answererPromise;
-            
+
             modelReady = true;
             isCurrentlyLoading = false;
             return result;
         } catch (err) {
-            answererPromise = null; 
+            answererPromise = null;
             attempt++;
-            
+
             if (onProgress) {
                 onProgress({ status: 'retry', attempt, error: err.message || String(err) });
             }
-            
+
             if (attempt > MAX_LOAD_RETRIES) {
                 modelFailed = true;
                 isCurrentlyLoading = false;
@@ -78,11 +76,38 @@ async function getAnswerer(onProgress) {
     }
 }
 
-// ---- Safe standard-compliant message handling ----
 self.addEventListener('message', async (event) => {
     const { id, type, question, context } = event.data;
 
-    // Route A: Warmup Proactive Model Caching Actions
+    // ---- Route INIT: receive the real, converted native-storage URLs ----
+    // Must be sent once, before anything else, after a successful download.
+    if (type === 'init') {
+        const { wasmDir, modelDir } = event.data;
+
+        if (!wasmDir || !modelDir) {
+            self.postMessage({ id, status: 'failed', error: 'init missing wasmDir/modelDir' });
+            return;
+        }
+
+        env.backends.onnx.wasm.wasmPaths = wasmDir; // converted URL, trailing slash
+        env.localModelPath = modelDir;               // converted URL, trailing slash
+
+        initialized = true;
+        self.postMessage({ id, status: 'initialized' });
+        return;
+    }
+
+    if (!initialized) {
+        self.postMessage({
+            id,
+            success: false,
+            status: 'failed',
+            error: 'Worker not initialized — send an "init" message with wasmDir/modelDir first.'
+        });
+        return;
+    }
+
+    // ---- Route A: warmup (proactive model loading) ----
     if (type === 'warmup') {
         if (modelReady) {
             self.postMessage({ id, status: 'ready', alreadyWarm: true });
@@ -103,7 +128,7 @@ self.addEventListener('message', async (event) => {
         return;
     }
 
-    // Route B: Context Query Search Executions (askAI)
+    // ---- Route B: ask (answer a question against note/list content) ----
     try {
         const wasAlreadyWarm = modelReady;
 
@@ -119,9 +144,8 @@ self.addEventListener('message', async (event) => {
             self.postMessage({ id, status: 'ready' });
         }
 
-        // Validate structure input parameters before passing to the model pipeline
         if (!question || !context) {
-            throw new Error("Missing required 'question' or 'context' values inside payload parameters.");
+            throw new Error("Missing required 'question' or 'context' values in payload.");
         }
 
         const output = await answerer(question, context);
@@ -129,7 +153,7 @@ self.addEventListener('message', async (event) => {
         self.postMessage({
             id,
             success: true,
-            answer: output?.answer || "",
+            answer: output?.answer || '',
             score: output?.score || 0
         });
 

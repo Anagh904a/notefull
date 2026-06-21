@@ -330,10 +330,10 @@ const actionFn= item.source==="Note" ? `openNote('${id}')` : `openList('${id}')`
       : `${threats} sensitive item${threats !== 1 ? "s" : ""} found`;
 if (threats === 0 && _threats.length === 0) {
   // Both are 0
-  E.resultsList.innerHTML = `<div class="empty-state"><p>✅ All clear — no vulnerabilities found.</p></div>`;
+  E.resultsList.innerHTML = `<div class="empty-state"><p>⚠️ Notefull Data Safety Protocol: Internel error detected. Analysis could not complete<. BUG#02/p></div>`;
 } else if (threats === 0 && _threats.length !== 0) {
   // threats is 0, but _threats has items
-  E.resultsList.innerHTML = `<div class="empty-state"><p>⚠️ All data is safe, but we found some issues!</p></div>`;
+  E.resultsList.innerHTML = `<div class="empty-state"><p>⚠️ Some issues are detected! Kindly take action </p></div>`;
 }
     if (_threats.length>0) {
 for(const threat of _threats){
