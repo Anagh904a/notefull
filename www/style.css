@@ -2364,7 +2364,7 @@ p {
 
 #assetsDownloader .download-progress {
     width: 100%;
-    height: 20px;
+    height: 30px;
     margin: 14px 0;
     border-radius: 3px;
     position: relative;
@@ -2372,7 +2372,7 @@ p {
 
     /* idle default: just an outline, fully transparent inside */
     background: transparent;
-    border: 1px solid #c7c7c7;
+    border: 2px solid #c7c7c7;
     box-sizing: border-box;
 }
 
@@ -2387,7 +2387,7 @@ p {
 
 /* ---- ACTIVE state: green fill grows, glowing edge travels with it ---- */
 #assetsDownloader .download-progress.active {
-    border-color: #b7d9b9;
+   border-color: #2fb344;
 }
 
 #assetsDownloader .download-progress.active .progress-fill {

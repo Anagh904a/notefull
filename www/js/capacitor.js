@@ -164,7 +164,7 @@ async function saveBlobToInternalStorage(blob, path) {
         // didn't exist — fine
     }
 
-    const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB per write — tune down if still tight on memory
+    const CHUNK_SIZE = 512 * 1024; // 4MB per write — tune down if still tight on memory
     const totalSize = blob.size;
     let offset = 0;
     let isFirstWrite = true;
@@ -173,21 +173,23 @@ async function saveBlobToInternalStorage(blob, path) {
         const end = Math.min(offset + CHUNK_SIZE, totalSize);
         const chunkBlob = blob.slice(offset, end);
 
-        const base64Chunk = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(chunkBlob);
-        });
+        const base64Chunk = await blobToBase64(chunkBlob);
 
-        await Filesystem.writeFile({
-            path,
-            data: base64Chunk,
-            directory: 'DATA',
-            recursive: true,
-            ...(isFirstWrite ? {} : { append: true })
-        });
-
+        if (isFirstWrite) {
+    await Filesystem.writeFile({
+        path,
+        data: base64Chunk,
+        directory: 'DATA',
+        recursive: true
+    });
+} else {
+    await Filesystem.appendFile({
+        path,
+        data: base64Chunk,
+        directory: 'DATA'
+    });
+}
+await new Promise(resolve => requestAnimationFrame(resolve));
         isFirstWrite = false;
         offset = end;
         // EXTRA DEBUG: immediate stat right after this specific write
@@ -220,19 +222,50 @@ if (offset >= totalSize) {
     return stat;
 }
 
-function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+const base64Worker = new Worker(
+    './js/base64-worker.js',
+    { type: 'module' }
+);
 
-        reader.onloadend = () => {
-            resolve(reader.result.split(',')[1]);
+base64Worker.onerror = (e) => {
+    console.error('[BASE64 WORKER ERROR]', e);
+};
+
+base64Worker.onmessageerror = (e) => {
+    console.error('[BASE64 WORKER MESSAGE ERROR]', e);
+};
+
+function blobToBase64(blob) {
+    console.log('[B64] Sending blob to worker:', blob.size);
+
+    return new Promise((resolve, reject) => {
+
+        const timeout = setTimeout(() => {
+            reject(new Error('Base64 worker timed out'));
+        }, 10000);
+
+        const handleMessage = (e) => {
+            clearTimeout(timeout);
+
+            base64Worker.removeEventListener(
+                'message',
+                handleMessage
+            );
+
+            console.log('[B64] Worker replied');
+
+            resolve(e.data);
         };
 
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
+        base64Worker.addEventListener(
+            'message',
+            handleMessage,
+            { once: true }
+        );
 
+        base64Worker.postMessage(blob);
+    });
+} 
 window.fileExists = async function (path) {
     const Filesystem = window.Capacitor.Plugins.Filesystem;
 
@@ -275,7 +308,7 @@ const AI_ASSETS = [
     {
         url: `${BASE_URL}/model/onnx/model_quantized.onnx`,
         path: `${MODEL_DEST}/onnx/model_quantized.onnx`,
-        sizeMB: 65
+        sizeMB: 62.8
     },
     {
         url: `${BASE_URL}/model/special_tokens_map.json`,
@@ -312,7 +345,7 @@ const AI_ASSETS = [
     {
         url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.asyncify.wasm`,
         path: `${LIB_DEST}/ort-wasm-simd-threaded.asyncify.wasm`,
-        sizeMB: 23
+        sizeMB: 23.6
     },
     {
         url: `${BASE_URL}/transformer/transformers.min.js`,
@@ -341,27 +374,24 @@ async function startDownload() {
     progressBar.classList.remove('idle', 'complete');
 
     try {
-      const alreadyHave = await checkExistingFiles();
+        const alreadyHave = await checkExistingFiles();
 
-if (alreadyHave) {
-    status.textContent = 'AI files already downloaded.';
-    fill.style.width = '100%';
-    progressBar.classList.add('complete');
-
-    setTimeout(() => modal.classList.add('hidden'), 600);
-
-    startBtn.disabled = false;
-    return;
-} 
+        if (alreadyHave) {
+            status.textContent = 'AI files already downloaded.';
+            fill.style.width = '100%';
+            progressBar.classList.add('complete');
+            setTimeout(() => modal.classList.add('hidden'), 600);
+            startBtn.disabled = false;
+            return;
+        } 
 
         // 2. Connecting phase
-        sizeTracker.textContent = `Size to be downloaded: ${AI_TOTAL_SIZE_MB} MB`;
+        sizeTracker.textContent = `Size to be downloaded: 87.6 MB`;
         status.textContent = 'Connecting to server…';
         progressBar.classList.add('active');
         fill.style.width = '0%';
 
-        let totalBytesDownloaded = 0;
-
+        // Map expected sizes using your fallback 87.6MB structure 
         const headInfos = [];
         for (const asset of AI_ASSETS) {
             try {
@@ -373,93 +403,86 @@ if (alreadyHave) {
             }
         }
         const totalBytesExpected = headInfos.reduce((a, b) => a + b, 0);
-
         status.textContent = 'Connection established. Downloading…';
 
-        // 3. Download each file with real byte progress, write to exact path
-      for (const asset of AI_ASSETS) {
+       let globalBytesDownloaded = 0;
+const totalBytesTrueBaseline =
+    AI_ASSETS.reduce(
+        (sum, a) => sum + a.sizeMB * 1024 * 1024,
+        0
+    )
 
-    // ---------- DOWNLOAD ----------
-    status.textContent =
-        `Downloading ${asset.path.split('/').pop()}...`;
+// 3. Download each file
 
-    fill.style.width = '0%';
+for (let i = 0; i < AI_ASSETS.length; i++ ) {
+    const asset = AI_ASSETS[i];
+
+    status.textContent = `Downloading ${asset.path.split('/').pop()}...`;
 
     const response = await fetch(asset.url);
-
     if (!response.ok || !response.body) {
-        throw new Error(
-            `Failed to download ${asset.path}`
-        );
+        throw new Error(`Failed to download ${asset.path}`);
     }
 
     const reader = response.body.getReader();
     const chunks = [];
-    let downloaded = 0;
-
-    const totalBytes =
-        Number(response.headers.get('content-length'))
-        || asset.sizeMB * 1024 * 1024;
+    let fileDownloaded = 0;
 
     while (true) {
         const { done, value } = await reader.read();
-
         if (done) break;
 
         chunks.push(value);
-        downloaded += value.length;
+        fileDownloaded += value.length;
+        
+        // Cumulative count of real, decompressed bytes read so far
+        const globalProgressBytes = globalBytesDownloaded + fileDownloaded;
 
-        const percent = Math.round(
-            downloaded / totalBytes * 100
-        );
+        // FIXED: Calculate progress against the true uncompressed baseline size
+        let percent = Math.round((globalProgressBytes / totalBytesTrueBaseline) * 100);
+        if (percent > 100) percent = 100;
 
+        // Smoothly scale the progress bar up to 100%
         fill.style.width = percent + '%';
 
-        sizeTracker.textContent =
-    `${(downloaded / 1024 / 1024).toFixed(1)} MB of ${asset.sizeMB} MB`;
+        // Display aggregate uncompressed progress values
+        const currentTotalMB = (globalProgressBytes / 1024 / 1024).toFixed(1);
+        sizeTracker.textContent = `${currentTotalMB} MB of 87.6 MB`;
     }
 
-    // ---------- CONVERT ----------
-    fill.style.width = '0%';
-    status.textContent =
-        `Converting ${asset.path.split('/').pop()}...`;
-        await new Promise(r => requestAnimationFrame(r));
+    // Commit this file's final decompressed byte footprint globally
+    globalBytesDownloaded += fileDownloaded;
+  
 
-    const fullBlob = new Blob(chunks);
+            // ---------- CONVERT ----------
+            status.textContent = `Converting ${asset.path.split('/').pop()}...`;
+            await new Promise(r => requestAnimationFrame(r));
 
-    // give UI time to repaint
-    await new Promise(r => setTimeout(r, 50));
+            const fullBlob = new Blob(chunks);
+            await new Promise(r => setTimeout(r, 50));
 
-    // ---------- SAVE ----------
-    fill.style.width = '20%';
-    status.textContent =
-        `Saving ${asset.path.split('/').pop()}...`;
-console.log(`[DEBUG] ${asset.path} — chunks.length: ${chunks.length}, fullBlob.size: ${fullBlob.size}`);
-await saveBlobToInternalStorage(
-    fullBlob,
-    asset.path
-);
-chunks.length = 0;
-    fill.style.width = '100%';
+            // ---------- SAVE ----------
+            status.textContent = `Extracting ${asset.path.split('/').pop()}...`;
+           
+             await saveBlobToInternalStorage(fullBlob, asset.path);
+            chunks.length = 0;
 
-    // ---------- VERIFY ----------
-    const exists =
-        await window.fileExists(asset.path);
-
-    if (!exists) {
-        throw new Error(
-            `Failed to save ${asset.path}`
-        );
-    }
-
-    console.log(`Saved ${asset.path}`);
-}
+            // ---------- VERIFY ----------
+            const exists = await window.fileExists(asset.path);
+            if (!exists) {
+                throw new Error(`Failed to save ${asset.path}`);
+            }
+            console.log(`Saved ${asset.path}`);
+        }
+      
 
         // 4. Done
         fill.style.width = '100%';
         progressBar.classList.remove('active');
         progressBar.classList.add('complete');
         status.textContent = 'Download complete!';
+      
+
         setTimeout(() => modal.classList.add('hidden'), 600);
 
     } catch (err) {
@@ -471,8 +494,8 @@ chunks.length = 0;
     }
 
     startBtn.disabled = false;
-
 }
+
 
 async function checkPermisson() {
 const permission = await notifications.checkPermissions();

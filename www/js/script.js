@@ -55,6 +55,8 @@ function syncDataWithUpdates() {
 
   });
 
-localStorage.setItem("syncState", "26.6.0")
-  showToast('Sucessfully updated Notefull! Welcome to Notefull 26.6.0 Update!');
+localStorage.setItem("syncState", "26.6.0");
+setTimeout(() => {
+  showToast('Updated Notefull assets to 26.6.0 Update!');
+}, 4000);
 } 

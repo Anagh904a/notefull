@@ -20,7 +20,6 @@ async function startUpdate() {
   const modal = document.getElementById("updateModal");
   modal.classList.remove('hidden');
   document.getElementById("updateWarn").classList.add("hidden");
-showToast('Update Started!');
 await new Promise(r => setTimeout(r, 1000));
   document.getElementById("heading").textContent = "Connecting to Server...";
   try {
@@ -113,7 +112,7 @@ async function startAiScan() {
   // ── Keywords from localStorage only — no fallback ─────────────
   const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
   if (!keywords.length) {
-    showToast('Welcome! We are setuping up Security for you');
+    showToast('Welcome to Notefull! Configuring Security for you...');
     startUpdate();
     document.getElementById('updateWarn').classList.add('hidden');
     return;

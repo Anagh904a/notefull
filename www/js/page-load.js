@@ -1,14 +1,18 @@
+
 window.onload = function () {
   const lastUpdated = parseInt(localStorage.getItem("lastUpdated"), 10);
   const now = Date.now();
   const UPDATE_INTERVAL = 7 * 24 * 60 * 60 * 1000;
-  if (!lastUpdated || now - lastUpdated > UPDATE_INTERVAL) {
-    showToast("New Engine Update Available!");
-    const sound = document.getElementById("alertSound");
-    sound.play();
-    document.getElementById('updateWarn').classList.remove("hidden");
+    if (lastUpdatedRaw === null) {
+    localStorage.setItem("lastUpdated", now.toString());
+    return; // Exit here. Do not show the warning.
   }
-};
+  if (now - lastUpdated > UPDATE_INTERVAL) {
+document.getElementById('updateWarn').classList.remove("hidden");
+showToast('New Analytics Update Avaliable!');
+  }
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
 const advSecurityState= localStorage.getItem("AdvSecurityEnabled");
 const appLockState= localStorage.getItem("appLockEnabled");
