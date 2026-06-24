@@ -189,12 +189,19 @@ console.log({
     contextText,
     bestMatch
 });
-    globalAiWorker.postMessage({
-        id: `ask_${thisRequestId}`,
-        type: 'askAI',
-        question: query,
-        context: contextText
-    });
+   worker.postMessage({
+    type: 'init',
+    wasmDir,
+    modelDir,
+    libUrl,
+    configFiles: {
+        'config.json': configJsonString,
+        'tokenizer.json': tokenizerJsonString,
+        'tokenizer_config.json': tokenizerConfigString,
+        'special_tokens_map.json': specialTokensString,
+        'vocab.txt': vocabString
+    }
+});
 }
 
 function generateAnswer(query, answer) {

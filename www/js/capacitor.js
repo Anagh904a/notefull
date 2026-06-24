@@ -154,49 +154,6 @@ async function initAi() {
   return aiWorker;
 }
 
-async function verifyAiFileSizes() {
-    const Filesystem = window.Capacitor.Plugins.Filesystem;
-
-    const expected = [
-        { path: 'AI/models/distilbert-base-cased-distilled-squad/config.json', expectedKB: 1 },
-        { path: 'AI/models/distilbert-base-cased-distilled-squad/special_tokens_map.json', expectedKB: 1 },
-        { path: 'AI/models/distilbert-base-cased-distilled-squad/tokenizer_config.json', expectedKB: 1 },
-        { path: 'AI/models/distilbert-base-cased-distilled-squad/tokenizer.json', expectedKB: 500 },
-        { path: 'AI/models/distilbert-base-cased-distilled-squad/vocab.txt', expectedKB: 250 },
-        { path: 'AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx', expectedKB: 65000 },
-        { path: 'libs/transformers/transformers.min.js', expectedKB: 200 },
-        { path: 'libs/transformers/ort-wasm-simd-threaded.asyncify.mjs', expectedKB: 50 },
-        { path: 'libs/transformers/ort-wasm-simd-threaded.asyncify.wasm', expectedKB: 23000 }
-    ];
-
-    for (const f of expected) {
-        try {
-            const stat = await Filesystem.stat({ path: f.path, directory: 'DATA' });
-            const actualKB = Math.round(stat.size / 1024);
-            const ratio = actualKB / f.expectedKB;
-            const flag = ratio < 0.9 || ratio > 1.5 ? '⚠️ SUSPICIOUS' : '✅';
-            console.log(`${flag} ${f.path}: ${actualKB}KB (expected ~${f.expectedKB}KB)`);
-        } catch (err) {
-            console.log(`❌ MISSING: ${f.path} — ${err.message}`);
-        }
-    }
-}
-
-
-
-verifyAiFileSizes();
-
-async function debugFetchSmallFile(url) {
-    const response = await fetch(url);
-    console.log('status:', response.status, 'ok:', response.ok);
-    const text = await response.text();
-    console.log('length:', text.length);
-    console.log('content:', text.slice(0, 200));
-}
-
-debugFetchSmallFile('https://anagh904a.github.io/notefull/aiFiles/model/special_tokens_map.json');
-debugFetchSmallFile('https://anagh904a.github.io/notefull/aiFiles/model/tokenizer_config.json');
-
 async function saveBlobToInternalStorage(blob, path) {
     const Filesystem = window.Capacitor.Plugins.Filesystem;
 
@@ -347,6 +304,11 @@ const AI_ASSETS = [
         path: `${LIB_DEST}/ort-wasm-simd-threaded.asyncify.mjs`,
         sizeMB: 0.05
     },
+     {
+        url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.jsep.mjs`,
+        path: `${LIB_DEST}/ort-wasm-simd-threaded.jsep.mjs`,
+        sizeMB: 0.02
+    },
     {
         url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.asyncify.wasm`,
         path: `${LIB_DEST}/ort-wasm-simd-threaded.asyncify.wasm`,
@@ -359,7 +321,7 @@ const AI_ASSETS = [
     }
 ];
 
-const AI_TOTAL_SIZE_MB = AI_ASSETS.reduce((sum, a) => sum + a.sizeMB, 0);
+const AI_TOTAL_SIZE_MB = AI_ASSETS.reduce((sum, a) => sum + a.sizeMB, 0).toFixed(1);
 
 async function startDownload() {
     const modal = document.getElementById('assetsDownloader');

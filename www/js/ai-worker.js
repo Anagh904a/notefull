@@ -14,6 +14,7 @@
 
 let pipeline, env;
 let libLoaded = false;
+let memoryFiles = {};
 
 const MODEL_ID = 'distilbert-base-cased-distilled-squad';
 const MAX_LOAD_RETRIES = 2;
@@ -25,12 +26,13 @@ let isCurrentlyLoading = false;
 let initialized = false;
 
 function loadModelWithProgress(onProgress) {
-    return pipeline('question-answering', MODEL_ID, {
-        dtype: 'q8',
-        progress_callback: (data) => {
-            if (onProgress) onProgress(data);
-        }
-    });
+return pipeline('question-answering', MODEL_ID, {
+    dtype: 'q8',
+    model_file_name: 'model',
+    progress_callback: (data) => {
+        if (onProgress) onProgress(data);
+    }
+});
 }
 
 async function getAnswerer(onProgress) {
@@ -73,8 +75,8 @@ self.addEventListener('message', async (event) => {
 
     // ---- Route INIT: dynamically load the library, then configure paths ----
     if (type === 'init') {
-        const { wasmDir, modelDir, libUrl } = event.data;
-
+const { wasmDir, modelDir, libUrl, configFiles } = event.data;
+memoryFiles = configFiles || {};
         if (!wasmDir || !modelDir || !libUrl) {
             self.postMessage({ id, status: 'failed', error: 'init missing wasmDir/modelDir/libUrl' });
             return;
@@ -83,7 +85,10 @@ self.addEventListener('message', async (event) => {
 
         try {
           if (!libLoaded) {
-    const mod = await import(/* webpackIgnore: true */ libUrl);
+const mod = await import(
+    /* webpackIgnore: true */
+    `${libUrl}?t=${Date.now()}`
+);
     pipeline = mod.pipeline;
     env = mod.env;
 
@@ -93,19 +98,41 @@ self.addEventListener('message', async (event) => {
     env.backends.onnx.wasm.numThreads = 1; // force single-thread
 
     // Intercept ALL fetches from this point forward — catches tokenizer loading
-    const originalFetch = self.fetch || fetch;
-    self.fetch = async (...args) => {
-        const url = typeof args[0] === 'string' ? args[0] : args[0]?.url;
-        console.log('[FETCH INTERCEPT]', url);
-        try {
-            const result = await originalFetch(...args);
-            console.log('[FETCH RESULT]', url, '→', result.status, result.ok ? '✅' : '❌');
-            return result;
-        } catch (err) {
-            console.log('[FETCH ERROR]', url, '→', err.message);
-            throw err;
-        }
-    };
+const originalFetch = self.fetch || fetch;
+
+self.fetch = async (...args) => {
+
+    const url =
+        typeof args[0] === 'string'
+            ? args[0]
+            : args[0]?.url || '';
+
+    const filename =
+        url.split('?')[0].split('/').pop();
+
+    // Serve tokenizer/config files from memory
+    if (memoryFiles[filename]) {
+
+        console.log('[MEMORY FILE]', filename);
+
+        return new Response(
+            memoryFiles[filename],
+            {
+                status: 200,
+                headers: {
+                    'Content-Type':
+                        filename.endsWith('.json')
+                            ? 'application/json'
+                            : 'text/plain'
+                }
+            }
+        );
+    }
+
+    console.log('[NETWORK FETCH]', url);
+
+    return originalFetch(...args);
+};
 
     libLoaded = true;
 }
