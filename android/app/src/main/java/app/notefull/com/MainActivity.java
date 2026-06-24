@@ -3,13 +3,36 @@ package app.notefull.com;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.webkit.WebSettings; // 1. Add this import
+import android.webkit.WebView; 
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
 
-    @Override
+@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // --- OVERRIDE WEBVIEW FOR CORAL & CROSS-ORIGIN ACCESS ---
+        // Post to the main thread loop to make sure the Capacitor Bridge has initiated the WebView instance
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                WebView webView = getBridge().getWebView();
+                WebSettings settings = webView.getSettings();
+
+                // Allow access to content and file URLs
+                settings.setAllowContentAccess(true);
+                settings.setAllowFileAccess(true);
+
+                // CRUCIAL: Allow cross-origin requests from local file/https schemes
+                settings.setAllowFileAccessFromFileURLs(true);
+                settings.setAllowUniversalAccessFromFileURLs(true);
+
+                
+
+                logToWebViewConsole("Native: WebView settings modified to unlock Cross-Origin & File Access.");
+            }
+        });
         getWindow().getDecorView().setOnApplyWindowInsetsListener((view, insets) -> {
             getWindow().setStatusBarColor(Color.TRANSPARENT);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {

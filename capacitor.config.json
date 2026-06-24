@@ -1,5 +1,9 @@
 {
   "appId": "app.notefull.com",
   "appName": " Notefull",
-  "webDir": "www"
+  "webDir": "www",
+   "server": {
+    "androidScheme": "https",
+     "allowNavigation": ["*"]
+  }
 }

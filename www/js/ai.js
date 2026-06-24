@@ -5,12 +5,10 @@ let globalAiWorker = null;
 let aiResponseTimer = null;
 
 // 2. BIND TO THE INPUT: Use 'searchInput' and evaluate BEFORE calling 'new Worker'
-document.getElementById('searchInput').addEventListener('click', () => {
-    // Check the global variable first. If it holds a worker, do nothing and exit.
-    if (globalAiWorker) return; 
-    
-    // If it's null, initialize the worker exactly once and save it globally
-    globalAiWorker = initAi();
+document.getElementById('searchInput').addEventListener('click', async () => {
+    if (globalAiWorker) return;
+
+    globalAiWorker = await initAi();
 });
 
 function searchNotes() {
@@ -179,6 +177,9 @@ ${item.items.map(i => i.name).join(", ")}
                 showAiResponse(fallbackMsg);
             }
         }
+
+   
+
     };
 
     globalAiWorker.addEventListener('message', handleWorkerAnswer);

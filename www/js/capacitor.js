@@ -22,29 +22,45 @@ if (permission.display !== 'granted') {
 }
 } 
 
+// initAi() — call this AFTER startDownload() has completed successfully.
 
 async function initAi() {
-  const aiWorker = new Worker('./js/ai-worker.js', { type: 'module' });
-
   const statusText = document.getElementById('ai-status-text');
   const modal = document.getElementById('model-progress-modal');
 
-  if (modal) modal.classList.remove("hidden");
+  const filesReady = await checkExistingFiles();
+  if (!filesReady) {
+    if (statusText) statusText.textContent = 'AI files not downloaded yet.';
+    console.warn('[AI] initAi() called before download completed — aborting.');
+    return null;
+  }
+  console.log('Files were ready');
+
+  if (modal) modal.classList.remove('hidden');
+
+  const aiWorker = new Worker('./js/ai-worker.js', { type: 'module' });
+  console.log('AI worker created');
+
+  aiWorker.onerror = (err) => {
+    console.error('[AI Worker Crashed]:', err.message, err);
+    if (statusText) statusText.textContent = 'AI worker crashed: ' + err.message;
+  };
+
+  aiWorker.onmessageerror = (err) => {
+    console.error('[AI Worker Message Error]:', err);
+  };
 
   aiWorker.onmessage = (event) => {
     const { status, progress, error } = event.data;
 
     if (status === 'initialized') {
-      // init handshake done — safe to warmup now (handled below, not here)
-      return;
+      return; // handled by the init handshake promise below, not here
     }
 
     if (status === 'progress' && progress) {
       if (progress.status === 'progress') {
         const percentage = Math.round(progress.progress || 0);
-        if (statusText) {
-          statusText.textContent = `Loading: ${percentage}%`;
-        }
+        if (statusText) statusText.textContent = `Loading: ${percentage}%`;
       }
       return;
     }
@@ -54,25 +70,21 @@ async function initAi() {
       showToast('AI succesfully loaded. You may get slight performance issues');
 
       setTimeout(() => {
-        if (modal) modal.classList.add("hidden");
+        if (modal) modal.classList.add('hidden');
       }, 1500);
       setTimeout(() => {
         showToastWarn('AI is a beta feature and may contain some bugs');
-      }, 8000);
+      }, 5000);
       return;
     }
 
     if (status === 'failed') {
       if (statusText) statusText.textContent = 'Failed to Load AI';
-      console.error("[AI Error]:", error);
+      console.error('[AI Error]:', error);
       return;
     }
   };
 
-  // ---- REQUIRED: convert native file paths and send init BEFORE warmup ----
-  // Model files live in native Filesystem storage (written by startDownload),
-  // not www/ — the worker has no fixed path to find them, so we have to
-  // resolve and hand it the real fetchable URLs first.
   async function sendInitAndWarmup() {
     try {
       const Filesystem = window.Capacitor.Plugins.Filesystem;
@@ -85,12 +97,19 @@ async function initAi() {
         path: 'libs/transformers',
         directory: 'DATA'
       });
+      const libUri = await Filesystem.getUri({
+        path: 'libs/transformers/transformers.min.js',
+        directory: 'DATA'
+      });
 
       const modelDirUrl = window.Capacitor.convertFileSrc(modelDirUri.uri).replace(/\/+$/, '') + '/';
       const wasmDirUrl = window.Capacitor.convertFileSrc(wasmDirUri.uri).replace(/\/+$/, '') + '/';
+      const libUrl = window.Capacitor.convertFileSrc(libUri.uri);
 
-      // Wait for the 'initialized' confirmation before sending warmup,
-      // otherwise warmup could race ahead of init in some edge cases.
+      console.log('modelDirUrl:', modelDirUrl);
+      console.log('wasmDirUrl:', wasmDirUrl);
+      console.log('libUrl:', libUrl);
+
       const initDone = new Promise((resolve, reject) => {
         const handler = (event) => {
           if (event.data.id !== 'init-handshake') return;
@@ -99,18 +118,23 @@ async function initAi() {
           else reject(new Error(event.data.error || 'init failed'));
         };
         aiWorker.addEventListener('message', handler);
+
+        setTimeout(() => {
+          aiWorker.removeEventListener('message', handler);
+          reject(new Error('init handshake timed out — worker may have crashed silently'));
+        }, 8000);
       });
 
       aiWorker.postMessage({
         id: 'init-handshake',
         type: 'init',
         modelDir: modelDirUrl,
-        wasmDir: wasmDirUrl
+        wasmDir: wasmDirUrl,
+        libUrl: libUrl
       });
 
       await initDone;
 
-      // NOW it's safe to warmup
       aiWorker.postMessage({ id: 'onload-warmup', type: 'warmup' });
 
     } catch (err) {
@@ -129,6 +153,49 @@ async function initAi() {
 
   return aiWorker;
 }
+
+async function verifyAiFileSizes() {
+    const Filesystem = window.Capacitor.Plugins.Filesystem;
+
+    const expected = [
+        { path: 'AI/models/distilbert-base-cased-distilled-squad/config.json', expectedKB: 1 },
+        { path: 'AI/models/distilbert-base-cased-distilled-squad/special_tokens_map.json', expectedKB: 1 },
+        { path: 'AI/models/distilbert-base-cased-distilled-squad/tokenizer_config.json', expectedKB: 1 },
+        { path: 'AI/models/distilbert-base-cased-distilled-squad/tokenizer.json', expectedKB: 500 },
+        { path: 'AI/models/distilbert-base-cased-distilled-squad/vocab.txt', expectedKB: 250 },
+        { path: 'AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx', expectedKB: 65000 },
+        { path: 'libs/transformers/transformers.min.js', expectedKB: 200 },
+        { path: 'libs/transformers/ort-wasm-simd-threaded.asyncify.mjs', expectedKB: 50 },
+        { path: 'libs/transformers/ort-wasm-simd-threaded.asyncify.wasm', expectedKB: 23000 }
+    ];
+
+    for (const f of expected) {
+        try {
+            const stat = await Filesystem.stat({ path: f.path, directory: 'DATA' });
+            const actualKB = Math.round(stat.size / 1024);
+            const ratio = actualKB / f.expectedKB;
+            const flag = ratio < 0.9 || ratio > 1.5 ? '⚠️ SUSPICIOUS' : '✅';
+            console.log(`${flag} ${f.path}: ${actualKB}KB (expected ~${f.expectedKB}KB)`);
+        } catch (err) {
+            console.log(`❌ MISSING: ${f.path} — ${err.message}`);
+        }
+    }
+}
+
+
+
+verifyAiFileSizes();
+
+async function debugFetchSmallFile(url) {
+    const response = await fetch(url);
+    console.log('status:', response.status, 'ok:', response.ok);
+    const text = await response.text();
+    console.log('length:', text.length);
+    console.log('content:', text.slice(0, 200));
+}
+
+debugFetchSmallFile('https://anagh904a.github.io/notefull/aiFiles/model/special_tokens_map.json');
+debugFetchSmallFile('https://anagh904a.github.io/notefull/aiFiles/model/tokenizer_config.json');
 
 async function saveBlobToInternalStorage(blob, path) {
     const Filesystem = window.Capacitor.Plugins.Filesystem;
@@ -166,6 +233,21 @@ async function saveBlobToInternalStorage(blob, path) {
 
         isFirstWrite = false;
         offset = end;
+        // EXTRA DEBUG: immediate stat right after this specific write
+if (offset >= totalSize) {
+    const immediateStat = await Filesystem.stat({ path, directory: 'DATA' });
+    console.log(`[WRITE-DEBUG] ${path} — immediately after writeFile: ${immediateStat.size} bytes (expected ${totalSize})`);
+
+    // also check again after a short delay, in case it's an async flush timing issue
+    setTimeout(async () => {
+        try {
+            const delayedStat = await Filesystem.stat({ path, directory: 'DATA' });
+            console.log(`[WRITE-DEBUG] ${path} — 2s after writeFile: ${delayedStat.size} bytes`);
+        } catch (err) {
+            console.log(`[WRITE-DEBUG] ${path} — 2s check failed: ${err.message}`);
+        }
+    }, 2000);
+}
         // base64Chunk and chunkBlob fall out of scope here each loop —
         // nothing large is held across iterations.
     }
@@ -222,17 +304,58 @@ async function checkExistingFiles() {
     return true;
 }
 
+const BASE_URL = 'https://anagh904a.github.io/notefull/aiFiles';
+const MODEL_DEST = 'AI/models/distilbert-base-cased-distilled-squad';
+const LIB_DEST = 'libs/transformers';
 
 const AI_ASSETS = [
+    // ---- model/ ----
     {
-        url: 'https://anagh904a.github.io/notefull/aiFiles/model_quantized.onnx',
-        path: 'AI/models/distilbert-base-cased-distilled-squad/onnx/model_quantized.onnx',
+        url: `${BASE_URL}/model/config.json`,
+        path: `${MODEL_DEST}/config.json`,
+        sizeMB: 0.01
+    },
+    {
+        url: `${BASE_URL}/model/onnx/model_quantized.onnx`,
+        path: `${MODEL_DEST}/onnx/model_quantized.onnx`,
         sizeMB: 65
     },
     {
-        url: 'https://anagh904a.github.io/notefull/aiFiles/ort-wasm-simd-threaded.asyncify.wasm',
-        path: 'libs/transformers/ort-wasm-simd-threaded.asyncify.wasm',
+        url: `${BASE_URL}/model/special_tokens_map.json`,
+        path: `${MODEL_DEST}/special_tokens_map.json`,
+        sizeMB: 0.01
+    },
+    {
+        url: `${BASE_URL}/model/tokenizer_config.json`,
+        path: `${MODEL_DEST}/tokenizer_config.json`,
+        sizeMB: 0.01
+    },
+    {
+        url: `${BASE_URL}/model/tokenizer.json`,
+        path: `${MODEL_DEST}/tokenizer.json`,
+        sizeMB: 0.5
+    },
+    {
+        url: `${BASE_URL}/model/vocab.txt`,
+        path: `${MODEL_DEST}/vocab.txt`,
+        sizeMB: 0.25
+    },
+
+    // ---- transformer/ ----
+    {
+        url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.asyncify.mjs`,
+        path: `${LIB_DEST}/ort-wasm-simd-threaded.asyncify.mjs`,
+        sizeMB: 0.05
+    },
+    {
+        url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.asyncify.wasm`,
+        path: `${LIB_DEST}/ort-wasm-simd-threaded.asyncify.wasm`,
         sizeMB: 23
+    },
+    {
+        url: `${BASE_URL}/transformer/transformers.min.js`,
+        path: `${LIB_DEST}/transformers.min.js`,
+        sizeMB: 0.2
     }
 ];
 
@@ -346,10 +469,10 @@ if (alreadyHave) {
     await new Promise(r => setTimeout(r, 50));
 
     // ---------- SAVE ----------
-    fill.style.width = '0%';
+    fill.style.width = '20%';
     status.textContent =
         `Saving ${asset.path.split('/').pop()}...`;
-
+console.log(`[DEBUG] ${asset.path} — chunks.length: ${chunks.length}, fullBlob.size: ${fullBlob.size}`);
 await saveBlobToInternalStorage(
     fullBlob,
     asset.path

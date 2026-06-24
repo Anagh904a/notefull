@@ -2,32 +2,26 @@
 // Runs in a separate thread (Web Worker) so model loading + inference
 // never blocks the main UI thread / app responsiveness.
 //
-// IMPORTANT: model files are written via native Capacitor Filesystem
-// (not bundled in www/, not Cache Storage), so this worker CANNOT use
-// fixed '/AI/models/' style paths — those only resolve against www/
-// content and will silently find nothing in native storage.
+// IMPORTANT: transformers.min.js AND the model files now live in native
+// Capacitor Filesystem storage (downloaded at runtime), not bundled in
+// www/. A static `import ... from '../libs/transformers/transformers.min.js'`
+// cannot reach native storage at all — it would silently crash the worker
+// before it ever registers a message listener.
 //
-// The main thread must send an 'init' message with the real,
-// Capacitor.convertFileSrc()-converted URLs BEFORE any warmup/ask
-// message will work. See ai-worker-init.js for that step.
+// Fix: load transformers.min.js via a DYNAMIC import(), using the real
+// converted URL sent by the main thread in the 'init' message. Nothing
+// model-related happens until that dynamic import resolves.
 
-import { pipeline, env } from '../libs/transformers/transformers.min.js';
-
-env.allowRemoteModels = false;
-env.allowLocalModels = true;
-env.useBrowserCache = false;
-
-// Caps WASM threads safely to protect lower-end mobile chipsets
-env.backends.onnx.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 2);
+let pipeline, env;
+let libLoaded = false;
 
 const MODEL_ID = 'distilbert-base-cased-distilled-squad';
 const MAX_LOAD_RETRIES = 2;
 
-// ---- Singleton model state ----
 let answererPromise = null;
 let modelReady = false;
 let modelFailed = false;
-let isCurrentlyLoading = false; // guard against concurrent warmup/ask races
+let isCurrentlyLoading = false;
 let initialized = false;
 
 function loadModelWithProgress(onProgress) {
@@ -43,7 +37,6 @@ async function getAnswerer(onProgress) {
     if (modelReady && answererPromise) {
         return answererPromise;
     }
-
     if (isCurrentlyLoading && answererPromise) {
         return answererPromise;
     }
@@ -55,18 +48,15 @@ async function getAnswerer(onProgress) {
         try {
             answererPromise = loadModelWithProgress(onProgress);
             const result = await answererPromise;
-
             modelReady = true;
             isCurrentlyLoading = false;
             return result;
         } catch (err) {
             answererPromise = null;
             attempt++;
-
             if (onProgress) {
                 onProgress({ status: 'retry', attempt, error: err.message || String(err) });
             }
-
             if (attempt > MAX_LOAD_RETRIES) {
                 modelFailed = true;
                 isCurrentlyLoading = false;
@@ -77,23 +67,63 @@ async function getAnswerer(onProgress) {
 }
 
 self.addEventListener('message', async (event) => {
+    
     const { id, type, question, context } = event.data;
+    console.log('worker received:', event.data)
 
-    // ---- Route INIT: receive the real, converted native-storage URLs ----
-    // Must be sent once, before anything else, after a successful download.
+    // ---- Route INIT: dynamically load the library, then configure paths ----
     if (type === 'init') {
-        const { wasmDir, modelDir } = event.data;
+        const { wasmDir, modelDir, libUrl } = event.data;
 
-        if (!wasmDir || !modelDir) {
-            self.postMessage({ id, status: 'failed', error: 'init missing wasmDir/modelDir' });
+        if (!wasmDir || !modelDir || !libUrl) {
+            self.postMessage({ id, status: 'failed', error: 'init missing wasmDir/modelDir/libUrl' });
             return;
         }
+        
 
-        env.backends.onnx.wasm.wasmPaths = wasmDir; // converted URL, trailing slash
-        env.localModelPath = modelDir;               // converted URL, trailing slash
+        try {
+          if (!libLoaded) {
+    const mod = await import(/* webpackIgnore: true */ libUrl);
+    pipeline = mod.pipeline;
+    env = mod.env;
 
-        initialized = true;
-        self.postMessage({ id, status: 'initialized' });
+    env.allowRemoteModels = false;
+    env.allowLocalModels = true;
+    env.useBrowserCache = false;
+    env.backends.onnx.wasm.numThreads = 1; // force single-thread
+
+    // Intercept ALL fetches from this point forward — catches tokenizer loading
+    const originalFetch = self.fetch || fetch;
+    self.fetch = async (...args) => {
+        const url = typeof args[0] === 'string' ? args[0] : args[0]?.url;
+        console.log('[FETCH INTERCEPT]', url);
+        try {
+            const result = await originalFetch(...args);
+            console.log('[FETCH RESULT]', url, '→', result.status, result.ok ? '✅' : '❌');
+            return result;
+        } catch (err) {
+            console.log('[FETCH ERROR]', url, '→', err.message);
+            throw err;
+        }
+    };
+
+    libLoaded = true;
+}
+
+env.backends.onnx.wasm.wasmPaths = wasmDir;
+env.localModelPath = modelDir;
+console.log('modelDir =', modelDir);
+
+            initialized = true;
+            self.postMessage({ id, status: 'initialized' });
+
+        } catch (err) {
+            self.postMessage({
+                id,
+                status: 'failed',
+                error: 'Failed to dynamically load transformers.min.js: ' + (err.message || String(err))
+            });
+        }
         return;
     }
 
@@ -102,13 +132,14 @@ self.addEventListener('message', async (event) => {
             id,
             success: false,
             status: 'failed',
-            error: 'Worker not initialized — send an "init" message with wasmDir/modelDir first.'
+            error: 'Worker not initialized — send an "init" message with wasmDir/modelDir/libUrl first.'
         });
         return;
     }
 
-    // ---- Route A: warmup (proactive model loading) ----
-    if (type === 'warmup') {
+console.log('[WORKER] proceeding to ask/warmup logic, type:', type);  // ← THIS line, inside ai-worker.js
+    
+if (type === 'warmup') {
         if (modelReady) {
             self.postMessage({ id, status: 'ready', alreadyWarm: true });
             return;
@@ -139,6 +170,10 @@ self.addEventListener('message', async (event) => {
         const answerer = await getAnswerer((progress) => {
             self.postMessage({ id, status: 'progress', progress });
         });
+        console.log('answerer:', answerer);
+console.log('tokenizer:', answerer.tokenizer);
+console.log('processor:', answerer.processor);
+console.log('model:', answerer.model);
 
         if (!wasAlreadyWarm) {
             self.postMessage({ id, status: 'ready' });
@@ -148,7 +183,12 @@ self.addEventListener('message', async (event) => {
             throw new Error("Missing required 'question' or 'context' values in payload.");
         }
 
-        const output = await answerer(question, context);
+      console.log('[WORKER] about to call answerer with:', question, context);  // ← add this too
+const testOutput = await answerer("When is the meeting?", "Meeting with Vikas at 9pm tomorrow.");
+console.log('[WORKER] TEST answerer returned:', testOutput);
+
+const output = await answerer(question, context);
+console.log('[WORKER] answerer returned:', output);
 
         self.postMessage({
             id,
