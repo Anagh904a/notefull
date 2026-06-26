@@ -1,2 +1,4 @@
 node_modules/
-
+android/app/build/
+android/.cxx/
+android/app/src/main/cpp/llama.cpp

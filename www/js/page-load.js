@@ -3,7 +3,7 @@ window.onload = function () {
   const lastUpdated = parseInt(localStorage.getItem("lastUpdated"), 10);
   const now = Date.now();
   const UPDATE_INTERVAL = 7 * 24 * 60 * 60 * 1000;
-    if (lastUpdatedRaw === null) {
+    if (lastUpdated === null) {
     localStorage.setItem("lastUpdated", now.toString());
     return; // Exit here. Do not show the warning.
   }

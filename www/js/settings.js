@@ -15,6 +15,7 @@ function openAntithreat() {
   }
   document.getElementById('')
 }
+
 let updateProgress = 0;
 async function startUpdate() {
   const modal = document.getElementById("updateModal");

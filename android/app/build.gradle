@@ -9,17 +9,51 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 29
         versionName "26.6.0"
+
+        ndk {
+            abiFilters "arm64-v8a"
+        }
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17 -Os -fvisibility=hidden -fdata-sections -ffunction-sections"
+                arguments "-DCMAKE_BUILD_TYPE=Release",
+                        "-DGGML_METAL=OFF",
+                        "-DGGML_CUDA=OFF",
+                        "-DGGML_OPENCL=OFF",
+                        "-DGGML_VULKAN=OFF",
+                        "-DGGML_OPENMP=OFF",
+                        "-DGGML_BLAS=OFF",
+                        "-DLLAMA_CURL=OFF",
+                        "-DLLAMA_BUILD_TESTS=OFF",
+                        "-DLLAMA_BUILD_EXAMPLES=OFF",
+                        "-DLLAMA_BUILD_SERVER=OFF",
+                        "-DLLAMA_BUILD_TOOLS=OFF",
+                        "-DLLAMA_BUILD_COMMON=OFF"
+            }
+        }
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
+    }
+
+// Add this block outside defaultConfig
+    packagingOptions {
+        exclude "**/libllama.so"      // exclude static libs from apk
+        exclude "**/libggml.so"
+        doNotStrip "*/arm64-v8a/libllama-android.so"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path file("src/main/cpp/CMakeLists.txt")
         }
     }
 }

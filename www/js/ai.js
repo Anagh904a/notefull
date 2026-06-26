@@ -1,14 +1,12 @@
-let  searchActive = false;
+let searchActive = false;
 let searchDebounceTimer = null;
-let currentAiRequestId = 0; // Tracks rapid input changes to prevent old responses overwriting new ones
-let globalAiWorker = null; 
+let currentAiRequestId = 0;
 let aiResponseTimer = null;
 
 // 2. BIND TO THE INPUT: Use 'searchInput' and evaluate BEFORE calling 'new Worker'
 document.getElementById('searchInput').addEventListener('click', async () => {
-    if (globalAiWorker) return;
-
-    globalAiWorker = await initAi();
+    if (window.aiAnswerer) return;
+    await initAi();
 });
 
 function searchNotes() {
@@ -43,22 +41,24 @@ function searchNotes() {
 function runSearch(query) {
     const lowerQuery = query.toLowerCase().trim();
     
-    // Safety fallback: if user hits backspace rapidly and query becomes empty before debounce fires
-    if (!lowerQuery) return; 
+   
+// Strip punctuation that breaks matching and regex
+const cleanQuery = lowerQuery.replace(/[?!.,;:]/g, '').trim();
+if (!cleanQuery) return;
 
     if (typeof nlp !== 'function') {
         console.error("Compromised Environment: Natural language parser ('nlp') missing.");
         return;
     }
 
-    const doc = nlp(lowerQuery);
+    const doc = nlp(cleanQuery);
     const isQuestion =
 /\b(when|what|where|why|how|who|which|can|could|would|should|do|does|did|is|are|was|were|will)\b/i
-.test(lowerQuery);
+.test(cleanQuery);
 
 
     const keywords = doc.out('array').filter(w => w.length > 2).join(' ');
-    const searchTerm = keywords || lowerQuery;
+    const searchTerm = keywords || cleanQuery;
 
     // Direct scope checks to prevent reference crashes on uninitialized databases
     const safeNotes = typeof notes !== 'undefined' ? notes : [];
@@ -102,13 +102,7 @@ Math.round((1 - bestMatch.score) * 100);
     if (!isQuestion) {
         const noteCount = noteResults.length;
         const listCount = listResults.length;
-
-        let response = `Found <strong>${total}</strong> matching items. Best match: <strong>${title}</strong> (${confidence}% match).`;
-        if (noteCount) response += ` ${noteCount} note${noteCount !== 1 ? "s" : ""}`;
-        if (listCount) response += ` ${listCount} list${listCount !== 1 ? "s" : ""}`;
-        
-        showAiResponse(response);
-        return;
+ return;
     }
 
     // ---- PATH B: QUESTION MODE (Model-driven Pipeline) ----
@@ -148,61 +142,29 @@ ${item.items.map(i => i.name).join(", ")}
     }
 
     const thisRequestId = ++currentAiRequestId;
- 
-    
-
-    if (!globalAiWorker) {
-        showAiResponse(`AI system initialization pending. Best context match: <strong>${title}</strong>.`);
+if (!window.aiAnswerer) {
+        showAiResponse(`AI still loading... Best match: <strong>${title}</strong>.`);
         return;
     }
 
+ const cleanedQuery = query.replace(/[?!.,;:]/g, '').trim();
 
-    const handleWorkerAnswer = (event) => {
-        const data = event.data;
-
-        if (data.id === `ask_${thisRequestId}`) {
-            globalAiWorker.removeEventListener('message', handleWorkerAnswer);
-            if (thisRequestId !== currentAiRequestId) return;
-
-            if (data.success && data.answer && data.answer.trim().length > 0 && data.score > 0.001) {
-              
-  const cleanFragment = data.answer.trim();
-
-               const dynamicAnswer  = generateAnswer(query, cleanFragment);
-                showAiResponse(dynamicAnswer);
-            } else {
-                let fallbackMsg = `I found an item called <strong>${title}</strong>`;
-                if (date) fallbackMsg += ` from ${date}`;
-                fallbackMsg += `, but I couldn't extract an explicit answer to your question within its contents.`;
-                showAiResponse(fallbackMsg);
-            }
+    window.aiAnswerer(cleanedQuery, contextText).then(output => {
+        if (thisRequestId !== currentAiRequestId) return;
+        if (output?.answer && output.score > 0.001) {
+            showAiResponse(generateAnswer(cleanedQuery, output.answer));
+        } else {
+            let fallback = `Found <strong>${title}</strong>`;
+            if (date) fallback += ` from ${date}`;
+            fallback += ` but couldn't extract a specific answer.`;
+            showAiResponse(fallback);
         }
-
-   
-
-    };
-
-    globalAiWorker.addEventListener('message', handleWorkerAnswer);
-    console.log("Listener added");
-console.log({
-    query,
-    contextText,
-    bestMatch
-});
-   worker.postMessage({
-    type: 'init',
-    wasmDir,
-    modelDir,
-    libUrl,
-    configFiles: {
-        'config.json': configJsonString,
-        'tokenizer.json': tokenizerJsonString,
-        'tokenizer_config.json': tokenizerConfigString,
-        'special_tokens_map.json': specialTokensString,
-        'vocab.txt': vocabString
-    }
-});
+    }).catch(err => {
+        console.error('[AI QA]', err);
+        showAiResponse(`Found <strong>${title}</strong>.`);
+    });
 }
+
 
 function generateAnswer(query, answer) {
 
@@ -431,4 +393,99 @@ function showDownloaderModal() {
     document.getElementById('assetsDownloader').classList.remove('hidden');
 }
 
+// 1. Added "async" keyword to allow the use of await
+async function checkAiCompatibility() {
+  const cores = navigator.hardwareConcurrency || 0;
+  
+  // WebView Fix: navigator.deviceMemory often returns undefined in WebViews
+  // We default to 4 if it's missing so we don't accidentally block valid devices
+  const ramGB = navigator.deviceMemory || 4;
 
+  // CPU + RAM checks
+  const hasEnoughCores = cores >= 4;
+  const hasEnoughRam = ramGB >= 4;
+
+  // Storage check (Safe execution)
+  let freeGB = 0;
+  try {
+    const storage = await navigator.storage?.estimate?.();
+    if (storage && storage.quota !== undefined && storage.usage !== undefined) {
+      freeGB = (storage.quota - storage.usage) / (1024 ** 3);
+    }
+  } catch (e) {
+    console.warn("Storage estimation not supported or blocked:", e);
+  }
+
+  const hasEnoughStorage = freeGB >= 2.5;
+  const ua = navigator.userAgent.toLowerCase();
+  
+  // Fixed Android version check logic
+  const deviceInfo = ua.match(/android\s([0-9\.]+)/);
+  // deviceInfo[1] contains the actual string match, not .osVersion
+  const androidVersion = deviceInfo ? parseInt(deviceInfo[1], 10) : 0;
+  const hasSupportedAndroid = androidVersion >= 10;
+
+  // 64-Bit detection (Enhanced for WebView compatibility)
+  const is64Bit =
+    ua.includes('arm64') ||
+    ua.includes('aarch64') ||
+    ua.includes('x86_64') ||
+    ua.includes('wow64') ||
+    ua.includes('win64') ||
+    navigator.platform?.includes('64') ||
+    navigator.userAgentData?.brands?.length > 0; // Modern Android WebView indicator
+
+  // Final decision (Uncomment variables as needed)
+  const supported = hasEnoughCores && hasEnoughRam;
+
+  // DOM Elements
+  const card  = document.getElementById('ai-compat-card');
+  const icon  = document.getElementById('ai-compat-icon');
+  const title = document.getElementById('ai-compat-title');
+  const desc  = document.getElementById('ai-compat-desc');
+  const specs = document.getElementById('ai-compat-specs');
+  const button = document.getElementById('ai-button');
+
+  // Verify DOM elements exist before modifying them to prevent crashes
+  if (!card || !icon || !title || !desc || !specs) {
+    console.error("Missing required AI compatibility DOM elements.");
+    return supported;
+  }
+
+  if (supported) {
+    card.classList.add('supported');
+    card.classList.remove('unsupported');
+
+    icon.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" 
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+    title.textContent = 'Your device supports AI features';
+    desc.textContent  = 'Click Download button to download AI files';
+    specs.textContent = `Detected: ${cores} CPU / ${ramGB}GB RAM (Min: 4 CPU / 4GB RAM / 64-bit / Android 10 / 2.5GB free)`
+    if (button) button.classList.remove('hidden');
+
+  } else {
+    card.classList.add('unsupported');
+    card.classList.remove('supported');
+    if (button) button.classList.add('hidden');
+    
+    icon.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 6l12 12M18 6L6 18" stroke="white" stroke-width="2.5" 
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+    title.textContent = 'Device not supported';
+    desc.textContent  = "Your device doesn't meet the minimum requirements to run AI. You cannot use AI features. Blocked to prevent crashes.";
+    specs.textContent = `${cores} cores · ${ramGB}GB RAM detected · Minimum: 4 cores · 4GB RAM`;
+  }
+
+  return supported;
+}
+
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', checkAiCompatibility);

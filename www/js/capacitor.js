@@ -24,6 +24,7 @@ if (permission.display !== 'granted') {
 
 // initAi() — call this AFTER startDownload() has completed successfully.
 
+// Keep originalFetch outside at the top function level so it never causes a ReferenceError
 async function initAi() {
   const statusText = document.getElementById('ai-status-text');
   const modal = document.getElementById('model-progress-modal');
@@ -31,128 +32,101 @@ async function initAi() {
   const filesReady = await checkExistingFiles();
   if (!filesReady) {
     if (statusText) statusText.textContent = 'AI files not downloaded yet.';
-    console.warn('[AI] initAi() called before download completed — aborting.');
+    console.warn('[AI] initAi() called before download — aborting.');
     return null;
   }
-  console.log('Files were ready');
 
   if (modal) modal.classList.remove('hidden');
+  if (statusText) statusText.textContent = 'Parsing configuration nodes...';
 
-  const aiWorker = new Worker('./js/ai-worker.js', { type: 'module' });
-  console.log('AI worker created');
+  const Filesystem = window.Capacitor.Plugins.Filesystem;
+  const MODEL = 'distilbert-base-cased-distilled-squad';
+  const MODEL_DEST = `AI/models/${MODEL}`;
+  const LIB_DEST = 'libs/transformers';
 
-  aiWorker.onerror = (err) => {
-    console.error('[AI Worker Crashed]:', err.message, err);
-    if (statusText) statusText.textContent = 'AI worker crashed: ' + err.message;
-  };
+  // Strip any stacked interceptors first
+  let realFetch = window.fetch;
+  while (realFetch._original) realFetch = realFetch._original;
 
-  aiWorker.onmessageerror = (err) => {
-    console.error('[AI Worker Message Error]:', err);
-  };
+  try {
+    if (statusText) statusText.textContent = 'Loading config files...';
 
-  aiWorker.onmessage = (event) => {
-    const { status, progress, error } = event.data;
+    // Load as RAW STRINGS — do not JSON.parse
+    const [a,b,c,d,e] = await Promise.all([
+      Filesystem.readFile({ path:`${MODEL_DEST}/config.json`,            directory:'DATA' }),
+      Filesystem.readFile({ path:`${MODEL_DEST}/tokenizer_config.json`,   directory:'DATA' }),
+      Filesystem.readFile({ path:`${MODEL_DEST}/tokenizer.json`,          directory:'DATA' }),
+      Filesystem.readFile({ path:`${MODEL_DEST}/vocab.txt`,               directory:'DATA' }),
+      Filesystem.readFile({ path:`${MODEL_DEST}/special_tokens_map.json`, directory:'DATA' }),
+    ]);
+    const cfg = {
+      'config.json':             atob(a.data),
+      'tokenizer_config.json':   atob(b.data),
+      'tokenizer.json':          atob(c.data),
+      'vocab.txt':               atob(d.data),
+      'special_tokens_map.json': atob(e.data),
+    };
 
-    if (status === 'initialized') {
-      return; // handled by the init handshake promise below, not here
-    }
+    if (statusText) statusText.textContent = 'Resolving secure paths...';
 
-    if (status === 'progress' && progress) {
-      if (progress.status === 'progress') {
-        const percentage = Math.round(progress.progress || 0);
-        if (statusText) statusText.textContent = `Loading: ${percentage}%`;
+    const [libUri, modelsUri, onnxUri] = await Promise.all([
+      Filesystem.getUri({ path:`${LIB_DEST}/transformers.min.js`,        directory:'DATA' }),
+      Filesystem.getUri({ path:'AI/models',                               directory:'DATA' }),
+      Filesystem.getUri({ path:`${MODEL_DEST}/onnx/model_quantized.onnx`,directory:'DATA' }),
+    ]);
+    const libUrl       = window.Capacitor.convertFileSrc(libUri.uri);
+    const modelsBaseUrl= window.Capacitor.convertFileSrc(modelsUri.uri).replace(/\/+$/,'') + '/';
+    const onnxNativeUrl= window.Capacitor.convertFileSrc(onnxUri.uri);
+
+    // Single clean interceptor — serve by filename
+    const interceptor = async (...args) => {
+      const url = (typeof args[0]==='string' ? args[0] : args[0]?.url || String(args[0])).split('?')[0];
+      const filename = url.split('/').pop();
+      if (cfg[filename]) {
+        return new Response(cfg[filename], {
+          status: 200,
+          headers: { 'Content-Type': filename.endsWith('.json') ? 'application/json' : 'text/plain' }
+        });
       }
-      return;
-    }
+      if (url.endsWith('.onnx')) return realFetch(onnxNativeUrl);
+      return realFetch(...args);
+    };
+    interceptor._original = realFetch;
+    window.fetch = interceptor;
 
-    if (status === 'ready') {
-      if (statusText) statusText.textContent = 'AI System Ready!';
-      showToast('AI succesfully loaded. You may get slight performance issues');
+    if (statusText) statusText.textContent = 'Loading AI module...';
+    const mod = await import(/* webpackIgnore: true */ `${libUrl}?t=${Date.now()}`);
+    const hf = mod;
 
-      setTimeout(() => {
-        if (modal) modal.classList.add('hidden');
-      }, 1500);
-      setTimeout(() => {
-        showToastWarn('AI is a beta feature and may contain some bugs');
-      }, 5000);
-      return;
-    }
+    hf.env.allowRemoteModels = false;
+    hf.env.allowLocalModels  = true;
+    hf.env.useBrowserCache   = false;
+    hf.env.backends.onnx.wasm.numThreads = 1;
+    hf.env.localModelPath = modelsBaseUrl; // ← native capacitor path
 
-    if (status === 'failed') {
-      if (statusText) statusText.textContent = 'Failed to Load AI';
-      console.error('[AI Error]:', error);
-      return;
-    }
-  };
+    if (statusText) statusText.textContent = 'Loading model weights...';
+    window.aiAnswerer = await hf.pipeline('question-answering', MODEL, {
+      dtype: 'q8',
+      model_file_name: 'model_quantized', // ← no .onnx extension!
+    });
 
-  async function sendInitAndWarmup() {
-    try {
-      const Filesystem = window.Capacitor.Plugins.Filesystem;
+    window.fetch = realFetch;
+    if (statusText) statusText.textContent = 'AI Ready!';
+    if (modal) setTimeout(() => modal.classList.add('hidden'), 1500);
 
-      const modelDirUri = await Filesystem.getUri({
-        path: 'AI/models',
-        directory: 'DATA'
-      });
-      const wasmDirUri = await Filesystem.getUri({
-        path: 'libs/transformers',
-        directory: 'DATA'
-      });
-      const libUri = await Filesystem.getUri({
-        path: 'libs/transformers/transformers.min.js',
-        directory: 'DATA'
-      });
+    showToast('AI successfully loaded!');
+    return window.aiAnswerer;
 
-      const modelDirUrl = window.Capacitor.convertFileSrc(modelDirUri.uri).replace(/\/+$/, '') + '/';
-      const wasmDirUrl = window.Capacitor.convertFileSrc(wasmDirUri.uri).replace(/\/+$/, '') + '/';
-      const libUrl = window.Capacitor.convertFileSrc(libUri.uri);
-
-      console.log('modelDirUrl:', modelDirUrl);
-      console.log('wasmDirUrl:', wasmDirUrl);
-      console.log('libUrl:', libUrl);
-
-      const initDone = new Promise((resolve, reject) => {
-        const handler = (event) => {
-          if (event.data.id !== 'init-handshake') return;
-          aiWorker.removeEventListener('message', handler);
-          if (event.data.status === 'initialized') resolve();
-          else reject(new Error(event.data.error || 'init failed'));
-        };
-        aiWorker.addEventListener('message', handler);
-
-        setTimeout(() => {
-          aiWorker.removeEventListener('message', handler);
-          reject(new Error('init handshake timed out — worker may have crashed silently'));
-        }, 8000);
-      });
-
-      aiWorker.postMessage({
-        id: 'init-handshake',
-        type: 'init',
-        modelDir: modelDirUrl,
-        wasmDir: wasmDirUrl,
-        libUrl: libUrl
-      });
-
-      await initDone;
-
-      aiWorker.postMessage({ id: 'onload-warmup', type: 'warmup' });
-
-    } catch (err) {
-      if (statusText) statusText.textContent = 'Failed to Load AI';
-      console.error('[AI Init Error]:', err);
-    }
+  } catch(err) {
+    window.fetch = realFetch;
+    if (statusText) statusText.textContent = 'Failed to load AI';
+    console.error('[AI] crash →', err);
+    if (modal) modal.classList.add('hidden');
+    return null;
   }
-
-  const startTrigger = () => sendInitAndWarmup();
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startTrigger);
-  } else {
-    startTrigger();
-  }
-
-  return aiWorker;
 }
+
+
 
 async function saveBlobToInternalStorage(blob, path) {
     const Filesystem = window.Capacitor.Plugins.Filesystem;
@@ -164,7 +138,7 @@ async function saveBlobToInternalStorage(blob, path) {
         // didn't exist — fine
     }
 
-    const CHUNK_SIZE = 512 * 1024; // 4MB per write — tune down if still tight on memory
+const CHUNK_SIZE = 1 * 1024 * 1024; // 4 MB
     const totalSize = blob.size;
     let offset = 0;
     let isFirstWrite = true;
@@ -294,64 +268,12 @@ async function checkExistingFiles() {
     return true;
 }
 
-const BASE_URL = 'https://anagh904a.github.io/notefull/aiFiles';
-const MODEL_DEST = 'AI/models/distilbert-base-cased-distilled-squad';
-const LIB_DEST = 'libs/transformers';
-
 const AI_ASSETS = [
-    // ---- model/ ----
-    {
-        url: `${BASE_URL}/model/config.json`,
-        path: `${MODEL_DEST}/config.json`,
-        sizeMB: 0.01
-    },
-    {
-        url: `${BASE_URL}/model/onnx/model_quantized.onnx`,
-        path: `${MODEL_DEST}/onnx/model_quantized.onnx`,
-        sizeMB: 62.8
-    },
-    {
-        url: `${BASE_URL}/model/special_tokens_map.json`,
-        path: `${MODEL_DEST}/special_tokens_map.json`,
-        sizeMB: 0.01
-    },
-    {
-        url: `${BASE_URL}/model/tokenizer_config.json`,
-        path: `${MODEL_DEST}/tokenizer_config.json`,
-        sizeMB: 0.01
-    },
-    {
-        url: `${BASE_URL}/model/tokenizer.json`,
-        path: `${MODEL_DEST}/tokenizer.json`,
-        sizeMB: 0.5
-    },
-    {
-        url: `${BASE_URL}/model/vocab.txt`,
-        path: `${MODEL_DEST}/vocab.txt`,
-        sizeMB: 0.25
-    },
-
-    // ---- transformer/ ----
-    {
-        url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.asyncify.mjs`,
-        path: `${LIB_DEST}/ort-wasm-simd-threaded.asyncify.mjs`,
-        sizeMB: 0.05
-    },
-     {
-        url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.jsep.mjs`,
-        path: `${LIB_DEST}/ort-wasm-simd-threaded.jsep.mjs`,
-        sizeMB: 0.02
-    },
-    {
-        url: `${BASE_URL}/transformer/ort-wasm-simd-threaded.asyncify.wasm`,
-        path: `${LIB_DEST}/ort-wasm-simd-threaded.asyncify.wasm`,
-        sizeMB: 23.6
-    },
-    {
-        url: `${BASE_URL}/transformer/transformers.min.js`,
-        path: `${LIB_DEST}/transformers.min.js`,
-        sizeMB: 0.2
-    }
+ {
+    url: 'https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf?download=true',
+    path: 'models/Llama-3.2-1B-Instruct-Q4_K_M.gguf',
+    sizeMB: 770.3
+  }
 ];
 
 const AI_TOTAL_SIZE_MB = AI_ASSETS.reduce((sum, a) => sum + a.sizeMB, 0).toFixed(1);
@@ -386,7 +308,7 @@ async function startDownload() {
         } 
 
         // 2. Connecting phase
-        sizeTracker.textContent = `Size to be downloaded: 87.6 MB`;
+        sizeTracker.textContent = `Size to be downloaded: ${AI_TOTAL_SIZE_MB}`;
         status.textContent = 'Connecting to server…';
         progressBar.classList.add('active');
         fill.style.width = '0%';
@@ -447,7 +369,7 @@ for (let i = 0; i < AI_ASSETS.length; i++ ) {
 
         // Display aggregate uncompressed progress values
         const currentTotalMB = (globalProgressBytes / 1024 / 1024).toFixed(1);
-        sizeTracker.textContent = `${currentTotalMB} MB of 87.6 MB`;
+        sizeTracker.textContent = `${currentTotalMB} MB of ${AI_TOTAL_SIZE_MB}`;
     }
 
     // Commit this file's final decompressed byte footprint globally

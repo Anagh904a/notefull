@@ -6,12 +6,14 @@ import android.os.Bundle;
 import android.webkit.WebSettings; // 1. Add this import
 import android.webkit.WebView; 
 import com.getcapacitor.BridgeActivity;
+import app.notefull.com.AIPlugin;
 
 public class MainActivity extends BridgeActivity {
 
 @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    registerPlugin(AIPlugin.class);
+    super.onCreate(savedInstanceState);
 
         // --- OVERRIDE WEBVIEW FOR CORAL & CROSS-ORIGIN ACCESS ---
         // Post to the main thread loop to make sure the Capacitor Bridge has initiated the WebView instance
