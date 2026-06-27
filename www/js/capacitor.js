@@ -37,91 +37,37 @@ async function initAi() {
   }
 
   if (modal) modal.classList.remove('hidden');
-  if (statusText) statusText.textContent = 'Parsing configuration nodes...';
-
-  const Filesystem = window.Capacitor.Plugins.Filesystem;
-  const MODEL = 'distilbert-base-cased-distilled-squad';
-  const MODEL_DEST = `AI/models/${MODEL}`;
-  const LIB_DEST = 'libs/transformers';
-
-  // Strip any stacked interceptors first
-  let realFetch = window.fetch;
-  while (realFetch._original) realFetch = realFetch._original;
+  if (statusText) statusText.textContent = 'Loading AI model...';
 
   try {
-    if (statusText) statusText.textContent = 'Loading config files...';
+    const Filesystem = window.Capacitor.Plugins.Filesystem;
+    const AIPlugin   = window.Capacitor.Plugins.AIPlugin;
 
-    // Load as RAW STRINGS — do not JSON.parse
-    const [a,b,c,d,e] = await Promise.all([
-      Filesystem.readFile({ path:`${MODEL_DEST}/config.json`,            directory:'DATA' }),
-      Filesystem.readFile({ path:`${MODEL_DEST}/tokenizer_config.json`,   directory:'DATA' }),
-      Filesystem.readFile({ path:`${MODEL_DEST}/tokenizer.json`,          directory:'DATA' }),
-      Filesystem.readFile({ path:`${MODEL_DEST}/vocab.txt`,               directory:'DATA' }),
-      Filesystem.readFile({ path:`${MODEL_DEST}/special_tokens_map.json`, directory:'DATA' }),
-    ]);
-    const cfg = {
-      'config.json':             atob(a.data),
-      'tokenizer_config.json':   atob(b.data),
-      'tokenizer.json':          atob(c.data),
-      'vocab.txt':               atob(d.data),
-      'special_tokens_map.json': atob(e.data),
-    };
+   if (statusText) statusText.textContent = 'Resolving model path...';
 
-    if (statusText) statusText.textContent = 'Resolving secure paths...';
+const uri = await Filesystem.getUri({
+  path: 'models/Llama-3.2-1B-Instruct-Q4_K_M.gguf',
+  directory: 'DATA'
+});
 
-    const [libUri, modelsUri, onnxUri] = await Promise.all([
-      Filesystem.getUri({ path:`${LIB_DEST}/transformers.min.js`,        directory:'DATA' }),
-      Filesystem.getUri({ path:'AI/models',                               directory:'DATA' }),
-      Filesystem.getUri({ path:`${MODEL_DEST}/onnx/model_quantized.onnx`,directory:'DATA' }),
-    ]);
-    const libUrl       = window.Capacitor.convertFileSrc(libUri.uri);
-    const modelsBaseUrl= window.Capacitor.convertFileSrc(modelsUri.uri).replace(/\/+$/,'') + '/';
-    const onnxNativeUrl= window.Capacitor.convertFileSrc(onnxUri.uri);
+const nativePath = uri.uri.replace('file://', '');
 
-    // Single clean interceptor — serve by filename
-    const interceptor = async (...args) => {
-      const url = (typeof args[0]==='string' ? args[0] : args[0]?.url || String(args[0])).split('?')[0];
-      const filename = url.split('/').pop();
-      if (cfg[filename]) {
-        return new Response(cfg[filename], {
-          status: 200,
-          headers: { 'Content-Type': filename.endsWith('.json') ? 'application/json' : 'text/plain' }
-        });
-      }
-      if (url.endsWith('.onnx')) return realFetch(onnxNativeUrl);
-      return realFetch(...args);
-    };
-    interceptor._original = realFetch;
-    window.fetch = interceptor;
+if (statusText) statusText.textContent = 'Initialising model...';
 
-    if (statusText) statusText.textContent = 'Loading AI module...';
-    const mod = await import(/* webpackIgnore: true */ `${libUrl}?t=${Date.now()}`);
-    const hf = mod;
+await AIPlugin.loadModel({
+    path: nativePath
+});
 
-    hf.env.allowRemoteModels = false;
-    hf.env.allowLocalModels  = true;
-    hf.env.useBrowserCache   = false;
-    hf.env.backends.onnx.wasm.numThreads = 1;
-    hf.env.localModelPath = modelsBaseUrl; // ← native capacitor path
-
-    if (statusText) statusText.textContent = 'Loading model weights...';
-    window.aiAnswerer = await hf.pipeline('question-answering', MODEL, {
-      dtype: 'q8',
-      model_file_name: 'model_quantized', // ← no .onnx extension!
-    });
-
-    window.fetch = realFetch;
+    window.aiReady = true;
     if (statusText) statusText.textContent = 'AI Ready!';
     if (modal) setTimeout(() => modal.classList.add('hidden'), 1500);
-
-    showToast('AI successfully loaded!');
-    return window.aiAnswerer;
+    showToast('AI loaded!');
+    return true;
 
   } catch(err) {
-    window.fetch = realFetch;
     if (statusText) statusText.textContent = 'Failed to load AI';
-    console.error('[AI] crash →', err);
     if (modal) modal.classList.add('hidden');
+    console.error('[AI]', err);
     return null;
   }
 }
@@ -416,6 +362,7 @@ for (let i = 0; i < AI_ASSETS.length; i++ ) {
     }
 
     startBtn.disabled = false;
+    alert('Dear user, Please provide feedback for this update on playstore! We value your valueable feedback.');
 }
 
 

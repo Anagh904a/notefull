@@ -1,32 +1,152 @@
 [
-  { "title": "password", "sev": "high" },
-  { "title": "passcode", "sev": "high" },
-  { "title": "pin", "sev": "high" },
-  { "title": "otp", "sev": "high" },
-  { "title": "cvv", "sev": "high" },
-  { "title": "credit card", "sev": "high" },
-  { "title": "debit card", "sev": "high" },
-  { "title": "card number", "sev": "high" },
-  { "title": "bank account", "sev": "high" },
-  { "title": "ifsc", "sev": "high" },
-  { "title": "upi id", "sev": "high" },
-  { "title": "net banking", "sev": "high" },
-  { "title": "google account", "sev": "medium" },
-  { "title": "gmail", "sev": "medium" },
-  { "title": "email", "sev": "medium" },
-  { "title": "username", "sev": "medium" },
-  { "title": "login", "sev": "medium" },
-  { "title": "security question", "sev": "high" },
-  { "title": "recovery code", "sev": "high" },
-  { "title": "backup code", "sev": "high" },
-  { "title": "secret key", "sev": "high" },
-  { "title": "api key", "sev": "high" },
-  { "title": "access token", "sev": "high" },
-  { "title": "auth token", "sev": "high" },
-  { "title": "private key", "sev": "high" },
-  { "title": "license key", "sev": "medium" },
-  { "title": "aadhaar", "sev": "high" },
-  { "title": "pan card", "sev": "high" },
-  { "title": "passport", "sev": "high" },
-  { "title": "driving license", "sev": "medium" }
+  {
+    "keyword": "password",
+    "title": "Password",
+    "sev": "high"
+  },
+  {
+    "keyword": "passcode",
+    "title": "Passcode",
+    "sev": "high"
+  },
+  {
+    "keyword": "pin",
+    "title": "PIN",
+    "sev": "high"
+  },
+  {
+    "keyword": "otp",
+    "title": "OTP",
+    "sev": "high"
+  },
+  {
+    "keyword": "cvv",
+    "title": "CVV",
+    "sev": "high"
+  },
+  {
+    "keyword": "credit card",
+    "title": "Credit Card Information",
+    "sev": "high"
+  },
+  {
+    "keyword": "debit card",
+    "title": "Debit Card Information",
+    "sev": "high"
+  },
+  {
+    "keyword": "card number",
+    "title": "Card Number",
+    "sev": "high"
+  },
+  {
+    "keyword": "bank account",
+    "title": "Bank Account Details",
+    "sev": "high"
+  },
+  {
+    "keyword": "ifsc",
+    "title": "IFSC Code",
+    "sev": "high"
+  },
+  {
+    "keyword": "upi id",
+    "title": "UPI ID",
+    "sev": "high"
+  },
+  {
+    "keyword": "net banking",
+    "title": "Net Banking Credentials",
+    "sev": "high"
+  },
+  {
+    "keyword": "google account",
+    "title": "Google Account",
+    "sev": "medium"
+  },
+  {
+    "keyword": "gmail",
+    "title": "Email Address",
+    "sev": "medium"
+  },
+  {
+    "keyword": "email",
+    "title": "Email Address",
+    "sev": "medium"
+  },
+  {
+    "keyword": "username",
+    "title": "Username",
+    "sev": "medium"
+  },
+  {
+    "keyword": "login",
+    "title": "Login Credentials",
+    "sev": "medium"
+  },
+  {
+    "keyword": "security question",
+    "title": "Security Question",
+    "sev": "high"
+  },
+  {
+    "keyword": "recovery code",
+    "title": "Recovery Code",
+    "sev": "high"
+  },
+  {
+    "keyword": "backup code",
+    "title": "Backup Code",
+    "sev": "high"
+  },
+  {
+    "keyword": "secret key",
+    "title": "Secret Key",
+    "sev": "high"
+  },
+  {
+    "keyword": "api key",
+    "title": "API Key",
+    "sev": "high"
+  },
+  {
+    "keyword": "access token",
+    "title": "Access Token",
+    "sev": "high"
+  },
+  {
+    "keyword": "auth token",
+    "title": "Authentication Token",
+    "sev": "high"
+  },
+  {
+    "keyword": "private key",
+    "title": "Private Key",
+    "sev": "high"
+  },
+  {
+    "keyword": "license key",
+    "title": "License Key",
+    "sev": "medium"
+  },
+  {
+    "keyword": "aadhaar",
+    "title": "Aadhaar Number",
+    "sev": "high"
+  },
+  {
+    "keyword": "pan card",
+    "title": "PAN Card Information",
+    "sev": "high"
+  },
+  {
+    "keyword": "passport",
+    "title": "Passport Information",
+    "sev": "high"
+  },
+  {
+    "keyword": "driving license",
+    "title": "Driving License Information",
+    "sev": "medium"
+  }
 ]

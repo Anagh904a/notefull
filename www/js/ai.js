@@ -3,9 +3,8 @@ let searchDebounceTimer = null;
 let currentAiRequestId = 0;
 let aiResponseTimer = null;
 
-// 2. BIND TO THE INPUT: Use 'searchInput' and evaluate BEFORE calling 'new Worker'
 document.getElementById('searchInput').addEventListener('click', async () => {
-    if (window.aiAnswerer) return;
+    if (window.aiReady) return; // ← was window.aiAnswerer
     await initAi();
 });
 
@@ -72,9 +71,40 @@ if (!cleanQuery) return;
 
     const total = noteResults.length + listResults.length;
 
-if (total === 0) {
-    showAiResponse(`I couldn't find anything related to "<strong>${searchTerm}</strong>".`);
-return;
+if (total === 0 && isQuestion) {
+
+    // No AI? Fall back to classic search UX
+    if (!window.aiReady) {
+        return;
+    }
+
+    const thisRequestId = ++currentAiRequestId;
+
+    const prompt = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+You are a helpful AI assistant.
+
+Answer the user's question naturally and concisely.
+
+If you do not know the answer, simply say so.
+
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+${cleanQuery}
+
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>`;
+
+    window.Capacitor.Plugins.AIPlugin.ask({ prompt })
+        .then(result => {
+
+            if (thisRequestId !== currentAiRequestId) return;
+
+            if (result?.answer) {
+                showAiResponse(result.answer);
+            }
+        })
+        .catch(console.error);
+
+    return;
 }
 
 
@@ -87,10 +117,7 @@ return;
 const topMatches =
 combined.filter(m => m.score < 0.4);
 
-const finalMatches =
-topMatches.length
-? topMatches.slice(0,3)
-: [bestMatch];
+const finalMatches = combined.slice(0, 5);
 const item = bestMatch.item;
 const title = item.title || "Untitled";
 const date = item.date ? formatDate(item.date) : null;
@@ -112,24 +139,13 @@ let contextText = "";
 finalMatches.forEach(match => {
     const item = match.item;
 
-    contextText += `
-Title: ${item.title}
-`;
-
     if (match.type === "note") {
-        contextText += `
-Content: ${item.content}
-`;
+        contextText += `${item.title}\n${item.content}\n\n`;
     }
 
     if (match.type === "list") {
-        contextText += `
-Items:
-${item.items.map(i => i.name).join(", ")}
-`;
+        contextText += `${item.title}\n${item.items.map(i => i.name).join(", ")}\n\n`;
     }
-
-    contextText += "\n\n";
 });
 
     // Clean up extreme cases where notes or lists exist but contain absolutely zero text content
@@ -140,29 +156,57 @@ ${item.items.map(i => i.name).join(", ")}
         showAiResponse(emptyMsg);
         return;
     }
+    contextText = contextText.slice(0, 4000);
 
     const thisRequestId = ++currentAiRequestId;
-if (!window.aiAnswerer) {
-        showAiResponse(`AI still loading... Best match: <strong>${title}</strong>.`);
-        return;
+if (!window.aiReady) {
+    return;
+}
+
+const cleanedQuery = query.replace(/[?!.,;:]/g, '').trim();
+
+// Build Llama instruct prompt — JS builds it, cpp just runs it
+const prompt = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+You are Notefull AI, a helpful and intelligent personal assistant.
+
+You may have access to information from the user's notes and lists.
+
+When answering:
+
+- Carefully read all notes and lists.
+- Use relevant information in your answer.
+- Combine information when needed.
+- If information is missing, use your own knowledge.
+- Answer naturally and conversationally.
+
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+User information:
+
+${contextText}
+
+Question:
+${query}
+
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>`;
+
+console.log(prompt);
+
+window.Capacitor.Plugins.AIPlugin.ask({ prompt }).then(result => {
+    if (thisRequestId !== currentAiRequestId) return;
+    if (result?.answer) {
+        showAiResponse(result.answer);
+    } else {
+        let fallback = `Found <strong>${title}</strong>`;
+        if (date) fallback += ` from ${date}`;
+        fallback += ` but couldn't extract a specific answer.`;
+        showAiResponse(fallback);
     }
-
- const cleanedQuery = query.replace(/[?!.,;:]/g, '').trim();
-
-    window.aiAnswerer(cleanedQuery, contextText).then(output => {
-        if (thisRequestId !== currentAiRequestId) return;
-        if (output?.answer && output.score > 0.001) {
-            showAiResponse(generateAnswer(cleanedQuery, output.answer));
-        } else {
-            let fallback = `Found <strong>${title}</strong>`;
-            if (date) fallback += ` from ${date}`;
-            fallback += ` but couldn't extract a specific answer.`;
-            showAiResponse(fallback);
-        }
-    }).catch(err => {
-        console.error('[AI QA]', err);
-        showAiResponse(`Found <strong>${title}</strong>.`);
-    });
+}).catch(err => {
+    console.error('[AI QA]', err);
+    showAiResponse(`Found <strong>${title}</strong>.`);
+});
 }
 
 
