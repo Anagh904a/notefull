@@ -24,6 +24,7 @@
     "@capacitor/privacy-screen": "^2.0.1",
     "@capacitor/toast": "^8.0.1",
     "@huggingface/transformers": "^4.2.0",
+    "@tabler/icons-webfont": "^3.44.0",
     "compromise": "^14.15.1",
     "izitoast": "^1.4.0",
     "localforage": "^1.10.0",

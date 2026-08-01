@@ -8,17 +8,26 @@
     <meta name="viewport" content="width=device-width">
     <meta name="description"
         content="An Open-source notes-taking app built just for productivity. No ads, no distractions." />
-    <link rel="stylesheet" href="libs/fontawesome/all.min.css" />
-    <link rel="icon" href="icon.png" type="image/x-icon">
+    <link rel="icon" href="notefull.png" type="image/x-icon">
     <title>Notefull - Home</title>
     <link rel="stylesheet" href="style.css">
     <script src="libs/localforage/localforage.min.js"></script>
     <!-- Add to your HTML head -->
     <link rel="stylesheet" href="libs/iziToast/iziToast.min.css">
+    <link rel="stylesheet" href="libs/tabler/tabler-icons.min.css">
     <script src="libs/iziToast/iziToast.min.js"></script>
     <script src="libs/compromise/compromise.js"></script>
+    <script type="module" src="libs/fuse/fuse.min.js"></script>
+    <script type="module">
+  import Fuse from './libs/fuse/fuse.min.js';
+  window.Fuse = Fuse; 
+</script>
 </head>
-
+<script>
+  if (localStorage.getItem('notefullOnboarding') !== 'true') {
+    window.location.replace('onboarding.html');
+  }
+</script>
 <body>
     <audio id="alertSound" src="sounds/t.mp3" preload="auto"></audio>
     <audio id="errorSound" src="sounds/e.mp3" preload="auto"></audio>
@@ -53,7 +62,7 @@
 
             <button class="add-button" onclick="showAddOptions()">
 
-                <i class="fas fa-plus"></i>
+              <i class="ti ti-plus"></i>
             </button>
         </div>
 
@@ -81,44 +90,31 @@
             <span class="nav-label">Settings</span>
         </button>
     </div>
+  
     <div id="privacyOverlay" class="hidden"></div>
     <div id="addOptionsModal" class="modal hidden">
         <div class="modal-content">
             <h3>Choose to create</h3>
             <div class="add-group">
                 <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
-                    <i class="fas fa-sticky-note"></i> Note
+                    <i class="ti ti-note"></i> Note
                 </button>
                 <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
-                    <i class="fas fa-list"></i> List
+                    <i class="ti ti-checklist"></i> List
                 </button>
             </div>
         </div>
     </div>
-    <div id="combinedContainer" class="container hidden">
-        <div class="header" id="header">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Ask anything related to notes and lists..."
-                oninput="searchNotes()">
-            <i class="fa-solid fa-xmark" onclick="clearSearch()" id="clearSearch"></i>
-        </div>
 
-        <div class="selection-toolbar" id="toolbar">
-            <div class="toolbar-elements">
-                <button onclick="closeSelectionMode()"><i class="fas fa-close"></i></button>
-                <div class="selected-count" id="selected-count">0 Selected</div>
-                <button onclick="selectAll()">Select All</button>
-                <button onclick="deleteSelected()"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>
-
-        <div class="custom-sort-wrapper" id="sort">
-            <div class="section-label">Multi-Delete Mode</div>
-
-            <div id="selectionBtn" class="filter-group"><button class="filter-item" onclick="showSelectionMode()"><i
-                        class="fas fa-trash"></i> Delete Data </button></div>
-        </div>
-        <div id="aiSearchResponse" class="hidden">
+    <div id="searchPage" class="search-page">
+ 
+  <div class="header" id="header">
+     <div class="ai-svg"></div>
+    <i class="ti ti-search"></i>
+    <input type="text" id="searchInput" placeholder="Ask anything related to notes and lists..." oninput="searchNotes()">
+    <i class="ti ti-circle-x" onclick="clearSearch()" id="clearSearch"></i>
+  </div>
+ <div id="aiSearchResponse" class="hidden">
             <div class="ai-header">
                 <svg class="ai-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path class="sparkle sp-1"
@@ -129,12 +125,48 @@
                         d="M19 12 L20.2 14.5 L22.7 15.7 L20.2 16.9 L19 19.4 L17.8 16.9 L15.3 15.7 L17.8 14.5 Z" />
                 </svg>
                 <span class="ai-title">AI Overview</span>
-                <span class="r-tag med">EARLY</span>
+                <span class="r-tag med">BETA</span>
             </div>
             <div id="aiResponseText"></div>
-            <p class="r-desc"><i class="fas fa-circle-info"></i> AI can make mistakes in responses</p>
+            <p class="r-desc"><i class="ti ti-info-circle"></i> AI can make mistakes in responses</p>
         </div>
-        <div id="search-result" class="hidden"></div>
+  <div id="src"></div> 
+   <div id="noResultsMessage" class="hidden">
+                    <i class="ti ti-zoom-question"></i>
+                    <p>No Matching Items were found</p>
+                    <span>Ensure you have entered your query correctly. Avoid typos </span>
+                </div>
+</div>
+    <div id="combinedContainer" class="container hidden">
+       <div class="top-bar-extreme" id="titleBar">
+    <div class="top-bar-brand">
+        <img src="notefull.png" alt="Notefull">
+        <h2>Notefull</h2>
+    </div>
+    <div class="btn-group-right-home">
+           <button class="action-btn" id="searchIcon" onclick="showSearchPage()">
+    <span class="search-ring"></span>
+    <i class="ti ti-search"></i>
+</button>
+    <button class="action-btn" onclick="showSelectionMode()">
+       
+        <i class="ti ti-checks"></i>
+    </button>
+
+</div>
+</div>
+  
+
+        <div class="selection-toolbar" id="toolbar">
+            <div class="toolbar-elements">
+                <button onclick="closeSelectionMode()"><i class="ti ti-x"></i></button>
+                <div class="selected-count" id="selected-count">0 Selected</div>
+                <button onclick="selectAll()">Select All</button>
+                <button onclick="deleteSelected()"><i class="ti ti-trash"></i></button>
+            </div>
+        </div>
+
+
 
 
 
@@ -144,7 +176,7 @@
                 <div id="noteS-label" class="section-label">Notes</div>
                 <div id="notesContainer"></div>
                 <div id="noNotesMessage" class="hidden">
-                    <i class="fas fa-note-sticky empty-icon"></i>
+                    <i class="ti ti-note-off"></i>
                     <p>This space is lonely</p>
                     <span>Tap + to add your first note</span>
                 </div>
@@ -153,7 +185,7 @@
                 <div id="listS-label" class="section-label">Lists</div>
                 <div id="listsContainerContent"></div>
                 <div id="noListsMessage" class="hidden">
-                    <i class="fas fa-list"></i>
+                    <i class="ti ti-receipt-off"></i>
                     <p>No lists yet</p>
                     <span>Tap + to create your first list</span>
                 </div>
@@ -164,17 +196,17 @@
     <div id="trashSection" class="container hidden">
         <div class="toolbar-trash" id="trash-toolbar">
             <div id="toolbar-elements" class="toolbar-elements">
-                <button onclick="closeTrashMode()"><i class="fas fa-close"></i></button>
+                <button onclick="closeTrashMode()"><i class="ti ti-x"></i></button>
                 <div class="selected-count" id="trash-count">0 Seleted</div>
-                <button onclick="emptyTrash()"><i class="fas fa-broom"></i></button>
-                <button onclick="deleteSelectedforever()"><i class="fas fa-trash-can"></i></button>
-                <button onclick="restoreSelected()"><i class="fa-solid fa-arrows-rotate"></i></button>
+                <button onclick="emptyTrash()"><i class="ti ti-trash-x"></i></button>
+                <button onclick="deleteSelectedforever()"><i class="ti ti-trash"></i></button>
+                <button onclick="restoreSelected()"><i class="ti ti-recycle"></i></button>
             </div>
 
         </div>
         <div class="custom-sort-wrapper" id="sort-trash">
             <div id="trashBtn" class="filter-group">
-                <button class="filter-item" onclick="showTrashMode()"><i class="fas fa-check-double"></i> Trash
+                <button class="filter-item" onclick="showTrashMode()"><i class="ti ti-checks"></i> Trash
                     Selection Mode</button>
             </div>
         </div>
@@ -183,47 +215,97 @@
         <div class="section-label">Deleted Items</div>
         <div id="trashContainer"></div>
         <div id="noDeletedItemsMessage" class="hidden">
-            <i class="fas fa-inbox empty-icon"></i>
+            <i class="ti ti-trash-off"></i>
             <p>Trash is empty</p>
             <span>Deleted notes and lists will appear here</span>
         </div>
 
     </div>
+    <div class="ai-thinking-modal" id="ai-thinking-modal">
+    <div class="ai-thinking-modal__backdrop"></div>
+ 
+  <!-- Shared sparkle shape, defined once, reused by every particle below.
+       Path is stretched vertically (taller than wide) per the requested look. -->
+  <svg width="0" height="0" style="position:absolute">
+    <symbol id="ai-sparkle-shape" viewBox="0 0 24 24">
+      <path d="M12 3 C12.6 8.5 13.5 9.4 19 12 C13.5 14.6 12.6 15.5 12 21 C11.4 15.5 10.5 14.6 5 12 C10.5 9.4 11.4 8.5 12 3 Z"/>
+    </symbol>
+  </svg>
+ 
+  <div class="ai-thinking-modal__card">
+    <div class="ai-thinking-modal__icon">
+      <div class="ai-thinking-modal__glow"></div>
+ 
+      <!-- 3 particles continuously streaming bottom-right -> top-left -->
+      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--travel" style="--delay:0s"><use href="#ai-sparkle-shape"/></svg>
+      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--travel" style="--delay:0.8s"><use href="#ai-sparkle-shape"/></svg>
+      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--travel" style="--delay:1.6s"><use href="#ai-sparkle-shape"/></svg>
+ 
+      <!-- 1 center particle — zooms in, holds, fades, repeats -->
+      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--center"><use href="#ai-sparkle-shape"/></svg>
+ 
+      <!-- 2 fixed particles — stay in their corners, just twinkle -->
+      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--fixed-a"><use href="#ai-sparkle-shape"/></svg>
+      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--fixed-b"><use href="#ai-sparkle-shape"/></svg>
+    </div>
+    <div class="ai-thinking-modal__text" id="ai-thinking-text">Processing</div>
+  </div>
+ 
+    <div class="ai-thinking-modal__shine">
+      <div class="ai-thinking-modal__shine-band"></div>
+    </div>
+  </div>
+    <div id="ai-result" class="modal hidden">
+        <div class="modal-content">
+
+        </div>
+    </div>
+    <div id="summary" class="modal hidden">
+        <div class="modal-content">
+<h2>Summary of Your Note</h2>
+<h4 id="summary-text"></h4>
+        </div>
+</div>
     <div id="addNoteSection" class="container hidden">
         <!-- Note Panel -->
 
         <div class="add-note-header">
             <div class="btn-group-left">
                 <button type="button" class="action-btn" onclick="cancelNote()">
-                    <i class="fas fa-chevron-left"></i>
+                    <i class="ti ti-chevron-left"></i>
                 </button>
-                <button type="button" id="undoButton" class="action-btn" onclick="undo()">
-                    <i class="fas fa-undo"></i>
-                </button>
-                <button type="button" id="redoButton" class="action-btn" onclick="redo()">
-                    <i class="fas fa-redo"></i>
-                </button>
+               
 
             </div>
             <div class="btn-group-right">
                 <button type="button" class="action-btn" onclick="saveNote()">
-                    <i class="fas fa-check"></i>
+                    <i class="ti ti-check"></i>
                 </button>
                 <button type="button" class="action-btn" onclick="showRemainderModal()"><i
-                        class="fas fa-clock"></i></button>
+                        class="ti ti-clock"></i></button>
 
                 <button type="button" class="action-btn" onclick="showMenu(this)">
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                    <i class="ti ti-dots"></i>
                 </button>
             </div>
         </div>
         <div class="menu hidden-animation" id="menu-notes">
-            <button class="menu-button ai" onclick="correctNote()"><i class="fas fa-magic"></i> Grammer
-                Assistant</button>
-            <button class="menu-button ai" onclick="showToastWarn('Note Summarization is under devlopment!')"><i
-                    class="fas fa-magic-wand-sparkles"></i>Summarize Note</button>
-            <button class="menu-button" onclick="showNotePassword()"><i class="fas fa-lock"></i> Lock Note</button>
-            <button class="menu-button" onclick="deleteThisNote()"><i class="fas fa-trash"></i> Delete Note</button>
+<button class="menu-button ai" onclick="correctNote()">
+<i class="ti ti-text-spellcheck"></i>
+    Grammar Assistant
+</button>
+
+<button class="menu-button ai" onclick="summarizeNote()">
+    <i class="ti ti-filter-2-spark"></i>
+    Summarize Note
+</button>
+
+<button class="menu-button ai" onclick="suggestTitle()">
+   <i class="ti ti-subtitles-ai"></i>
+    Title Suggestion
+</button>
+            <button class="menu-button" onclick="showNotePassword()"><i class="ti ti-lock"></i> Lock Note</button>
+            <button class="menu-button" onclick="deleteThisNote()"><i class="ti ti-trash"></i> Delete Note</button>
 
         </div>
 
@@ -255,6 +337,32 @@
         <div class="note-content-input" id="noteContent" contenteditable="true"
             data-placeholder="Enter your note here....">
         </div>
+        <div class="note-bottom-bar">
+            <div class="row">
+                <div class="row-buttons">
+                 <button id="undoButton" class="row-button" onclick="undo()">
+                    <i class="ti ti-arrow-back-up"></i>
+                </button>
+                <button id="redoButton" class="row-button" onclick="redo()">
+                    <i class="ti ti-arrow-forward-up"></i>
+                </button>
+</div>
+<div class="divider-line-row"></div>
+<div class="format-menu">
+    <buttom class="row-button" onclick="showFormatMsg()"><i class="ti ti-bold"></i></buttom> <!--Make selected text bold-->
+    <button class="row-button" onclick="showFormatMsg()"><i class="ti ti-underline"></i></button> <!--Underline-->
+    <buttom class="row-button" onclick="showFormatMsg()"><i class="ti ti-italic"></i></buttom> <!--Italic-->
+    <button class="row-button" onclick="showFormatMsg()"><i class="ti ti-list"></i></button> <!--Bullet Point-->
+    <button class="row-button" onclick="showFormatMsg()"><i class="ti ti-wheel"></i></button> <!--Text color needs color picker too-->
+</div>
+            </div>
+        <div class="divider-line"></div>
+            <div class="row">
+             <div class="total-char" id="totalChar">Total Characters 0</div>
+          
+           
+            </div>
+        </div>
         <!-- Note Password Modal -->
         <div id="notePasswordModal" class="modal hidden">
             <div class="modal-content">
@@ -262,16 +370,16 @@
                 </h3>
                 <input type="password" id="notePassword" placeholder="Enter New Password.." />
                 <button type="button" onclick="closeModal('notePasswordModal')">Close <i
-                        class="fa-solid fa-xmark"></i></button>
+                        class="ti ti-x"></i></button>
             </div>
         </div>
     </div>
     <!--Add list section-->
     <div id="addListSection" class="container hidden">
-        <div class="add-note-header">
+        <div class="add-list-header">
             <div class="btn-group-left">
                 <button class="action-btn" onclick="cancelList()">
-                    <i class="fa-solid fa-chevron-left"></i>
+    <i class="ti ti-chevron-left"></i>
                 </button>
             </div>
 
@@ -280,13 +388,13 @@
 
             <div class="btn-group-right">
                 <button type="button" class="action-btn" onclick="saveList()">
-                    <i class="fas fa-check"></i>
+                    <i class="ti ti-check"></i>
                 </button>
                 <button type="button" class="action-btn" onclick="showListRemainderModal()"><i
-                        class="fas fa-clock"></i></button>
+                        class="ti ti-clock"></i></button>
 
                 <button type="button" class="action-btn" onclick="showList()">
-                    <i class="fa-solid fa-key"></i>
+                    <i class="ti ti-key"></i>
                 </button>
             </div>
         </div>
@@ -295,16 +403,16 @@
 
         <input type="text" id="listTitle" class="note-title-input" placeholder="List Title" />
         <button class="add-item-btn hidden" id="orignal-add-item-btn" onclick="addItem()">
-            <i class="fas fa-plus"></i> Add New Item
+            <i class="ti ti-plus"></i> Add New Item
         </button>
         <div id="checklistContainer" class="checklist-items"></div>
         <div id="items-no" class="hidden">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <i class="ti ti-exclamation-circle"></i>
             <p>No Items yet</p>
             <span>Tap + to create your first item</span>
         </div>
         <button class="add-item-btn" onclick="addItem()">
-            <i class="fas fa-plus"></i> Add New Item
+            <i class="ti ti-plus"></i> Add New Item
         </button>
 
 
@@ -316,7 +424,7 @@
                 <h3 id="list-password-text">Set Password</h3>
                 <input type="password" id="listPassword" placeholder="Enter New Password.." />
                 <button type="button" onclick="closeModal('listPasswordModalr')">Close <i
-                        class="fa-solid fa-xmark"></i></button>
+                        class="ti ti-x"></i></button>
             </div>
         </div>
         <div class="modal hidden" id="list-remainder-modal">
@@ -349,10 +457,14 @@
         <div class="modal-content">
             <h3 id="passwordModalText">Unlock note 🔓</h3>
             <input type="password" id="passwordInput" placeholder="Password">
-            <button onclick="verifyPassword()">Go <i class="fas fa-arrow-right"></i>
+            <button onclick="verifyPassword()">Go <i class="ti ti-arrow-right"></i>
                 <!-- Best for a Go button -->
             </button>
-            <button onclick="closeModal('passwordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+            
+            <button onclick="closeModal('passwordModal')">Close <i class="ti ti-x"></i></button>
+        <button class="forgot-password hidden" id="noteForget" onclick="forgetPassword()">
+                Forget Password? 
+            </button>
         </div>
     </div>
     <div class="modal hidden" id="model-progress-modal">
@@ -368,20 +480,20 @@
         <div class="modal-content">
             <h3 id="deletePasswordModalText">Delete Note 🔓</h3>
             <input type="password" id="deletePasswordInput" placeholder="Password" />
-            <button onclick="deleteVerifyPassword()">Go <i class="fas fa-arrow-right"></i>
+            <button onclick="deleteVerifyPassword()">Go <i class="ti ti-arrow-right"></i>
                 <!-- Best for a Go button -->
             </button>
-            <button onclick="closeModal('deletePasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+            <button onclick="closeModal('deletePasswordModal')">Close <i class="ti ti-x"></i></button>
         </div>
     </div>
     <div class="settings-stack">
         <div id="settingsSection" class="container hidden">
             <div class="settings-group">
-                <h2> <img class="brand" src="icon.png"> <br>Settings</h2>
+                <h2> <img class="brand" src="notefull.png"> <br>Settings</h2>
                 <br>
                 <div class="card" onclick="showSection('creditSection')">
                     <div class="icon wifi">
-                        <i class="fa-solid fa-crown"></i>
+                        <i class="ti ti-crown"></i>
                     </div>
                     <div class="text-box">
                         <div class="title2">Information and Credits</div>
@@ -390,7 +502,7 @@
                 </div>
                 <div class="card" onclick="showSection('privacySection')">
                     <div class="icon privacy">
-                        <i class="fa-solid fa-user-shield"></i>
+                        <i class="ti ti-user-shield"></i>
                     </div>
                     <div class="text-box">
                         <div class="title2">Legal Center</div>
@@ -399,7 +511,7 @@
                 </div>
                 <div class="card" onclick="openLockSection()">
                     <div class="icon modes">
-                        <i class="fa-solid fa-lock"></i>
+                        <i class="ti ti-lock"></i>
                     </div>
                     <div class="text-box">
                         <div class="title2">Security Settings</div>
@@ -408,17 +520,17 @@
                 </div>
                 <div class="card" onclick="openAntithreat()">
                     <div class="icon modes">
-                        <i class="fa-solid fa-shield-halved"></i>
+                        <i class="ti ti-shield"></i>
                     </div>
                     <div class="text-box">
                         <div class="title2">Analytics Updates</div>
-                        <div class="subtitle">Version · Shield · Updates</div>
+                        <div class="subtitle">Engine Version  · Updates</div>
                     </div>
                 </div>
             </div>
             <div class="card" onclick="showSection('devSection')">
                 <div class="icon wifi">
-                    <i class="fa-solid fa-sliders"></i>
+                <i class="ti ti-adjustments-horizontal"></i>
                 </div>
                 <div class="text-box">
                     <div class="title2">Developer Options</div>
@@ -427,7 +539,7 @@
             </div>
             <div class="card" onclick="showSection('notificationSection')">
                 <div class="icon privacy">
-                    <i class="fa-solid fa-bell"></i>
+                    <i class="ti ti-bell"></i>
                 </div>
                 <div class="text-box">
                     <div class="title2">Notifications Settings</div>
@@ -436,7 +548,7 @@
             </div>
             <div class="card" onclick="showSection('files')">
                 <div class="icon privacy">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <i class="ti ti-sparkles"></i>
                 </div>
                 <div class="text-box">
                     <div class="title2">AI Manager</div>
@@ -449,7 +561,7 @@
 
         <div class="modal hidden" id="updateModal">
             <div class="modal-content">
-                <h2 id="heading">Updating Notefull AI</h2>
+                <h2 id="heading">Updating Analytics Engine</h2>
                 <div class="percentage" id="percentage">0%</div>
                 <div class="progress-container">
                     <div class="progress-bar" id="progressBar"></div>
@@ -459,7 +571,7 @@
         </div>
         <div id="antithreatSection" class="container hidden">
             <button class="modal-button" onclick="showSection('settingsSection')">
-                <i class="fa-solid fa-chevron-left"></i>
+<i class="ti ti-chevron-left"></i>
             </button>
             <div class="section-card">
                 <h2>Analytics Engine Updater</h2>
@@ -476,7 +588,7 @@
         </div>
         <div id="privacySection" class="container hidden">
             <button class="modal-button" onclick="showSection('settingsSection')">
-                <i class="fa-solid fa-chevron-left"></i>
+<i class="ti ti-chevron-left"></i>
             </button>
             <div class="section-card">
                 <h2>Our Privacy Policy</h2>
@@ -493,7 +605,7 @@
         </div>
         <div id="creditSection" class="container hidden">
             <button class="modal-button" onclick="showSection('settingsSection')">
-                <i class="fa-solid fa-chevron-left"></i>
+<i class="ti ti-chevron-left"></i>
             </button>
             <div class="section-card">
                 <h2>Credits and links</h2>
@@ -510,11 +622,14 @@
                     <p>Report bugs to <a href="https://github.com/Anagh904a/notefull/issues" target="_blank">GitHub
                             Issues</a>
                 </div>
+                <div class="info-box">
+                    <p>Notefull AI is powered by Qwen 2.5</p>
+                </div>
             </div>
             <div class=" section-card">
                 <h2>About App</h2>
-                <div class="info-box"><img class="brand-t" src="icon.png">
-                    <h4>App Version: 26.6.0</h4>
+                <div class="info-box"><img class="brand-t" src="notefull.png">
+                    <h4>App Version: 26.7.0</h4>
                 </div>
                 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&amp;hl=en">
                     <button>App Updates</button>
@@ -524,7 +639,7 @@
 
         <div id="lockSection" class="container hidden">
             <button class="modal-button" onclick="showSection('settingsSection')"> <i
-                    class="fa-solid fa-chevron-left"></i></button>
+                    class="ti ti-chevron-left"></i></button>
             <div class="section-card">
                 <h3 id="appLockStatus">App Lock</h3>
                 <p>This uses andorid authentication(System pin, password, fingerprint, etc.)</p>
@@ -568,10 +683,10 @@
         </div>
         <div class="container hidden" id="devSection">
             <button class="modal-button" onclick="showSection('settingsSection')"> <i
-                    class="fa-solid fa-chevron-left"></i></button>
+                    class="ti ti-chevron-left"></i></button>
             <div class="section-card">
                 <h2>Developer Options</h2>
-                <p>Not recommended for everyday use</p>
+                <p>Not recommended for general people</p>
                 <div class="toggle-container">
                     <span class="toggle-label">Better Cache Overflow</span>
                     <label class="toggle-switch">
@@ -579,14 +694,13 @@
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <p id="scary" style="color: red;" class="hidden">Notefull Data Protection Protocol: LocalStorage sandbox
-                    memory threshold exceeded. <strong>Feature has been disabled to prevent future freezes</strong> </p>
+                <p id="scary" style="color: red;" class="hidden">NDSP: OS not responding <strong>Fatal Error exception, automated disbaling enabled!</strong> </p>
             </div>
 
         </div>
         <div class="container hidden" id="notificationSection">
             <button class="modal-button" onclick="showSection('settingsSection')"> <i
-                    class="fa-solid fa-chevron-left"></i></button>
+                    class="ti ti-chevron-left"></i></button>
             <div class="section-card">
                 <h2>Manage App Notifications</h2>
                 <p>Notifications permisson is required for reminders in Notefull! If you don't want to grant it, it's up
@@ -601,28 +715,24 @@
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-
-                <p>To disable this, kindly disable reminders first! (For a while, reminders CANNOT be disabled)</p>
             </div>
 
         </div>
         <div class="container hidden" id="files">
             <button class="modal-button" onclick="showSection('settingsSection')"> <i
-                    class="fa-solid fa-chevron-left"></i></button>
+                    class="ti ti-chevron-left"></i></button>
             <div class="section-card">
                 <h2>Manage AI features</h2>
-                <p>Downloads AI features from official github repo</p>
-                <div class="toggle-container">
-                    <span class="toggle-label">Allow all type of downloading of assests</span>
+                <p>Installs Notefull AI for you</p>
+                 <div class="toggle-container">
+                    <span class="toggle-label">Enable Notefull AI</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" disabled checked>
+                        <input type="checkbox" checked disabled>
 
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <p>This permission is managed by Notefull itself, this is required to load UI correctly</p>
-
-  
+                <p>Sorry, but very soon, you would be able to disable AI features because currently we are stablizing them first!</p>
 <div class="ai-compat-card" id="ai-compat-card">
   <div class="ai-compat-icon" id="ai-compat-icon">
     <svg id="ai-compat-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -637,22 +747,33 @@
   </div>
   
 </div>
- <button id="ai-button" onclick="showDownloaderModal()" class="hidden">Start Download</button>
+ <button id="ai-button" onclick="showDownloaderModal()" class="hidden"><i class="ti ti-download"></i>Start Installation</button>
+
             </div>
 
         </div>
 
     </div>
     <div id="assetsDownloader" class="modal hidden">
-        <div class="modal-content">
-            <h2>Notefull Assests Downloader</h2>
-            <h3 id="sizeTracker">Size to be downloaded</h3>
-            <p id="downloadStaus">Click start button to start downloading</p>
-            <div id="download-progress" class="download-progress"></div>
-            <button class="startBtn" onclick="startDownload()" id="startBtn">Start</button>
+    <div class="modal-content">
+                <h2 id="downloadStaus">Click start to begin installation of Notefull AI </h2>
+                <p id="sizeTracker">AI Size: 2.54 GB </p>
 
+        
+
+        
+           
+               
+                <span id="etaTracker">Estimating time…</span>
+          
+            <div id="download-progress" class="download-progress">
+            
         </div>
+            
+       
+        <button onclick="startDownload()" id="startBtn">Start</button>
     </div>
+</div>
     <div id="aiSection" class="container hidden">
         <div class="outdated-banner hidden" id="updateWarn">
             <div class="outdated-icon">
@@ -753,8 +874,8 @@
         <div class="modal-content">
             <h3 id="listPasswordModalText">Unlock List 🔒</h3>
             <input type="password" id="listPasswordInput" placeholder="Password" />
-            <button onclick="verifyListPassword()">Go <i class="fas fa-arrow-right"></i></button>
-            <button onclick="closeModal('listPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+            <button onclick="verifyListPassword()">Go <i class="ti ti-arrow-right"></i></button>
+            <button onclick="closeModal('listPasswordModal')">Close <i class="ti ti-x"></i></button>
         </div>
     </div>
     <!-- Delete List Password Modal -->
@@ -762,8 +883,8 @@
         <div class="modal-content">
             <h3 id="deleteListPasswordModalText">Delete List 🔒</h3>
             <input type="password" id="deleteListPasswordInput" placeholder="Password" />
-            <button onclick="deleteListVerifyPassword()">Go <i class="fas fa-arrow-right"></i></button>
-            <button onclick="closeModal('deleteListPasswordModal')">Close <i class="fa-solid fa-xmark"></i></button>
+            <button onclick="deleteListVerifyPassword()">Go <i class="ti ti-arrow-right"></i></button>
+            <button onclick="closeModal('deleteListPasswordModal')">Close <i class="ti ti-x"></i></button>
         </div>
     </div>
     <script type="module" src="js/capacitor.js"></script>

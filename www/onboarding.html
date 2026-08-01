@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Welcome to Notefull</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --primary-subtle: #bae6fd;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --danger: #ef4444;
+      --danger-bg: #fef2f2;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --unknown: #64748b;
+      --unknown-bg: #f1f5f9;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #e0f2fe; color: var(--text-main); opacity: 1; transition: opacity 0.45s ease; }
+body.fade-out {
+  opacity: 0;
+}
+    /* Richer animated gradient background, full bleed */
+    .bg-gradient {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(circle at 12% 15%, rgba(56,189,248,0.5), transparent 45%),
+        radial-gradient(circle at 88% 12%, rgba(129,140,248,0.4), transparent 50%),
+        radial-gradient(circle at 80% 88%, rgba(45,212,191,0.4), transparent 50%),
+        radial-gradient(circle at 15% 90%, rgba(59,130,246,0.4), transparent 45%),
+        linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
+      animation: meshShift 16s ease-in-out infinite alternate;
+    }
+    @keyframes meshShift { from { filter: saturate(105%); } to { filter: saturate(140%) hue-rotate(8deg); } }
+
+    .bg-blob { position: fixed; border-radius: 50%; filter: blur(65px); opacity: 0.45; z-index: 0; pointer-events: none; animation: drift 14s ease-in-out infinite alternate; }
+    .bg-blob.one { width: 320px; height: 320px; background: #7dd3fc; top: -120px; left: -100px; }
+    .bg-blob.two { width: 280px; height: 280px; background: #a5b4fc; bottom: -100px; right: -80px; animation-delay: -6s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(24px,-18px) scale(1.08); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
+
+    /* ---------------- Full-screen onboarding shell (edge to edge, no floating capped card) ---------------- */
+    .onboarding-wrapper {
+      position: relative; z-index: 10;
+      width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: stretch;
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .onboarding-wrapper.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      width: 100%; height: 100%;
+      padding: calc(28px + var(--safe-top)) 24px calc(24px + var(--safe-bottom));
+      box-shadow: 0 0 60px rgba(2,132,199,0.08);
+      display: flex; flex-direction: column;
+      position: relative; overflow-y: auto;
+    }
+
+    .stepper { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; flex-shrink: 0; }
+    .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary-subtle); transition: all 0.4s ease; }
+    .step-dot.active { width: 24px; border-radius: 10px; background: var(--primary); }
+
+    .step-content { display: none; flex-direction: column; align-items: center; text-align: center; height: 100%; width: 100%; animation: fadeInSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .step-content.active { display: flex; }
+    @keyframes fadeInSlide { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    .icon-badge {
+      width: 68px; height: 68px; border-radius: 20px; color: var(--primary);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.8); flex-shrink: 0;
+      animation: badgeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .icon-badge svg { width: 34px; height: 34px; }
+    @keyframes badgeIn { from { opacity: 0; transform: scale(0.6) rotate(-8deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+
+    .free-badge { display: inline-flex; align-items: center; gap: 6px; background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
+
+    h1 { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; letter-spacing: -0.4px; line-height: 1.25; }
+    p { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+
+    /* Tutorial Box */
+    .tutorial-preview { width: 100%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 14px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+    .mock-nav-bar { display: flex; justify-content: space-around; align-items: center; background: #f8fafc; padding: 10px; border-radius: 14px; border: 1px dashed var(--primary-subtle); margin-top: 8px; }
+    .mock-plus-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; box-shadow: 0 4px 12px rgba(2,132,199,0.3); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0.4); } 70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(2,132,199,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0); } }
+    .mock-options { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
+    .mock-chip { background: var(--primary-light); color: var(--primary); font-weight: 600; font-size: 12px; padding: 5px 12px; border-radius: 16px; }
+
+    /* Feature Lists */
+    .feature-list { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; margin-bottom: 16px; }
+    .feature-item { display: flex; align-items: flex-start; gap: 12px; background: #ffffff; padding: 12px 14px; border-radius: 14px; border: 1px solid #f1f5f9; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .feature-icon { font-size: 18px; margin-top: 2px; }
+    .feature-item strong { display: block; font-size: 13px; color: var(--text-main); margin-bottom: 2px; }
+    .feature-item span { font-size: 12px; color: var(--text-muted); line-height: 1.35; }
+
+    /* ---------------- Windows-11-style AI compatibility badge (circle + icon, no emoji) ---------------- */
+    .ai-compat-wrap { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
+    #ai-compat-card { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 4px 20px; }
+
+    .status-circle-outer { width: 108px; height: 108px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; background: var(--unknown-bg); transition: background 0.5s ease; }
+    #ai-compat-icon { width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--unknown); color: #fff; transition: background 0.5s ease; }
+    #ai-compat-icon svg { width: 32px; height: 32px; }
+
+    #ai-compat-card.status-ok .status-circle-outer     { background: var(--success-bg); }
+    #ai-compat-card.status-ok #ai-compat-icon           { background: var(--success); }
+    #ai-compat-card.status-warn .status-circle-outer    { background: var(--warning-bg); }
+    #ai-compat-card.status-warn #ai-compat-icon         { background: var(--warning); }
+    #ai-compat-card.status-bad .status-circle-outer     { background: var(--danger-bg); }
+    #ai-compat-card.status-bad #ai-compat-icon          { background: var(--danger); }
+    #ai-compat-card.status-unknown .status-circle-outer { background: var(--unknown-bg); }
+    #ai-compat-card.status-unknown #ai-compat-icon      { background: var(--unknown); }
+
+    #ai-compat-card.pop-in .status-circle-outer { animation: circlePop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    #ai-compat-card.pop-in #ai-compat-icon svg { animation: iconDraw 0.4s ease 0.2s both; }
+    @keyframes circlePop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+    @keyframes iconDraw { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+
+    #ai-compat-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+    #ai-compat-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+    #ai-compat-specs { display: block; font-size: 11px; color: #94a3b8; line-height: 1.6; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 10px 12px; white-space: pre-line; text-align: left; font-family: 'SFMono-Regular', Consolas, monospace; }
+
+    .loader-container { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--primary-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Buttons */
+    .btn-group-vertical { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: auto; }
+    .btn-group { display: flex; gap: 10px; width: 100%; margin-top: auto; flex-shrink: 0; }
+    .btn { flex: 1; padding: 13px 18px; border-radius: 16px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
+    .btn-primary { background: var(--primary); color: #ffffff; box-shadow: 0 4px 12px rgba(2,132,199,0.25); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-secondary { background: #f1f5f9; color: var(--text-muted); }
+    .btn-secondary:hover:not(:disabled) { background: #e2e8f0; color: var(--text-main); }
+    .btn-secondary:active { transform: scale(0.97); }
+    .btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+    /* Offline Warning Box */
+    .offline-banner { display: none; align-items: center; gap: 8px; background: var(--danger-bg); border: 1px solid #fecaca; color: var(--danger); font-size: 12px; font-weight: 600; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px; width: 100%; text-align: left; }
+    .offline-banner.active { display: flex; }
+
+    /* Embedded Frame */
+    #appFrame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; opacity: 0; transition: opacity 0.8s ease; pointer-events: none; }
+    #appFrame.visible { opacity: 1; pointer-events: all; }
+
+    /* Interactive Overlay */
+    .journey-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 99; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: calc(90px + var(--safe-bottom)); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+    .journey-overlay.active { opacity: 1; pointer-events: all; }
+
+    .tooltip-box { background: #ffffff; padding: 14px 22px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25); text-align: center; animation: bounce 2s infinite; margin-bottom: 12px; pointer-events: none; }
+    .tooltip-box h3 { font-size: 15px; font-weight: 800; color: var(--primary); }
+    .tooltip-box p { font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+    .arrow-down { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 14px solid #ffffff; margin-bottom: 12px; pointer-events: none; }
+
+    .bubbled-add-btn { width: 64px; height: 64px; border-radius: 50%; background: rgba(2, 132, 199, 0.9); color: #ffffff; font-size: 32px; font-weight: 300; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 0 8px rgba(2, 132, 199, 0.35), 0 10px 25px rgba(2, 132, 199, 0.5); animation: glowPulse 1.8s infinite; border: 3px solid #ffffff; pointer-events: auto; }
+    @keyframes glowPulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0.5), 0 10px 25px rgba(2,132,199,0.5); } 70% { transform: scale(1.1); box-shadow: 0 0 0 14px rgba(2,132,199,0), 0 10px 25px rgba(2,132,199,0.5); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0), 0 10px 25px rgba(2,132,199,0.5); } }
+  </style>
+</head>
+<body>
+
+  <div class="bg-gradient"></div>
+  <div class="bg-blob one"></div>
+  <div class="bg-blob two"></div>
+
+  <!-- Onboarding Stepper — full screen, edge to edge -->
+  <div class="onboarding-wrapper" id="onboardingCard">
+    <div class="card">
+
+      <div class="stepper">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
+
+      <!-- STEP 1: Welcome -->
+      <div class="step-content active" id="step1">
+        <div class="free-badge">✨ 100% FREE • NO ADS • NO PREMIUM</div>
+        <div class="icon-badge">
+          <img src="notefull.png" style="width: 60px; height: 60px; object-fit: contain; color: currentColor;" alt="Note Icon">
+
+        </div>
+        <h1>Welcome to Notefull</h1>
+        <p>Your private note-taking hub. Enjoy total functionality including AI features with 0 hidden costs or subscriptions.</p>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-icon">🎁</span>
+            <div><strong>100% Free Forever</strong><span>No ads, no premium tiers, no locked features.</span></div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📝</span>
+            <div><strong>Notes & Checklists</strong><span>Organize tasks with rich interactive checklists.</span></div>
+          </div>
+        </div>
+        <div class="btn-group"><button class="btn btn-primary" onclick="nextStep(2)">Get Started</button></div>
+      </div>
+
+      <!-- STEP 2: Quick Scan & Security -->
+      <div class="step-content" id="step2">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h1>Quick Scan & Privacy</h1>
+        <p>Keep sensitive ideas completely safe with our deep built-in privacy controls.</p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-icon">🔍</span>
+            <div><strong>Quick Scan Protection</strong><span>Scan for unprotected notes and lists, then secure them instantly with a password.</span></div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🔒</span>
+            <div><strong>Inbuilt Password & App Lock</strong><span>Lock individual notes or set up App Lock.</span></div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🛡️</span>
+            <div><strong>Screenshot Protection</strong><span>Enable Privacy Shield to block unauthorized screenshots.</span></div>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="nextStep(1)">Back</button>
+          <button class="btn btn-primary" onclick="nextStep(3)">Continue</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Quick Navigation Tutorial -->
+      <div class="step-content" id="step3">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </div>
+        <h1>How to Start</h1>
+        <p>In the <strong>bottom navigation bar</strong>, tap the <strong>+</strong> button to create a <strong>Note</strong> or a <strong>List</strong>.</p>
+        <div class="tutorial-preview">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight:700;">BOTTOM NAV BAR PREVIEW</span>
+          <div class="mock-nav-bar">
+            <div style="opacity:0.3">🏠</div>
+            <div class="mock-plus-btn">+</div>
+            <div style="opacity:0.3">⚙️</div>
+          </div>
+          <div class="mock-options">
+            <span class="mock-chip">📝 Note</span><span class="mock-chip">☑️ List</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="nextStep(2)">Back</button>
+          <button class="btn btn-primary" onclick="nextStep(4)">Got It!</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: AI Compatibility Checker (Windows-11-style circular status) -->
+      <div class="step-content" id="step4">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <h1>Offline AI Check</h1>
+        <p>Checking your device capabilities for offline Notefull AI features...</p>
+
+        <div class="offline-banner" id="offlineBanner">
+          ⚠️ <span>Internet is disconnected. You may not be able to download AI models.</span>
+        </div>
+
+        <div class="ai-compat-wrap">
+          <div id="aiLoader" class="loader-container">
+            <div class="spinner"></div>
+            <span class="loader-sub" id="loaderSub">Analyzing hardware...</span>
+          </div>
+
+          <div id="ai-compat-card" class="status-unknown" style="display:none;">
+            <div class="status-circle-outer"><div id="ai-compat-icon"></div></div>
+            <div id="ai-compat-title"></div>
+            <p id="ai-compat-desc"></p>
+            <span id="ai-compat-specs"></span>
+          </div>
+        </div>
+
+        <!-- Dynamic Buttons Container -->
+        <div class="btn-group-vertical" id="aiBtnGroup" style="display: none;">
+          <!-- Buttons injected dynamically via JS based on hardware capability -->
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hidden iframe pointing to index.html -->
+  <iframe id="appFrame" src="index.html"></iframe>
+
+  <!-- Overlay with Touch-responsive Bubbled Add Button -->
+  <div class="journey-overlay" id="journeyOverlay">
+    <div class="tooltip-box">
+      <h3>Click + to start your journey!</h3>
+      <p>Tap button below to launch</p>
+    </div>
+    <div class="arrow-down"></div>
+    <div class="bubbled-add-btn" onclick="handleAddButtonClick()">+</div>
+  </div>
+
+  <script>
+    /**
+     * ---------------------------------------------------------------------
+     * NotefullAI — device compatibility check, embedded directly in this
+     * page (no separate ai.js file to keep in sync). Single source of truth
+     * for "can this device run offline Notefull AI". If you also render an
+     * AI-settings section inside index.html, copy this whole IIFE there too.
+     *
+     * Reads device info from the native Capacitor plugin only. Renders into
+     * these ids: #ai-compat-card, #ai-compat-icon, #ai-compat-title,
+     * #ai-compat-desc, #ai-compat-specs, #ai-button (optional).
+     * --------------------------------------------------------------------- */
+    const NotefullAI = (() => {
+
+      const REQUIREMENTS = {
+        minimum:     { cores: 4, ramGB: 4, androidVersion: 12, storageGB: 2.7 },
+        recommended: { cores: 4, ramGB: 6, androidVersion: 12, storageGB: 2.7, require64Bit: true },
+      };
+
+      const ICONS = {
+        ok: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`,
+        warn: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="2"/>
+          <line x1="12" y1="8" x2="12" y2="13" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+          <circle cx="12" cy="16.2" r="1.15" fill="currentColor"/>
+        </svg>`,
+        bad: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`,
+        unknown: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="2"/>
+          <path d="M9.5 9.3a2.5 2.5 0 1 1 3.7 2.2c-.9.5-1.2 1-1.2 2" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="16.6" r="1.1" fill="currentColor"/>
+        </svg>`,
+      };
+
+      // How long we'll wait on the native plugin before giving up.
+      const TIMEOUT_MS = 20000;
+
+      // Missing plugin (e.g. dev/browser preview) => "unknown", never
+      // silently treated as "unsupported". A plugin call that never
+      // responds is cut off at TIMEOUT_MS and IS treated as unsupported,
+      // since we can't leave the user waiting forever.
+      async function readDeviceInfo() {
+        const plugin = window.Capacitor?.Plugins?.AIPlugin;
+        if (!plugin || typeof plugin.getDeviceInfo !== "function") {
+          return { ok: false, reason: "plugin-unavailable" };
+        }
+
+        const pluginCall = plugin.getDeviceInfo()
+          .then((info) => ({ ok: true, info }))
+          .catch((e) => {
+            console.error("[NotefullAI] AIPlugin.getDeviceInfo failed:", e);
+            return { ok: false, reason: "plugin-error", error: e };
+          });
+
+        const timeout = new Promise((resolve) => {
+          setTimeout(() => resolve({ ok: false, reason: "timeout" }), TIMEOUT_MS);
+        });
+
+        return Promise.race([pluginCall, timeout]);
+      }
+
+      function evaluate(info) {
+        const cores = Number(info.cores) || 0;
+        const ramGB = Number(info.ramGB) || 0;
+        const androidVersion = parseInt(info.androidVersion, 10) || 0;
+        const arch = info.arch || "unknown";
+        const is64Bit = arch.includes("64");
+
+        let freeGB = typeof info.freeStorageGB === "number" ? info.freeStorageGB : null;
+        let storageKnown = freeGB !== null;
+        if (freeGB === null) freeGB = 0;
+
+        const min = REQUIREMENTS.minimum;
+        const rec = REQUIREMENTS.recommended;
+
+        const meetsMinimum =
+          cores >= min.cores &&
+          ramGB >= min.ramGB &&
+          androidVersion >= min.androidVersion &&
+          (!storageKnown || freeGB >= min.storageGB);
+
+        const meetsRecommended = meetsMinimum && ramGB >= rec.ramGB && is64Bit;
+
+        let status;
+        if (meetsRecommended) status = "ok";
+        else if (meetsMinimum) status = "warn";
+        else status = "bad";
+
+        return { status, cores, ramGB, androidVersion, arch, is64Bit, freeGB, storageKnown };
+      }
+
+      function copyFor(result) {
+        const min = REQUIREMENTS.minimum;
+        const rec = REQUIREMENTS.recommended;
+        const detected = `Detected: ${result.cores} CPU cores · ${result.ramGB}GB RAM · Android ${result.androidVersion} · ${result.arch}` +
+          (result.storageKnown ? ` · ${result.freeGB.toFixed(1)}GB free` : " · free space unknown");
+        const required = `Minimum: ${min.cores} cores / ${min.ramGB}GB RAM / Android ${min.androidVersion} / ${min.storageGB}GB free — Recommended: ${rec.ramGB}GB RAM / 64-bit`;
+
+        switch (result.status) {
+          case "ok":
+            return {
+              title: "Your device supports AI features",
+              desc: "Everything checks out. Download the AI files to enable offline features.",
+              specs: `${detected}\n${required}`,
+              buttonLabel: "Download AI now",
+            };
+          case "warn":
+            return {
+              title: "AI features will run, but slowly",
+              desc: "Your device meets the minimum but not the recommended specs. Expect slower responses, and occasional lag.",
+              specs: `${detected}\n${required}`,
+              buttonLabel: "Download anyway",
+            };
+          case "bad":
+            if (result.reason === "timeout") {
+              return {
+                title: "Device not supported",
+                desc: "The compatibility check didn't respond within 20 seconds, so this device is being treated as unsupported. Offline AI features are disabled to prevent crashes.",
+                specs: `Couldn't read device specs in time.\n${required}`,
+                buttonLabel: null,
+              };
+            }
+            return {
+              title: "Device not supported",
+              desc: "Your device doesn't meet the minimum requirements for offline AI. AI features are disabled to prevent crashes — you can still use every other part of Notefull.",
+              specs: `${detected}\n${required}`,
+              buttonLabel: null,
+            };
+          default:
+            return {
+              title: "Couldn't check this device",
+              desc: "We couldn't read your device's specs. You can try again, or continue without AI features for now.",
+              specs: required,
+              buttonLabel: "Try again",
+            };
+        }
+      }
+
+      function render(status, copy) {
+        const card = document.getElementById("ai-compat-card");
+        const icon = document.getElementById("ai-compat-icon");
+        const title = document.getElementById("ai-compat-title");
+        const desc = document.getElementById("ai-compat-desc");
+        const specs = document.getElementById("ai-compat-specs");
+        const button = document.getElementById("ai-button");
+
+        if (card) {
+          card.classList.remove("status-ok", "status-warn", "status-bad", "status-unknown");
+          card.classList.add(`status-${status}`);
+          card.classList.remove("pop-in");
+          void card.offsetWidth; // reflow to restart the pop-in animation
+          card.classList.add("pop-in");
+        }
+        if (icon) icon.innerHTML = ICONS[status] || ICONS.unknown;
+        if (title) title.textContent = copy.title;
+        if (desc) desc.textContent = copy.desc;
+        if (specs) specs.textContent = copy.specs;
+        if (button) {
+          if (copy.buttonLabel) {
+            button.textContent = copy.buttonLabel;
+            button.hidden = false;
+            button.disabled = false;
+          } else {
+            button.hidden = true;
+          }
+        }
+      }
+
+      async function checkCompatibility() {
+        const { ok, info, reason } = await readDeviceInfo();
+
+        if (!ok) {
+          const status = reason === "timeout" ? "bad" : "unknown";
+          const copy = copyFor({ status, reason });
+          render(status, copy);
+          return { status, reason };
+        }
+
+        const result = evaluate(info);
+        const copy = copyFor(result);
+        render(result.status, copy);
+        return result;
+      }
+
+      return { checkCompatibility, REQUIREMENTS };
+    })();
+
+    /* ------------------------- Onboarding flow ------------------------- */
+    let currentStep = 1;
+    let aiChecked = false;
+
+    function checkNetworkStatus() {
+      const isOnline = navigator.onLine;
+      const offlineBanner = document.getElementById('offlineBanner');
+      offlineBanner.classList.toggle('active', !isOnline);
+    }
+    window.addEventListener('online', checkNetworkStatus);
+    window.addEventListener('offline', checkNetworkStatus);
+    window.addEventListener('DOMContentLoaded', checkNetworkStatus);
+
+    function nextStep(stepNumber) {
+      document.getElementById(`step${currentStep}`).classList.remove('active');
+
+      const dots = document.querySelectorAll('.step-dot');
+      dots[currentStep - 1].classList.remove('active');
+
+      currentStep = stepNumber;
+
+      document.getElementById(`step${currentStep}`).classList.add('active');
+      dots[currentStep - 1].classList.add('active');
+
+      if (currentStep === 4) {
+        checkNetworkStatus();
+        if (!aiChecked) runAiCompatibilityCheck();
+      }
+    }
+
+    async function runAiCompatibilityCheck() {
+      aiChecked = true;
+      const loader = document.getElementById('aiLoader');
+      const card = document.getElementById('ai-compat-card');
+      const btnGroup = document.getElementById('aiBtnGroup');
+
+      // Let the person know a 20s ceiling is in play, not an indefinite hang
+      const slowNotice = setTimeout(() => {
+        const sub = document.getElementById('loaderSub');
+        if (sub) sub.textContent = 'Still checking… this can take up to 20s';
+      }, 6000);
+
+      const result = await NotefullAI.checkCompatibility();
+      clearTimeout(slowNotice);
+
+      loader.style.display = 'none';
+      card.style.display = 'flex';
+      btnGroup.style.display = 'flex';
+
+      if (result.status === 'bad') {
+        // Unsupported (including a 20s timeout): no download offer
+        btnGroup.innerHTML = `
+          <button class="btn btn-primary" onclick="finishOnboarding(false)">OK, continue without AI</button>
+        `;
+      } else if (result.status === 'unknown') {
+        btnGroup.innerHTML = `
+          <button class="btn btn-primary" onclick="finishOnboarding(false)">Continue</button>
+        `;
+      } else if (result.status === 'warn') {
+        btnGroup.innerHTML = `
+          <button class="btn btn-primary" onclick="finishOnboarding(true)">Download anyway</button>
+          <button class="btn btn-secondary" onclick="finishOnboarding(false)">Don't install AI features</button>
+        `;
+      } else {
+        btnGroup.innerHTML = `
+          <button class="btn btn-primary" onclick="finishOnboarding(true)">Download AI now</button>
+          <button class="btn btn-secondary" onclick="finishOnboarding(false)">I will download later</button>
+        `;
+      }
+    }
+
+function finishOnboarding(shouldDownloadAi) {
+  const card = document.getElementById('onboardingCard');
+
+  card.classList.add('hidden');
+
+  localStorage.setItem('notefullOnboarding', 'true');
+
+  setTimeout(() => {
+    document.body.classList.add('fade-out');
+
+    setTimeout(() => {
+      window.location.replace('index.html');
+    }, 450);
+  }, 400);
+}
+  </script>
+</body>
+</html>

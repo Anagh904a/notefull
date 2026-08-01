@@ -57,6 +57,9 @@ function syncDataWithUpdates() {
 
 localStorage.setItem("syncState", "26.6.0");
 setTimeout(() => {
-  showToast('Updated Notefull assets to 26.6.0 Update!');
-}, 4000);
+    const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
+  if (keywords.length) {
+  showToast('Updated Notefull to v26.7!');
+  }
+}, 1000);
 } 

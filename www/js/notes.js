@@ -132,8 +132,8 @@ async function deleteThisNote() {
     showSection('combinedContainer');
     currentNoteId = null;
     document.getElementById("navBar").classList.remove("hidden");
-displayDeletedNotes();
-  rebuildDeletedNotes();
+    displayDeletedNotes();
+    rebuildDeletedNotes();
 
   } else {
     cancelNote();
@@ -219,16 +219,154 @@ async function saveNote() {
   displayNotes();
   showSection('combinedContainer');
   currentNoteId = null;
-  
+
   const navBar = document.getElementById("navBar");
   if (navBar) navBar.classList.remove("hidden");
 }
 
 function correctNote() {
-  showToastWarn('This feature is under development!');
-  const sound = document.getElementById("alertSound");
-  sound.play();
+   if (!window.aiReady) {}
+  if (!currentNoteId) {
+    showToastError('Please save the note to use AI features');
+    return;
+  }
+  const note = notes.find(n => n.id === currentNoteId);
+  if (!note) {
+    showToastError('Invalid Note detected!');
+    return;
+  }
+
+  const noteContent = document.getElementById('noteContent');
+
+  // ← FIX 1: read live DOM text, not the stored note object —
+  // this is the actual unsaved content the user is looking at right now,
+  // so it can never mismatch what's on screen
+  const content = noteContent.innerText;
+
+const prompt = `<|turn>user
+You are Notefull AI. Fix grammer and spelling mistakes of given note text
+
+Strict Rules:
+1. The correction must not include new details. It should be ONLY the corrected grammer version that will be your reponse.
+2. Your response just contain corrected note text. Nothing else, as your response will be new note text, it should not change menaing of text at all.
+3. DO NOT ADD DETAILS OR REMOVE DETAILS
+
+Note Text: ${content}
+<turn|>
+<|turn>model
+`;
+
+
+  showAiThinkingModal('Correcting note...');
+window.Capacitor.Plugins.AIPlugin.ask({ prompt, shortAnswer: false }).then(result => {
+
+    if (result?.answer) {
+      noteContent.innerText = result.answer;
+      closeAiThinkingModal();
+      showToast('Note corrected successfully! Save Note to save changes');
+    } else {
+      closeAiThinkingModal();
+      return;
+    }
+
+  }).catch(err => {
+    closeAiThinkingModal();
+    showToastError('Failed to correct Note')
+  });
+
+}
+
+function summarizeNote() {
+  if (!currentNoteId) {
+    showToastError('Please save the note to use AI features');
+    return;
+  }
+  const note = notes.find(n => n.id === currentNoteId);
+  if (!note) {
+    showToastError('Invalid Note detected!');
+    return;
+  }
+
+  const noteContent = document.getElementById('noteContent');
+  const content = noteContent.innerText;
+const prompt = `
+<|turn>user
+Summarize the given Note Text
+
+RULE: Do not add details or remove any details. Just provide the summary of the Note
+
+Note Text: ${content}
+<turn|>
+<|turn>model
+`;
+;
+
+
+  showAiThinkingModal('Summarizing...');
+  window.Capacitor.Plugins.AIPlugin.ask({ prompt, shortAnswer: false }).then(result => {
+
+   if (result?.answer) {
+  closeAiThinkingModal();
+  setTimeout(() => showResultsModal(result.answer), 650); // wait for the close animation to finish
+} else {
+  closeAiThinkingModal();
   return;
+}
+
+  }).catch(err => {
+    closeAiThinkingModal();
+    showToastError('Failed to Summarize Note');
+  });
+}
+function suggestTitle() {
+  if (!currentNoteId) {
+    showToastError('Please save the note to use AI features');
+    return;
+  }
+  const note = notes.find(n => n.id === currentNoteId);
+  if (!note) {
+    showToastError('Invalid Note detected!');
+    return;
+  }
+
+  const noteContent = document.getElementById('noteContent');
+  const content = noteContent.innerText;
+const prompt = `<|turn>user
+You are Notefull AI.
+
+Generate a short, meaningful title for the following note.
+
+Rules:
+- Return ONLY the title.
+- Do not use quotation marks.
+- Do not explain your answer.
+- Keep it under 6 words.
+- Preserve the note's meaning.
+
+Note:
+
+${content}
+<turn|>
+<|turn>model
+`;
+
+
+
+  showAiThinkingModal('Thinking...');
+  window.Capacitor.Plugins.AIPlugin.ask({ prompt, shortAnswer: true }).then(result => {
+
+   if (result?.answer) {
+  closeAiThinkingModal();
+document.getElementById('noteTitle').value = result.answer.trim();
+} else {
+  closeAiThinkingModal();
+  return;
+}
+
+  }).catch(err => {
+    closeAiThinkingModal();
+    showToastError('Failed to Summarize Note');
+  });
 }
 function displayNotes() {
   const container = document.getElementById("notesContainer");
@@ -247,13 +385,30 @@ function displayNotes() {
     const noteDiv = document.createElement("div");
     const noteDate = new Date(note.date);
     const formattedDate = formatDate(noteDate);
-    const lockIndicator = note.password && note.password !== "" ? ' <div class="lock-indicator"><i class="fas fa-lock"></i></div>' : "";
+    const lockIndicator = note.password && note.password !== "" ? '<div class="lock-indicator"><i class="ti ti-lock"></i></div>' : "";
     const remainderElement = note.remainderEnabled === true && note.remainderTime
       ? `<div class="remainder-pill" id="note-pill-${note.id}">
-      <i class="fa-solid fa-hourglass"></i> 
+      <i class="ti ti-hourglass"></i> 
          <span class="remainder-text" id="note-remainder-${note.id}">     ${getReminderText(note.remainderTime)}</span>
        </div>`
       : "";
+      let noteText = "";
+      if (!note) {
+noteText = "Inavlid Note";
+}
+      const isTooLong = note.content && note.content.length > 100;
+ const htmlRegex = /<\/?(br|b|strong|i|em|span|u|ins|ul|ol|li)(\s[^>]*)?\/?>/i;
+  const HTML = htmlRegex.test(note.content);
+ if (note.password) {
+noteText = "Locked Note";
+} else if (isTooLong) {
+noteText = "Content Too Large To Display";
+} else if (HTML) {
+  noteText = "Formatted note text cannot be displayed";
+} else {
+  noteText = note.content || "Empty Note";
+}
+
 
 
 
@@ -271,15 +426,14 @@ function displayNotes() {
     <h4>${note.title}</h4>
    ${lockIndicator}
   </div>
-  <div class="note-text">
-  ${note.password ? "Protected Note" : note.content}
-  </div>
+<div class="note-text">${noteText}</div>
   </div>
   </div>
     `;
     container.appendChild(noteDiv);
   });
 }
+
 function openNote(noteId) {
   const note = notesMap[noteId];
   currentNoteId = noteId;
@@ -317,9 +471,41 @@ function verifyPassword() {
     showToastError("Incorrect password");
     const sound = document.getElementById("errorSound");
     sound.play();
+    document.getElementById('noteForget').classList.remove('hidden')
   }
   input.value = "";
 }
+
+async function forgetPassword() {
+  const modal = document.getElementById("passwordModal");
+  if (!modal) return;
+  
+  const noteId = modal.dataset.noteId;
+  const note = notesMap[noteId];
+  if (!note) return;
+
+  const appLockState = localStorage.getItem("appLockEnabled");
+
+  // 1. Proactively block if security framework is disabled
+  if (appLockState === "false" || appLockState === null) {
+    showToastError("Sorry, we cannot verify it's you. App lock is disabled!");
+    return; 
+  }
+
+  // 2. Wait for the secure boolean response from your biometrics layer [1]
+  const isVerified = await authUser(`Verify identity to open ${note.title}`);
+
+  // 3. Only show data if the verification returned true [1]
+  if (isVerified) {
+    showNoteContent(note);
+    showToast(`Your Password for ${note.title} is: ${note.password}`);
+
+  } else {
+      showToastError("Access denied: Biometric verification failed.");
+  }
+}
+
+
 
 function showNoteContent(note) {
   document.getElementById("noteTitle").value = note.title;

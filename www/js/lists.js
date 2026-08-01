@@ -37,7 +37,7 @@ function displayChecklist() {
     oninput="updateItemName('${item.id}', this.value)"
     placeholder="Type your task here..."
     style="${item.checked ? 'text-decoration: line-through; color: #94a3b8;' : ''}">
-  <button onclick="removeItem('${item.id}')"><i class="fas fa-trash"></i></button>
+  <button onclick="removeItem('${item.id}')"><i class="ti ti-trash"></i></button>
 </div>
 `;
   checklistContainer.appendChild(itemDiv);
@@ -82,7 +82,7 @@ function displayLists() {
       const listDiv = document.createElement("div");
       const listDate = new Date(list.date);
       const formattedDate = formatDate(listDate);
-      const loclIndicator = list.password && list.password !== "" ? ' <i class="fas fa-lock"></i>' : "";
+      const loclIndicator = list.password && list.password !== "" ? ' <i class="ti ti-lock"></i>' : "";
       let progressHTML = "";
       if (list.items && list.items.length > 0) {
         const total = list.items.length;
@@ -97,7 +97,7 @@ function displayLists() {
       }
       const listRemainderElement = list.remainderEnabled
       ? `<div class="remainder-pill" id="list-pill-${list.id}">
-      <i class="fa-solid fa-hourglass"></i> 
+      <i class="ti ti-hourglass"></i> 
          <span class="remainder-text" id="list-remainder-${list.id}">  ${getReminderText(list.remainderTime)}</span>
        </div>`
       : "";
@@ -105,7 +105,7 @@ function displayLists() {
       <div class="list-wrapper" id="listWrapper" data-id="${list.id}">
             <input type="checkbox" id="selectBoxList" onchange="selectList('${list.id}')" class="select-box hidden">
   <div class="list" onclick="openList('${list.id}')">   
-   <i class="fas fa-list"></i>
+   <i class="ti ti-list"></i>
   
    <span class="note-date">${formattedDate}</span>
    ${listRemainderElement}
@@ -265,5 +265,7 @@ const listId = modal.dataset.listId;
     showToastError("Incorrect password!");
     const sound = document.getElementById("errorSound");
     sound.play();
+    const btn = document.getElementById('noteForget');
+    btn.classList.remove('hidden');
   }
 }

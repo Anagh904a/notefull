@@ -113,14 +113,15 @@ async function startAiScan() {
   // ── Keywords from localStorage only — no fallback ─────────────
   const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
   if (!keywords.length) {
-    showToast('Welcome to Notefull! Configuring Security for you...');
+    showToast('Welcome to Notefull v26.7! Please Rate us on Playstore');
     startUpdate();
+    document.getElementById('updateModal').classList.add('hidden');
     document.getElementById('updateWarn').classList.add('hidden');
     return;
   }
 
   if (typeof keywords[0] !== "object") {
-    showToastWarn('SECURTY CORRUPTION DETECTED: Attempting to recover');
+    showToastWarn('NDSP: Invalid security keys detected: Attempting to update..');
      startUpdate();
     document.getElementById('updateWarn').classList.add('hidden');
     return;
@@ -329,12 +330,10 @@ const actionFn= item.source==="Note" ? `openNote('${id}')` : `openList('${id}')`
       ? `All ${total} items are clean!`
       : `${threats} sensitive item${threats !== 1 ? "s" : ""} found`;
 if (threats === 0 && _threats.length === 0) {
-  // Both are 0
-  E.resultsList.innerHTML = `<div class="empty-state"><p>✅ You're Fully Protected</p></div>`;
+E.resultsList.innerHTML = `<div class="empty-state"><p class="protected"><i class="ti ti-circle-check" style="color:#22c55e;"></i> You're Fully Protected</p></div>`;
 } else if (threats === 0 && _threats.length !== 0) {
-  // threats is 0, but _threats has items
-  E.resultsList.innerHTML = `<div class="empty-state"><p>⚠️ Kindly perform the below actions for extra protection!</p></div>`;
-}
+  E.resultsList.innerHTML = `<div class="empty-state"><p class="warn"><i class="ti ti-exclamation-circle" style="color:#f59e0b;"></i> You're safe but vulnerable. Perform Recommended Actions</p></div>`;
+} 
     if (_threats.length>0) {
 for(const threat of _threats){
  const div = document.createElement("div");

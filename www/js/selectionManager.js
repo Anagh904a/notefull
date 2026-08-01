@@ -19,14 +19,13 @@ let selectedCount = 0;
 function showSelectionMode() {
     const toolbar = document.getElementById('toolbar');
     const nav = document.getElementById('navBar');
-    const search = document.getElementById('header');
-    const sort = document.getElementById('sort');
+    const sort = document.getElementById('titleBar');
     toolbar.classList.add('active');
     nav.classList.add('hidden');
-    search.classList.add('hidden');
-    sort.style.paddingTop = "80px";
+document.getElementById('items-container').style.marginTop = "60px";
+    sort.classList.add('hidden');
     selectionMode = true;
-    document.getElementById('selectionBtn').classList.add('hidden');
+   
 
     const noteWrapper = document.querySelectorAll('.note-wrapper');
     const listWrapper = document.querySelectorAll(".list-wrapper");
@@ -61,13 +60,11 @@ deletedNotes.forEach(l => deletedNotesMap[l.id] = l);
 function closeSelectionMode() {
     const toolbar = document.getElementById('toolbar');
     const nav = document.getElementById('navBar');
-    const search = document.getElementById('header');
-    const sort = document.getElementById('sort');
+    const sort = document.getElementById('titleBar');
     toolbar.classList.remove('active');
     nav.classList.remove('hidden');
-    search.classList.remove('hidden');
-    sort.style.paddingTop = "0px";
-    document.getElementById("selectionBtn").classList.remove("hidden");
+    sort.classList.remove('hidden');
+    document.getElementById('items-container').style.marginTop = "0px";
     selectionMode = false;
     const noteWrapper = document.querySelectorAll('.note-wrapper');
     const listWrapper = document.querySelectorAll('.list-wrapper');
@@ -493,7 +490,7 @@ function displayDeletedNotes() {
       const noteDiv = document.createElement("div");
       const noteDate = new Date(note.date);
       const formattedDate = formatDate(noteDate);
-      const lockIndicator = note.password && note.password !== "" ? ' <div class="lock-indicator"><i class="fas fa-lock"></i></div>' : "";
+      const lockIndicator = note.password && note.password !== "" ? ' <div class="lock-indicator"><i class="ti ti-lock"></i></div>' : "";
     
       noteDiv.innerHTML = `
       <div class="trash-note-wrapper" data-id="${note.id}">
@@ -526,7 +523,7 @@ function displayDeletedLists() {
       const listDiv = document.createElement("div");
       const listDate = new Date(list.date);
       const formattedDate = formatDate(listDate);
-      const loclIndicator = list.password && list.password !== "" ? ' <div class="lock-indicator"><i class="fas fa-lock"></i></div>' : "";
+      const loclIndicator = list.password && list.password !== "" ? ' <div class="lock-indicator"><i class="ti ti-lock"></i></div>' : "";
      let progressHTML = "";
       if (list.items && list.items.length > 0) {
         const total = list.items.length;
@@ -543,7 +540,7 @@ function displayDeletedLists() {
       <div class="trash-list-wrapper" data-id="${list.id}">
       <input type="checkbox" id="selectBoxList" onchange="selectDeletedList('${list.id}')" class="select-box-trash hidden">
      <div class="trash-list">
-     <i class="fas fa-list"></i>
+     <i class="ti ti-list"></i>
   <span class="list-date">${formattedDate}</span>
   <div class="note-header">
     <h4>${list.title}</h4>
