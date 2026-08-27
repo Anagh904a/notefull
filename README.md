@@ -1,95 +1,105 @@
 # Notefull
 
-Notefull is a free, open-source notes and lists app for Android — built to be simple, private, and lightweight. No accounts, no ads, no tracking. Just your notes, on your device.
+[![Platform: Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://play.google.com/store/apps/details?id=app.notefull.com)
+[![Version: v8](https://img.shields.io/badge/Release-v8%20(Development)-6366f1)](#-whats-new-in-v8)
+[![License: Open Source](https://img.shields.io/badge/License-Open%20Source-blue.svg)](LICENSE)
+[![Zero Ads / No Tracking](https://img.shields.io/badge/Privacy-100%25%20Offline%20%26%20Ad--Free-success)](#-privacy--local-first)
+
+Notefull is a fast, lightweight, and 100% open-source notes and lists app for Android. Built with a local-first philosophy: **no accounts, no cloud dependencies, no ads, and zero tracking**. Your data stays on your device.
 
 ---
 
-## ✨ What's New in v6 (Summer Update)
+## 📥 Download & Install
 
-Notefull has been overhauled with major improvements across the app. It now introduces smarter AI search, a complete reminder system, a new trash system (recycle bin), redesigned interfaces, and many quality-of-life improvements.
+| Distribution Channel | Link / Status | Details |
+| :--- | :--- | :--- |
+| **Google Play Store** | [![Get it on Google Play](https://img.shields.io/badge/Google_Play-414141?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=app.notefull.com) | Official stable releases |
+| **GitHub Releases** | [**Download Latest APK**](https://github.com/Anagh904a/Notefull/releases/latest) | Standalone direct APK install |
+| **Beta Channel** | [**Download Beta APK**](https://github.com/Anagh904a/Notefull/releases) | Pre-release builds *(See AI note below)* |
 
-This update includes:
-
-* A smoother and faster experience with revamped UIs
-* Smarter search capabilities
-* A complete reminder system
-* A new trash/recycle bin system for recovering deleted notes and lists
-* Many bug fixes and stability improvements
+> ⚠️ **Beta Build Note:** On-device AI search features are temporarily unavailable in current Beta builds while the underlying execution engine transitions to **Google LiteRT** for enhanced efficiency and speed.
 
 ---
 
-## ⏰ Reminders
+## ✨ What's New in v8
 
-Set reminders on any note or list, and Notefull will notify you directly on your device when the time arrives.
+The v8 release series focuses on local collaboration, networking foundations, and next-generation inference architectures:
 
-No accounts, no cloud sync, and no external services are required — reminders run completely locally on your phone.
-
-*Note: Notifications may occasionally be slightly delayed due to Android system restrictions designed to optimize battery usage.*
-
----
-
-## 🗑️ Trash (Recycle Bin)
-
-Deleted something by mistake? Notefull now includes a Trash system.
-
-You can recover deleted notes and lists, manage multiple deleted items, or permanently remove them when you're ready. Think twice before deleting your data — your important thoughts can now be restored.
+* **P2P Networking Foundation:** Introduction of decentralized peer-to-peer (P2P) protocol layers designed for direct device-to-device synchronization without centralized cloud servers.
+* **Shared Lists (Preview / UI Ready):** Complete interface support for collaborative list sharing. *(Currently under active development — backend synchronization logic is in progress, but the UI is fully accessible for testing and inspection).*
+* **AI Engine Migration (LiteRT):** Ongoing architectural migration to Google's LiteRT runtime for faster model loading, reduced memory usage, and enhanced on-device inference.
+* **UI & Performance Enhancements:** Smoother interactions, reduced baseline RAM footprint, and extensive stability fixes across note rendering.
 
 ---
 
-## 🤖 Smart AI Search *(Optional)*
+## ⚡ Key Features
 
-Notefull now includes an optional smart AI search feature. Instead of only matching keywords, you can ask questions in natural language — such as *"when is my meeting tomorrow?"* — and it will search your notes to find relevant answers.
+### 🤝 Shared Lists & P2P Foundation *(Under Development)*
+Collaborate directly without giving away your personal data. 
+* Uses a decentralized, peer-to-peer foundation to share checklists and task boards directly between devices.
+* **Current Status:** The user interface code is fully designed and functional in the v8 codebase; network sync protocols are being actively refined.
 
-A few important things to know:
+### ⏰ Offline Reminders
+Set precise notifications on any note or list item.
+* Runs entirely through local Android system alarms.
+* No accounts, push-notification servers, or background internet access required.
+* *(Note: Delivery timing may vary slightly based on OEM battery optimization policies).*
 
-* **It's optional.** AI Search is not included in the base app installation. You choose whether to enable it, and the required AI model is downloaded only when you activate the feature. This keeps Notefull lightweight for users who do not need AI features.
-* **It's completely private.** AI processing happens directly on your device. Your notes are never uploaded, sent to servers, or processed online. Once the model is downloaded, no internet connection is required.
-* **It's completely free.** There are no credits, subscriptions, or usage limits. You can use AI Search freely because everything runs locally on your device.
-* **Performance limitations exist.** AI features use local AI models through **llama.cpp**, meaning performance depends heavily on your device hardware. These features are recommended for devices with at least **6 GB RAM** for the best experience. Devices with **4 GB RAM may also run AI features**, but users may experience significant performance issues, slower responses, or increased memory usage depending on the size of their notes and lists.
-* **It's still actively improving.** Local AI is a complex technology, and this feature is still in active development. Improvements, optimizations, and fixes will continue to arrive over time.
+### 🗑️ Trash & Recovery System
+Accidentally deleted a critical note or list? 
+* Dedicated recycle bin allows restoring deleted items with full formatting.
+* Granular controls to restore individually, batch recover, or permanently purge items.
 
-**Credit where it's due:** Notefull's AI features are powered by the open-source **Qwen 2.5 3B Instruct** model from Hugging Face, developed by Alibaba Cloud's Qwen team. The model is licensed under Apache 2.0 and is used with respect for its open-source license. AI inference is powered locally using **llama.cpp**, an open-source project that enables efficient on-device AI execution.
-
----
-
-## 📝 Upcoming AI Features & Improvements
-
-AI features in Notefull are still actively being developed. Future improvements will include more intelligent note understanding, better search accuracy, and additional productivity features.
-
-Formatting options and enhancements are also currently in development and will be introduced in future updates to improve the note-writing experience.
-
----
-
-## 📱 Will it work on my phone?
-
-Notefull is designed to run well on a wide range of Android devices.
-
-* Works on Android 7 and above (Android 10+ recommended for the best experience)
-* No special hardware is required for the base app
-* The base app remains lightweight and only grows as you add more notes and lists
-* Optional AI features require a one-time model download
-* AI features work best on devices with 6 GB RAM or more
-* 4 GB RAM devices may run AI features but can experience heavy performance limitations due to local AI processing requirements
+### 🤖 On-Device AI Natural Language Search *(Optional)*
+Search your notes semantically using natural language (e.g., *"where did I save the WiFi password?"* or *"what tasks are due this Friday?"*).
+* **100% Local & Private:** Inference runs exclusively on your device. Zero telemetry, zero external API calls, zero server processing.
+* **Modular & Lightweight:** The base app excludes heavy AI binaries. The model is downloaded strictly on demand if you choose to activate it.
+* **Completely Free:** No API keys, no subscription tiers, no usage caps.
+* **Open Source Model:** Powered by the open-weights **Qwen 2.5 3B Instruct** model, utilizing local on-device runtimes.
 
 ---
 
-## 🔓 Open Source
+## 📱 Hardware & Compatibility Requirements
 
-Notefull is fully open-source. You are welcome to explore the code, suggest improvements, contribute ideas, or report issues.
-
----
-
-## 📄 About Me
-
-Notefull is developed by a class 9 student solo developer — that's me.
-
-I created Notefull because many modern apps have become overloaded with advertisements, subscriptions, unnecessary restrictions, and forced AI features. My goal was to build a notes app that is transparent, private, lightweight, and enjoyable to use while still offering modern features like optional on-device AI.
+| Component | Minimum Specification | Recommended Specification |
+| :--- | :--- | :--- |
+| **OS Version** | Android 7.0 (Nougat) | Android 10.0+ |
+| **Base App Memory** | 300 MB RAM | 700 MB RAM |
+| **Optional AI Features** | 2 GB RAM *(May experience latency)* | **4 GB+ RAM** |
+| **Storage** | ~25 MB (Base app) | ~1 GB (With optional AI model) |
 
 ---
 
-## 🚀 What's Next
+## 🛡️ Privacy & Security Principles
 
-Notefull is actively being improved with more stability updates, performance optimizations, new features, formatting options, and improvements to existing systems.
+* **Zero Tracking:** No tracking SDKs, no behavioral telemetry, and no ad libraries.
+* **Offline-First:** All notes, lists, and metadata are stored locally in SQLite on your device storage.
+* **No Account Lock-In:** Open the app and start writing immediately. No logins, phone numbers, or passwords required.
 
-The goal is to keep making Notefull a powerful yet simple notes experience while keeping privacy, transparency, and user control at the center.
+---
 
+## 🧑‍💻 About the Developer
+
+Notefull is an independent, non-profit project engineered and maintained by **Anagh Manglick**, a Class 9 student solo developer (Age 14).
+
+> *"Modern utility software has become bogged down by forced cloud logins, invasive telemetry, mandatory recurring subscriptions, and intrusive ads. Notefull is built to prove that productivity tools can remain private, performant, completely open-source, and user-first."*
+
+---
+
+## 🤝 Contributing & Community
+
+Contributions, issue reports, and architecture discussions are warmly welcomed:
+
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+For bugs and feature requests, open an issue in the [GitHub Issues](https://github.com/Anagh904a/Notefull/issues) tracker.
+
+---
+
+## 📄 License
+
+This project is licensed under the open-source **MIT License** (or Apache 2.0 where specified). Open-source models and external libraries remain under their respective licenses.

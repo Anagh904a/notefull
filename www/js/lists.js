@@ -8,6 +8,7 @@ listsMap = {};
 lists.forEach(l => listsMap[l.id] = l);
 updateAllPillsDynamically();
 }
+
 function displayChecklist() {
   const checklistContainer = document.getElementById("checklistContainer");
   const noItemsMessage = document.getElementById("items-no");

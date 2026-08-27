@@ -10,6 +10,10 @@ window.Capacitor.Plugins.AIPlugin.addListener('aiStatus', (data) => {
     }
 });
 
+AIPlugin.addListener('aiNativeLog', ({ message }) => {
+    console.log(`[AI Native] ${message}`);
+});
+
 function searchNotes() {
     const searchInput = document.getElementById('searchInput');
     if (!searchInput) return; // Prevent crash if element is temporarily missing during DOM paint
@@ -22,6 +26,9 @@ function searchNotes() {
             const sortEl = document.getElementById('sort');
             if (sortEl) sortEl.classList.remove('hidden');
             hideAiResponse();
+        
+              showToastError('AI features have been temporarily disabled due to instablity');
+
             if (typeof displayNotes === 'function') displayNotes();
             if (typeof displayLists === 'function') displayLists();
         }
@@ -111,13 +118,13 @@ if (!isUnlockedInStorage) {
         const thisRequestId = ++currentAiRequestId;
 
         // FIXED: Replaced legacy layout selectors with clean Gemma 4 turns
-        const prompt = `<|turn>system
+const prompt = `<|im_start|>system
 You are Notefull AI, the built-in assistant for the Notefull notes and lists app. Answer the user's question naturally and concisely. If you do not know the answer, say so.
-<turn|>
-<|turn>user
+<|im_end|>
+<|im_start|>user
 ${cleanQuery}
-<turn|>
-<|turn>model
+<|im_end|>
+<|im_start|>assistant
 `;
 
         window.Capacitor.Plugins.AIPlugin.ask({ prompt })
@@ -185,7 +192,7 @@ ${cleanQuery}
     if (!window.aiReady) return;
 
     // --- 4. OPTIMIZED GEMMA 4 RAG INSTRUCT TEMPLATE ---
-    const prompt = `<|turn>system
+   const prompt = `<|im_start|>system
 You are Notefull AI, the built-in assistant for the Notefull notes and lists app.
 
 Strict Rules:
@@ -193,17 +200,16 @@ Strict Rules:
 2. If the answer is completely missing from the notes and lists, state that you cannot find this information in a short, natural way. Do not invent details.
 3. Keep answers factual, direct, and conversational.
 4. Answer directly. Do not repeat the question back or output raw list contents — extract only what answers the question.
-<turn|>
-<|turn>user
+<|im_end|>
+<|im_start|>user
 [DATA]
 ${contextText}
 [/DATA]
 
 Question: ${query}
-<turn|>
-<|turn>model
+<|im_end|>
+<|im_start|>assistant
 `;
-
     window.Capacitor.Plugins.AIPlugin.ask({ prompt }).then(result => {
         if (thisRequestId !== currentAiRequestId) return;
         if (result?.answer) {

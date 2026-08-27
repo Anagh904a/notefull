@@ -274,6 +274,39 @@ function loadSettingsUI() {
 function showFormatMsg() {
   showToastWarn('Formatting features are under development')
 }
+
+function handleTermsCheckbox(isChecked) {
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) {
+    startBtn.disabled = !isChecked;
+  }
+}
+
+function setModalViewState(state) {
+  const readyView = document.getElementById('dlReadyState');
+  const activeView = document.getElementById('dlActiveState');
+  const doneView = document.getElementById('dlDoneState');
+  const title = document.getElementById('assetsDownloadStatus');
+  const desc = document.getElementById('assetsDownloadDesc');
+
+  readyView?.classList.remove('active');
+  activeView?.classList.remove('active');
+  doneView?.classList.remove('active');
+
+  if (state === 'ready') {
+    readyView?.classList.add('active');
+    if (title) title.textContent = 'Install Notefull AI';
+    if (desc) desc.textContent = 'Download on-device AI models for private, fully offline smart notes and task analysis.';
+  } else if (state === 'active') {
+    activeView?.classList.add('active');
+    if (title) title.textContent = 'Downloading AI Assets…';
+    if (desc) desc.textContent = 'Please keep Notefull open until download and verification finish.';
+  } else if (state === 'done') {
+    doneView?.classList.add('active');
+    if (title) title.textContent = 'Ready to Use!';
+    if (desc) desc.textContent = 'The AI model has been installed and verified on your device.';
+  }
+}
 function showNotePassword() {
  hideMenu();
   const password = document.getElementById('notePassword').value.trim();

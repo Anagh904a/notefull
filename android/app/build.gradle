@@ -3,50 +3,21 @@ apply plugin: 'com.android.application'
 android {
     namespace = "app.notefull.com"
     compileSdk = rootProject.ext.compileSdkVersion
+
     defaultConfig {
         applicationId "app.notefull.com"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 30
-        versionName "26.7.0"
+        versionCode 33
+        versionName "26.7.1Special"
 
         ndk {
             abiFilters 'arm64-v8a'
         }
+    } // <-- Closed defaultConfig properly
 
-        externalNativeBuild {
-            cmake {
-                cppFlags "-std=c++17 -O3 -fvisibility=hidden -fdata-sections -ffunction-sections"
-                arguments "-DCMAKE_BUILD_TYPE=Release",
-                        "-DGGML_METAL=OFF",
-                        "-DGGML_CUDA=OFF",
-                        "-DGGML_OPENCL=OFF",
-                        "-DGGML_LLAMAFILE=OFF",
-                        "-DGGML_RPC=OFF",
-                        "-DGGML_VULKAN=OFF",
-                        "-DGGML_OPENMP=OFF",
-                        "-DGGML_BLAS=OFF",
-                        "-DLLAMA_CURL=OFF",
-                        "-DLLAMA_BUILD_TESTS=OFF",
-                        "-DLLAMA_BUILD_EXAMPLES=OFF",
-                        "-DLLAMA_BUILD_SERVER=OFF",
-                        "-DLLAMA_BUILD_TOOLS=OFF",
-                        "-DLLAMA_BUILD_COMMON=OFF"
-            }
-        }
+    // CMake path belongs directly inside android { }// packaging / packagingOptions belongs directly inside android { }
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        aaptOptions {
-            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
-        }
-    }
-
-// Add this block outside defaultConfig
-    packagingOptions {
-        exclude "**/libllama.so"      // exclude static libs from apk
-        exclude "**/libggml.so"
-        doNotStrip "*/arm64-v8a/libllama-android.so"
-    }
     buildTypes {
         release {
             minifyEnabled true
@@ -54,15 +25,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    externalNativeBuild {
-        cmake {
-            path file("src/main/cpp/CMakeLists.txt")
-        }
-    }
 }
 
 repositories {
-    flatDir{
+    flatDir {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }
@@ -73,6 +39,7 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
+    implementation("com.google.ai.edge.litertlm:litertlm-android:0.16.0")
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

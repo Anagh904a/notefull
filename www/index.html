@@ -18,15 +18,33 @@
     <script src="libs/iziToast/iziToast.min.js"></script>
     <script src="libs/compromise/compromise.js"></script>
     <script type="module" src="libs/fuse/fuse.min.js"></script>
+    <script src="libs/qrcode/qrcode.min.js"></script>
     <script type="module">
   import Fuse from './libs/fuse/fuse.min.js';
   window.Fuse = Fuse; 
+</script>
+<script type="module">
+import { joinRoom, selfId } from './libs/trystero/nostr.mjs';
+window.joinRoom = joinRoom;
 </script>
 </head>
 <script>
   if (localStorage.getItem('notefullOnboarding') !== 'true') {
     window.location.replace('onboarding.html');
-  }
+} 
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+    if (localStorage.getItem("openAiDownloader") === "true") {
+        localStorage.removeItem("openAiDownloader");
+        showDownloaderModal();
+        startDownload();
+    }
+
+});
+
+
 </script>
 <body>
     <audio id="alertSound" src="sounds/t.mp3" preload="auto"></audio>
@@ -94,7 +112,7 @@
     <div id="privacyOverlay" class="hidden"></div>
     <div id="addOptionsModal" class="modal hidden">
         <div class="modal-content">
-            <h3>Choose to create</h3>
+            <h3>Choose to Create</h3>
             <div class="add-group">
                 <button class="modal-btn" id="addNoteButton" onclick="showAddNote()">
                     <i class="ti ti-note"></i> Note
@@ -102,6 +120,9 @@
                 <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
                     <i class="ti ti-checklist"></i> List
                 </button>
+               <!--- <button class="modal-btn" id="sharedListBtn" onclick="showSharedList()">
+    <i class="ti ti-table-share"></i> Shared List
+                </button> -->
             </div>
         </div>
     </div>
@@ -141,8 +162,12 @@
        <div class="top-bar-extreme" id="titleBar">
     <div class="top-bar-brand">
         <img src="notefull.png" alt="Notefull">
-        <h2>Notefull</h2>
+      
+        <h2 class="special-text">Notefull</h2>
+        
+        
     </div>
+
     <div class="btn-group-right-home">
            <button class="action-btn" id="searchIcon" onclick="showSearchPage()">
     <span class="search-ring"></span>
@@ -188,6 +213,15 @@
                     <i class="ti ti-receipt-off"></i>
                     <p>No lists yet</p>
                     <span>Tap + to create your first list</span>
+                </div>
+            </div>
+                  <div id="sharedListSectio">
+                <div id="SL-label" class="section-label">Shared Lists</div>
+                <div id="Slcontainer"></div>
+                <div id="noSLMessage" class="hidden">
+                    <i class="ti ti-receipt-off"></i>
+                    <p>You don't own or participate in a shared list!</p>
+                    <span>Tap + to create a new shared list as owner</span>
                 </div>
             </div>
         </div>
@@ -452,6 +486,190 @@
             </div>
         </div>
     </div>
+    <div id="sharedListSection" class="container hidden">
+    
+        <div class="add-list-header">
+            <div class="btn-group-left">
+                <button class="action-btn" onclick="cancelList()">
+    <i class="ti ti-chevron-left"></i>
+                </button>
+            </div>
+
+<div class="nf-statusbar__inner">
+    <span class="nf-status-pill nf-status-pill--live" id="nfStatusPill" aria-hidden="true">
+      <span class="nf-status-pill__dot"></span>
+      <span class="nf-status-pill__label" id="status">LIVE</span>
+    </span>
+    <span class="nf-statusbar__text" id="nfStatusText">Only you are editing</span>
+  </div>
+
+
+            <div class="btn-group-right">
+                <button id="sharedListButton" type="button" class="action-btn" onclick="saveSharedList()">
+                    <i class="ti ti-check"></i>
+                </button>
+               <button type="button" class="action-btn" onclick="showMembersModal()">
+ <i class="ti ti-user-cog"></i>
+               </button>
+            </div>
+        </div>
+
+
+
+        <input type="text" id="slTitle" class="note-title-input" placeholder="Shared List Title..." />
+        <div id="slItemsContainer" class="checklist-items"></div>
+        <div id="sl-items-no" class="hidden">
+            <i class="ti ti-exclamation-circle"></i>
+            <p>No Items yet</p>
+            <span>Tap + to create your first item into shared list!</span>
+        </div>
+        <button id="sl-add-item-btn" class="add-item-btn" onclick="addSlItem()">   <i class="ti ti-plus"></i> Add New Shared Item</button>
+
+<div class="modal hidden" id="member-modal">
+
+<div class="members-modal-content">
+
+    <div class="tab-container" id="nf-tabs">
+
+        <div class="tab active" id="activeTab" onclick="switchTab('nf-tabs', 'activeTab', 'membersPanel')">
+            <div class="tab-name">Members</div>
+        </div>
+
+        <div class="tab" id="settingsTab" onclick="switchTab('nf-tabs', 'settingsTab', 'settingsPanel')">
+            <div class="tab-name">Settings</div>
+        </div>
+
+    </div>
+
+
+    <!-- Members -->
+
+    <div class="nf-panel" id="membersPanel">
+
+        <div class="nf-members-meta">
+
+            <div class="nf-members-meta__stat">
+                <span class="nf-members-meta__num" id="totalMembers"></span>
+                <span class="nf-members-meta__label">Total</span>
+            </div>
+
+            <div class="nf-members-meta__divider"></div>
+
+            <div class="nf-members-meta__stat">
+                <span class="nf-members-meta__num nf-members-meta__num--live" id="onlineMembers"></span>
+                <span class="nf-members-meta__label">Online</span>
+            </div>
+
+            <div class="nf-members-meta__divider"></div>
+
+            <div class="nf-members-meta__stat nf-members-meta__stat--wide">
+                <span class="nf-members-meta__label">Last edited</span>
+                <span class="nf-members-meta__num nf-members-meta__num--time" id="lastEdited"></span>
+            </div>
+
+        </div>
+
+
+        <!-- JS adds members here -->
+        <ul class="nf-member-list" id="memberList"></ul>
+
+        <div class="nf-devices-empty" id="noMembers">
+            <div class="nf-devices-empty__title">
+                No members yet.
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Settings -->
+
+    <div class="nf-panel hidden" id="settingsPanel">
+
+
+        <!-- Add Members -->
+
+        <section class="nf-settings-section">
+
+            <h3 class="nf-settings-section__heading">
+                Add Members
+            </h3>
+
+            <div class="nf-devices-picker hidden" id="devicePicker">
+
+                <!-- JS adds paired devices here -->
+                <ul class="nf-device-list" id="deviceList"></ul>
+
+                <div class="nf-devices-empty nf-devices-empty--hidden" id="noDevices">
+
+                    <div class="nf-devices-empty__title">
+                        No paired devices found.
+                    </div>
+
+                    <div class="nf-devices-empty__hint">
+                        Pair a device from Settings → Manage Devices.
+                    </div>
+
+                </div>
+
+                <div class="nf-devices-actions">
+
+                    <button class="nf-btn nf-btn--ghost" id="deviceCancel">
+                        Cancel
+                    </button>
+
+                    <button class="nf-btn nf-btn--primary" id="deviceAdd" onclick="handleAddSharedListMembers()">
+                        Add (0)
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <button class="nf-btn nf-btn--secondary nf-btn--full" id="addMembersBtn" onclick="addMembers()">
+                Add Members
+            </button>
+
+        </section>
+
+
+        <!-- Permissions -->
+
+        <section class="nf-settings-section">
+
+            <h3 class="nf-settings-section__heading">
+                Permissions
+            </h3>
+
+            <!-- JS adds permission blocks here -->
+            <div id="permissionList"></div>
+
+            <div class="nf-devices-empty nf-devices-empty--hidden" id="noPermissions">
+                <div class="nf-devices-empty__title">
+                    No members to manage.
+                </div>
+            </div>
+
+        </section>
+        <section class="nf-settings-section nf-settings-section--danger">
+
+            <h3 class="nf-settings-section__heading nf-settings-section__heading--danger">
+                Danger Zone
+            </h3>
+
+            <button class="nf-btn nf-btn--danger-ghost nf-btn--full" id="removeMemberBtn">
+                Remove Member
+            </button>
+
+            <button class="nf-btn nf-btn--danger nf-btn--full" id="stopSharingBtn">
+                Stop Sharing
+            </button>
+</section>
+</div>
+</div>
+</div>
+</div>
     <!-- Add Options Modal -->
     <div id="passwordModal" class="modal hidden">
         <div class="modal-content">
@@ -555,6 +773,15 @@
                     <div class="subtitle">AI Features · Download files</div>
                 </div>
             </div>
+            <div class="card" onclick="openMembersSection()">
+                    <div class="icon modes">
+                        <i class="ti ti-lock"></i>
+                    </div>
+                    <div class="text-box">
+                        <div class="title2">Manage Devices</div>
+                        <div class="subtitle">Add/remove devices· Requets </div>
+                    </div>
+                </div>
         </div>
 
 
@@ -752,27 +979,192 @@
             </div>
 
         </div>
-
-    </div>
-    <div id="assetsDownloader" class="modal hidden">
-    <div class="modal-content">
-                <h2 id="downloadStaus">Click start to begin installation of Notefull AI </h2>
-                <p id="sizeTracker">AI Size: 2.54 GB </p>
-
-        
-
-        
-           
-               
-                <span id="etaTracker">Estimating time…</span>
-          
-            <div id="download-progress" class="download-progress">
-            
+<div id="membersSection" class="container hidden">
+    <h2 id="mainHeading">Manage Devices</h2>
+    <div class="tab-container" id="tabs">
+        <div id="membersTab" class="tab active" onclick="switchTab('tabs', 'membersTab', 'devices')">
+            <span class="tab-name">Devices</span>
         </div>
-            
-       
-        <button onclick="startDownload()" id="startBtn">Start</button>
+        <div id="requestsTab" class="tab" onclick="switchTab('tabs', 'requestsTab', 'requests')">
+            <span class="tab-name">Requests</span>
+        </div>
     </div>
+    <div class="devices-section" id="devices">
+        <div class="device-container">
+<div class="section-label">Active Devices</div>
+<div id="deviceList"></div>
+<div id="noDevicesMessage">No devices yet! Click Add Device to add a device</div>
+    </div>
+    <button class="members-btn" onclick="showAddDeviceSection()">Add Device</button>
+</div>
+<div class="section-card hidden" id="addDevice">
+    <h2>Add a device</h2>
+    <button class="modal-button" onclick="backtoDevices()"> <i
+                    class="ti ti-chevron-left"></i></button>
+    <div class="methods-container" id="method1">
+    <div class="qr-code-container">
+<div id="qr"></div>
+<p>Scan this QR code to connect a device</p>
+    </div>
+<div class="code-container">
+    <div class="code"></div>
+    <p>Enter this code on the other device to connect</p>
+</div>
+
+</div>
+<div class="methods-container hidden" id="method2">
+    <div class="qr-code-container">
+        <button class="scan-qr" id="scanBtn" onclick="scanQr()">Scan a QR</button>
+    </div>
+
+<div class="code-container">
+    <input id="enteredCode" placeholder="Enter a 6-digit code" class="code-input">
+</div>
+</div>
+<div class="method-switch">
+    <p class="switch-text" id="switchText" onclick="showConnectSection('method2')">Scan a QR code instead</p>
+</div>
+</div>
+<div class="devices-section hidden" id="requests">
+    <div class="section-label">Incoming Requests for shared Lists</div>
+    <div id="requetsContainer" class="requets-container"></div>
+    <div id="noRequestsMessage">No requests yet!</div>
+</div>
+    </div>
+<div class="connecting-modal hidden" id="connectingModal">
+<div class="main-content">
+    <div class="spinner"></div>
+    <p class="main-content-text" id="connectingText">Connecting< to device...</p>
+</div>
+</div>
+<div class="modal hidden" id="displayNameModal">
+    <div class="modal-content">
+          <h2>Enter your display name</h2>
+       <p>This will be visble to all devices you connect with</p>
+        <input class="display-name" id="displayName" placeholder="Your Device Name">
+        <button onclick="setDisplayName()">Set Name</button>
+    </div>
+</div>
+    <!-- AI Assets Downloader Modal -->
+<div id="assetsDownloader" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="assetsDownloadStatus">
+  <div class="assets-modal-backdrop" onclick="closeAssetsModal()"></div>
+  
+  <div class="assets-modal-card">
+    <!-- Close Button -->
+    <button class="assets-close-btn" onclick="closeAssetsModal()" aria-label="Close modal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Header Icon -->
+    <div class="assets-icon-badge" id="assetsModalIconBadge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+    </div>
+
+    <!-- Title & Subtitle -->
+    <h2 id="assetsDownloadStatus" class="assets-modal-title">Install Notefull AI</h2>
+    <p id="assetsDownloadDesc" class="assets-modal-desc">Download on-device AI models for private, fully offline smart notes and task analysis.</p>
+
+    <!-- VIEW 1: PRE-DOWNLOAD & TERMS -->
+    <div id="dlReadyState" class="assets-modal-state active">
+      <!-- Spec Chips -->
+      <div class="assets-spec-grid">
+        <div class="assets-spec-item">
+          <span class="assets-spec-label">Download Size</span>
+          <span class="assets-spec-value" id="sizeTracker">2.54 GB</span>
+        </div>
+        <div class="assets-spec-item">
+          <span class="assets-spec-label">Privacy</span>
+          <span class="assets-spec-value">100% Offline</span>
+        </div>
+      </div>
+
+      <!-- Gemma Model Terms Box -->
+      <div class="assets-terms-card">
+        <div class="assets-terms-header">
+          <span class="assets-terms-icon">⚖️</span>
+          <div>
+            <strong>Gemma Model Terms</strong>
+            <p>Gemma is provided under and subject to the Gemma Terms of Use found at <a href="https://ai.google.dev/gemma/terms" target="_blank" rel="noopener" class="assets-terms-link">ai.google.dev/gemma/terms</a>.</p>
+          </div>
+        </div>
+
+        <label class="assets-checkbox-label">
+          <input type="checkbox" id="assetsTermsCheck" onchange="handleTermsCheckbox(this.checked)">
+          <span class="assets-custom-checkbox"></span>
+          <span class="assets-checkbox-text">
+            I accept the Gemma Terms of Use and agree to use the AI in compliance with these terms. 
+            <a href="https://ai.google.dev/gemma/terms" target="_blank" rel="noopener" class="assets-terms-link">Learn more</a>
+          </span>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="assets-btn-row">
+        <button class="assets-btn assets-btn-secondary" onclick="closeAssetsModal()">Cancel</button>
+        <button class="assets-btn assets-btn-primary" id="startBtn" onclick="startDownload()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="assets-btn-icon">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Start Download
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 2: ACTIVE DOWNLOADING -->
+    <div id="dlActiveState" class="assets-modal-state">
+      <div class="assets-progress-wrapper">
+        <div class="assets-progress-track">
+          <div id="download-progress-fill" class="assets-progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="assets-metric-row">
+        <span id="dlPercentText" class="assets-percent-text">0%</span>
+        <span id="etaTracker" class="assets-eta-pill">Estimating time…</span>
+      </div>
+
+      <div class="assets-stats-grid">
+        <div class="assets-stat-col">
+          <span class="assets-stat-val" id="dlProgressBytes">0 MB</span>
+          <span class="assets-stat-lbl">Downloaded</span>
+        </div>
+        <div class="assets-stat-col">
+          <span class="assets-stat-val" id="dlSpeedTracker">0 MB/s</span>
+          <span class="assets-stat-lbl">Speed</span>
+        </div>
+        <div class="assets-stat-col">
+          <span class="assets-stat-val" id="dlTotalSize">2.54 GB</span>
+          <span class="assets-stat-lbl">Total</span>
+        </div>
+      </div>
+
+      <div class="assets-btn-row">
+        <button class="assets-btn assets-btn-danger" id="cancelDlBtn" onclick="cancelDownload()">Cancel Download</button>
+      </div>
+    </div>
+
+    <!-- VIEW 3: COMPLETED SUCCESS -->
+    <div id="dlDoneState" class="assets-modal-state">
+      <div class="assets-success-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        Installation Complete
+      </div>
+      <div class="assets-btn-row">
+        <button class="assets-btn assets-btn-primary" onclick="closeAssetsModal()">Done</button>
+      </div>
+    </div>
+  </div>
 </div>
     <div id="aiSection" class="container hidden">
         <div class="outdated-banner hidden" id="updateWarn">
@@ -893,7 +1285,9 @@
     <script src="js/selectionManager.js"></script>
     <script src="js/notes.js"></script>
     <script src="js/lists.js"></script>
-    <script src="js/reaminders.js"></script>
+    <script src="js/notefull-pair.js"></script>
+    <script src="js/connect.js"></script> 
+<script src="js/reaminders.js"></script>
     <script src="js/page-load.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/ui.js"></script>

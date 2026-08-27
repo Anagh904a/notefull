@@ -4,6 +4,7 @@ let notesTrash = [];
 let currentNoteId = null;
 let currentIndex = -1;
 let historyStack = [];
+
 function resetHistory() {
   historyStack = [];
   currentIndex = -1;
@@ -225,7 +226,9 @@ async function saveNote() {
 }
 
 function correctNote() {
-   if (!window.aiReady) {}
+   if (!window.aiReady) {
+    initAi();
+   }
   if (!currentNoteId) {
     showToastError('Please save the note to use AI features');
     return;
@@ -243,17 +246,19 @@ function correctNote() {
   // so it can never mismatch what's on screen
   const content = noteContent.innerText;
 
-const prompt = `<|turn>user
-You are Notefull AI. Fix grammer and spelling mistakes of given note text
+const prompt = `<|im_start|>system
+You are Notefull AI. Fix grammar and spelling mistakes of the given note text.
 
 Strict Rules:
-1. The correction must not include new details. It should be ONLY the corrected grammer version that will be your reponse.
-2. Your response just contain corrected note text. Nothing else, as your response will be new note text, it should not change menaing of text at all.
-3. DO NOT ADD DETAILS OR REMOVE DETAILS
-
-Note Text: ${content}
-<turn|>
-<|turn>model
+1. The correction must not include new details. It should ONLY be the corrected grammar version as your response.
+2. Your response must contain only the corrected note text. Nothing else, as your response will replace the original note text. Do not change the meaning of the text.
+3. DO NOT ADD DETAILS OR REMOVE DETAILS.
+<|im_end|>
+<|im_start|>user
+Note Text:
+${content}
+<|im_end|>
+<|im_start|>assistant
 `;
 
 
@@ -277,6 +282,9 @@ window.Capacitor.Plugins.AIPlugin.ask({ prompt, shortAnswer: false }).then(resul
 }
 
 function summarizeNote() {
+     if (!window.aiReady) {
+    initAi();
+   }
   if (!currentNoteId) {
     showToastError('Please save the note to use AI features');
     return;
@@ -290,16 +298,19 @@ function summarizeNote() {
   const noteContent = document.getElementById('noteContent');
   const content = noteContent.innerText;
 const prompt = `
-<|turn>user
-Summarize the given Note Text
+<|im_start|>system
+You are a helpful assistant. Follow instructions exactly.
+<|im_end|>
+<|im_start|>user
+Summarize the given Note Text.
 
-RULE: Do not add details or remove any details. Just provide the summary of the Note
+RULE: Do not add new details or remove important details. Only provide a concise summary of the Note.
 
-Note Text: ${content}
-<turn|>
-<|turn>model
+Note Text:
+${content}
+<|im_end|>
+<|im_start|>assistant
 `;
-;
 
 
   showAiThinkingModal('Summarizing...');
@@ -319,6 +330,9 @@ Note Text: ${content}
   });
 }
 function suggestTitle() {
+     if (!window.aiReady) {
+    initAi();
+   }
   if (!currentNoteId) {
     showToastError('Please save the note to use AI features');
     return;
@@ -331,7 +345,7 @@ function suggestTitle() {
 
   const noteContent = document.getElementById('noteContent');
   const content = noteContent.innerText;
-const prompt = `<|turn>user
+const prompt = `<|im_start|>system
 You are Notefull AI.
 
 Generate a short, meaningful title for the following note.
@@ -342,12 +356,13 @@ Rules:
 - Do not explain your answer.
 - Keep it under 6 words.
 - Preserve the note's meaning.
-
+<|im_end|>
+<|im_start|>user
 Note:
 
 ${content}
-<turn|>
-<|turn>model
+<|im_end|>
+<|im_start|>assistant
 `;
 
 
@@ -384,7 +399,7 @@ function displayNotes() {
     }
     const noteDiv = document.createElement("div");
     const noteDate = new Date(note.date);
-    const formattedDate = formatDate(noteDate);
+   const formattedDate = formatDate(noteDate);
     const lockIndicator = note.password && note.password !== "" ? '<div class="lock-indicator"><i class="ti ti-lock"></i></div>' : "";
     const remainderElement = note.remainderEnabled === true && note.remainderTime
       ? `<div class="remainder-pill" id="note-pill-${note.id}">

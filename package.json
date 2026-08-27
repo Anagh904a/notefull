@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@aparajita/capacitor-biometric-auth": "^10.0.0",
+    "@capacitor-mlkit/barcode-scanning": "^8.1.0",
     "@capacitor/android": "^8.4.0",
     "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.4.0",
@@ -28,7 +29,8 @@
     "compromise": "^14.15.1",
     "izitoast": "^1.4.0",
     "localforage": "^1.10.0",
-    "puppeteer-core": "^24.42.0"
+    "puppeteer-core": "^24.42.0",
+    "trystero": "^0.25.3"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
