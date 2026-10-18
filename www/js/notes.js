@@ -113,12 +113,15 @@ function showAddNote() {
     document.getElementById("noteContent").innerHTML = "";
     document.getElementById("notePassword").value = "";
   }
-  document.getElementById("navBar").classList.add("hidden");
+  document.getElementById("bottomBar").classList.add("hidden");
   resetHistory();
   closeModal('addOptionsModal');
 }
 async function deleteThisNote() {
-  if (!confirm("Are you sure you want to move this note to trash?")) return;
+  if (!await showConfirmToast({
+    title: 'Delete this note?',
+    message: 'Do you want to move this note to trash'
+  })) return;
   if (currentNoteId !== null) {
     const noteDeleted = notes.find(n => n.id === currentNoteId);
     deletedNotes.push(noteDeleted);
@@ -129,10 +132,10 @@ async function deleteThisNote() {
     await localforage.setItem("notes", notes);
     await localforage.setItem("deletedNotes", deletedNotes);
     rebuildNotes();
-    displayNotes();
+    renderItems();
     showSection('combinedContainer');
     currentNoteId = null;
-    document.getElementById("navBar").classList.remove("hidden");
+    document.getElementById("bottomBar").classList.remove("hidden");
     displayDeletedNotes();
     rebuildDeletedNotes();
 
@@ -149,7 +152,7 @@ function cancelNote() {
   currentNoteId = null;
   showSection("combinedContainer");
   document.getElementById("notePasswordModal").classList.add("hidden");
-  document.getElementById("navBar").classList.remove("hidden");
+  document.getElementById("bottomBar").classList.remove("hidden");
 
 }
 async function saveNote() {
@@ -180,6 +183,7 @@ async function saveNote() {
   const note = {
     id,
     title,
+    type: "note",
     content,
     password,
     remainderTime: existingNote ? existingNote.remainderTime : null,
@@ -217,79 +221,203 @@ async function saveNote() {
   }
 
   rebuildNotes();
-  displayNotes();
+  renderItems();
   showSection('combinedContainer');
   currentNoteId = null;
 
-  const navBar = document.getElementById("navBar");
-  if (navBar) navBar.classList.remove("hidden");
+  const bottomBar = document.getElementById("bottomBar");
+  if (bottomBar) bottomBar.classList.remove("hidden");
+}
+//This function basically handles autosaving a note, it also supports updating a note preventing data loss and also supports creating a note by passing title and content
+// Helper to cleanly write to localforage without DOM elements
+async function persistNotesToStorage() {
+  const cleanNotesForStorage = notes.map(n => {
+    const copy = { ...n };
+    delete copy.cachedPillElement;
+    return copy;
+  });
+
+  try {
+    await localforage.setItem("notes", cleanNotesForStorage);
+  } catch (dbError) {
+    console.error("Storage write failed:", dbError);
+  }
+
+  rebuildNotes();
 }
 
-function correctNote() {
-   if (!window.aiReady) {
-    initAi();
-   }
+// Auto-save + Programmatic Update + AI Tool Note Creation
+async function saveNotesStorage(noteId = null, note = null) {
+  console.log('Auto-saving function triggered');
+
+  // PART 1 & 2: Auto-saving from the active Editor (new or existing note)
+  if (note === null) {
+    const titleEl = document.getElementById('noteTitle');
+    const contentEl = document.getElementById('noteContent');
+    const passwordEl = document.getElementById('notePassword');
+
+    if (!titleEl || !contentEl) return null;
+
+    const title = titleEl.value.trim();
+    const content = contentEl.innerHTML.trim();
+    const password = passwordEl ? passwordEl.value.trim() : "";
+
+    // Silently skip auto-save if both are empty (don't spam error toasts on background save)
+    if (content === "" || title === "") {
+      return null;
+    }
+
+    // Use passed noteId, or active currentNoteId, or generate a new UUID once
+    const id = noteId || currentNoteId || crypto.randomUUID();
+    currentNoteId = id; // Lock in currentNoteId so future auto-saves update this exact note
+
+    const existingNote = notesMap[id];
+
+    const updatedNote = {
+      id,
+      title,
+      type: "note",
+      content,
+      password,
+      remainderTime: existingNote ? existingNote.remainderTime : null,
+      repeatType: existingNote ? existingNote.repeatType : "once",
+      remainderEnabled: existingNote ? existingNote.remainderEnabled : false,
+      notificationId: existingNote ? existingNote.notificationId : null,
+      date: Date.now()
+    };
+
+    // Prevent duplicates: Update in-place if it already exists, otherwise push once
+    const existingIndex = notes.findIndex(n => n.id === id);
+    if (existingIndex !== -1) {
+      notes[existingIndex] = updatedNote;
+    } else {
+      notes.push(updatedNote);
+    }
+
+    notesMap[id] = updatedNote;
+    await persistNotesToStorage();
+    return updatedNote;
+  }
+
+  // PART 3: Custom Note Creation or Update (for AI Tools / External callers)
+  if (note !== null) {
+    const id = noteId || note.id || crypto.randomUUID();
+    const existingNote = notesMap[id];
+
+    const customNote = {
+      id,
+      title: (note.title || (existingNote && existingNote.title) || "Untitled Note").trim(),
+      type: "note",
+      content: note.content !== undefined ? note.content : (existingNote ? existingNote.content : ""),
+      password: note.password !== undefined ? note.password : (existingNote ? existingNote.password : ""),
+      remainderTime: note.remainderTime !== undefined ? note.remainderTime : (existingNote ? existingNote.remainderTime : null),
+      repeatType: note.repeatType || (existingNote ? existingNote.repeatType : "once"),
+      remainderEnabled: note.remainderEnabled !== undefined ? note.remainderEnabled : (existingNote ? existingNote.remainderEnabled : false),
+      notificationId: note.notificationId !== undefined ? note.notificationId : (existingNote ? existingNote.notificationId : null),
+      date: Date.now()
+    };
+
+    const existingIndex = notes.findIndex(n => n.id === id);
+    if (existingIndex !== -1) {
+      notes[existingIndex] = customNote;
+    } else {
+      notes.push(customNote);
+    }
+
+    notesMap[id] = customNote;
+    await persistNotesToStorage();
+    renderItems();
+    return customNote;
+  }
+}
+
+// TOOLS CALLING FUNCTION
+async function createNote(title, content) {
+  return await saveNotesStorage(null, { title, content });
+}
+
+
+async function correctNote() {
+  if (!window.aiReady) {
+    await initAi();
+  }
+
   if (!currentNoteId) {
     showToastError('Please save the note to use AI features');
     return;
   }
+
   const note = notes.find(n => n.id === currentNoteId);
+
   if (!note) {
     showToastError('Invalid Note detected!');
     return;
   }
 
   const noteContent = document.getElementById('noteContent');
+  const content = noteContent.innerHTML;
 
-  // ← FIX 1: read live DOM text, not the stored note object —
-  // this is the actual unsaved content the user is looking at right now,
-  // so it can never mismatch what's on screen
-  const content = noteContent.innerText;
-
-const prompt = `<|im_start|>system
+  const prompt = `
 You are Notefull AI. Fix grammar and spelling mistakes of the given note text.
 
 Strict Rules:
 1. The correction must not include new details. It should ONLY be the corrected grammar version as your response.
 2. Your response must contain only the corrected note text. Nothing else, as your response will replace the original note text. Do not change the meaning of the text.
 3. DO NOT ADD DETAILS OR REMOVE DETAILS.
-<|im_end|>
-<|im_start|>user
+4. If the note is formatted containing B, U or I tags, DO NOT REMOVE THEM.
+
 Note Text:
 ${content}
-<|im_end|>
-<|im_start|>assistant
 `;
 
+  noteContent.classList.add('thinking');
+  document.getElementById('thinking-ai-notes').classList.remove('hidden');
 
-  showAiThinkingModal('Correcting note...');
-window.Capacitor.Plugins.AIPlugin.ask({ prompt, shortAnswer: false }).then(result => {
+  try {
+    const result = await askAI(prompt);
 
-    if (result?.answer) {
-      noteContent.innerText = result.answer;
-      closeAiThinkingModal();
+    if (result) {
+      noteContent.innerHTML = result;
+
+      noteContent.classList.remove('thinking');
+      document.getElementById('thinking-ai-notes').classList.add('hidden');
+
       showToast('Note corrected successfully! Save Note to save changes');
     } else {
+      noteContent.classList.remove('thinking');
+      document.getElementById('thinking-ai-notes').classList.add('hidden');
       closeAiThinkingModal();
-      return;
     }
 
-  }).catch(err => {
-    closeAiThinkingModal();
-    showToastError('Failed to correct Note')
-  });
+  } catch (error) {
+    console.error('Note correction failed:', error);
 
+    noteContent.classList.remove('thinking');
+    document.getElementById('thinking-ai-notes').classList.add('hidden');
+
+    showToastError('Failed to correct note');
+  }
 }
 
-function summarizeNote() {
-     if (!window.aiReady) {
-    initAi();
-   }
+async function summarizeNote() {
+  if (!window.aiReady) {
+    showToast('Warming up AI engine...');
+
+    const ready = await initAi();
+
+    if (!ready && !window.aiReady) {
+      showToastError('AI model is not ready or still initializing.');
+      return;
+    }
+  }
+
   if (!currentNoteId) {
     showToastError('Please save the note to use AI features');
     return;
   }
+
   const note = notes.find(n => n.id === currentNoteId);
+
   if (!note) {
     showToastError('Invalid Note detected!');
     return;
@@ -297,37 +425,58 @@ function summarizeNote() {
 
   const noteContent = document.getElementById('noteContent');
   const content = noteContent.innerText;
-const prompt = `
-<|im_start|>system
-You are a helpful assistant. Follow instructions exactly.
-<|im_end|>
-<|im_start|>user
-Summarize the given Note Text.
 
-RULE: Do not add new details or remove important details. Only provide a concise summary of the Note.
+  const prompt = `You are a concise, accurate assistant. Summarize the following note into clear, key bullet points. Do not invent new facts. Return only the summary text with no introductory or conversational remarks.
 
-Note Text:
-${content}
-<|im_end|>
-<|im_start|>assistant
-`;
-
+Note Content:
+${content}`;
 
   showAiThinkingModal('Summarizing...');
-  window.Capacitor.Plugins.AIPlugin.ask({ prompt, shortAnswer: false }).then(result => {
 
-   if (result?.answer) {
-  closeAiThinkingModal();
-  setTimeout(() => showResultsModal(result.answer), 650); // wait for the close animation to finish
-} else {
-  closeAiThinkingModal();
-  return;
-}
+  let summary = '';
 
-  }).catch(err => {
+  try {
+    await askAI(prompt, {
+      thinkingMode: false,
+      tools: false,
+      stream: true,
+
+      onToken: (token, accumulated) => {
+        summary = accumulated;
+
+        // If your modal has a text element:
+        const result = document.getElementById('aiResultText');
+
+        if (result) {
+          result.innerText = accumulated;
+        }
+      },
+
+      onDone: (text) => {
+        summary = text;
+      },
+
+      onError: (error) => {
+        console.error('AI streaming error:', error);
+      }
+    });
+
+    if (!summary.trim()) {
+      throw new Error('AI returned an empty summary');
+    }
+
     closeAiThinkingModal();
-    showToastError('Failed to Summarize Note');
-  });
+
+    setTimeout(() => {
+      showResultsModal(summary);
+    }, 650);
+
+  } catch (error) {
+    console.error('Summarization failed:', error);
+
+    closeAiThinkingModal();
+    showToastError('Failed to summarize note');
+  }
 }
 function suggestTitle() {
      if (!window.aiReady) {
@@ -345,7 +494,7 @@ function suggestTitle() {
 
   const noteContent = document.getElementById('noteContent');
   const content = noteContent.innerText;
-const prompt = `<|im_start|>system
+const prompt = `
 You are Notefull AI.
 
 Generate a short, meaningful title for the following note.
@@ -356,23 +505,21 @@ Rules:
 - Do not explain your answer.
 - Keep it under 6 words.
 - Preserve the note's meaning.
-<|im_end|>
-<|im_start|>user
+
 Note:
 
 ${content}
-<|im_end|>
-<|im_start|>assistant
+
 `;
 
 
 
   showAiThinkingModal('Thinking...');
-  window.Capacitor.Plugins.AIPlugin.ask({ prompt, shortAnswer: true }).then(result => {
+  window.Capacitor.Plugins.AIPlugin.askAI({ prompt, shortAnswer: true }).then(result => {
 
-   if (result?.answer) {
+   if (result?.success && result?.response) {
   closeAiThinkingModal();
-document.getElementById('noteTitle').value = result.answer.trim();
+document.getElementById('noteTitle').value = result.response.trim();
 } else {
   closeAiThinkingModal();
   return;
@@ -383,71 +530,20 @@ document.getElementById('noteTitle').value = result.answer.trim();
     showToastError('Failed to Summarize Note');
   });
 }
-function displayNotes() {
-  const container = document.getElementById("notesContainer");
-  container.innerHTML = "";
-  const noNotesMessage = document.getElementById("noNotesMessage");
-  if (notes.length === 0) {
-    noNotesMessage.classList.remove("hidden");
-  } else {
-    noNotesMessage.classList.add("hidden");
-  }
-  notes.forEach((note) => {
-    if (note.selected === undefined || note.selected === true) {
-      note.selected = false;
-
-    }
-    const noteDiv = document.createElement("div");
-    const noteDate = new Date(note.date);
-   const formattedDate = formatDate(noteDate);
-    const lockIndicator = note.password && note.password !== "" ? '<div class="lock-indicator"><i class="ti ti-lock"></i></div>' : "";
-    const remainderElement = note.remainderEnabled === true && note.remainderTime
-      ? `<div class="remainder-pill" id="note-pill-${note.id}">
-      <i class="ti ti-hourglass"></i> 
-         <span class="remainder-text" id="note-remainder-${note.id}">     ${getReminderText(note.remainderTime)}</span>
-       </div>`
-      : "";
-      let noteText = "";
-      if (!note) {
-noteText = "Inavlid Note";
-}
-      const isTooLong = note.content && note.content.length > 100;
- const htmlRegex = /<\/?(br|b|strong|i|em|span|u|ins|ul|ol|li)(\s[^>]*)?\/?>/i;
-  const HTML = htmlRegex.test(note.content);
- if (note.password) {
-noteText = "Locked Note";
-} else if (isTooLong) {
-noteText = "Content Too Large To Display";
-} else if (HTML) {
-  noteText = "Formatted note text cannot be displayed";
+function countChar() {
+  const charCount = document.getElementById('totalChar');
+  const noteContent = document.getElementById('noteContent');
+   const text = noteContent.innerText || '';
+  const length = text.length;
+  if (length > 0) {
+  charCount.textContent = `Total Characters: ${length}`;
+} else if (length === 0) {
+    charCount.textContent = `Total Characters: 0`;
 } else {
-  noteText = note.content || "Empty Note";
+      charCount.textContent = `Total Characters: 0`;
+}
 }
 
-
-
-
-    noteDiv.innerHTML = `
-      <div id="noteWrapper" class="note-wrapper" data-id="${note.id}">
-     
-      <input type="checkbox" id="selectBoxNote" onchange="selectNote('${note.id}')" class="select-box hidden">
-     
- <div class="note" onclick="openNote('${note.id}')">
- 
- <span class="note-date">${formattedDate}</span>   
- ${remainderElement}
- 
- <div class="note-header">
-    <h4>${note.title}</h4>
-   ${lockIndicator}
-  </div>
-<div class="note-text">${noteText}</div>
-  </div>
-  </div>
-    `;
-    container.appendChild(noteDiv);
-  });
-}
 
 function openNote(noteId) {
   const note = notesMap[noteId];
@@ -469,6 +565,9 @@ function openNote(noteId) {
   } else {
     showNoteContent(note);
   }
+}
+function toggleBulletList() {
+  document.execCommand('insertUnorderedList', false, null);
 }
 function verifyPassword() {
   const modal = document.getElementById("passwordModal");
@@ -527,5 +626,69 @@ function showNoteContent(note) {
   document.getElementById("noteContent").innerHTML = note.content;
   document.getElementById("notePassword").value = note.password;
   showSection('addNoteSection');
-  document.getElementById("navBar").classList.add("hidden");
+  document.getElementById("bottomBar").classList.add("hidden");
+}
+function displayNotes() {
+  const container = document.getElementById("itemsContainer");
+
+  notes.forEach((note) => {
+    if (note.selected === undefined || note.selected === true) {
+      note.selected = false;
+
+    }
+    const noteDiv = document.createElement("div");
+    const noteDate = new Date(note.date);
+   const formattedDate = formatDate(noteDate);
+    const lockIndicator = note.password && note.password !== "" ? '<div class="lock-indicator"><i class="ti ti-lock"></i></div>' : "";
+    const remainderElement = note.remainderEnabled === true && note.remainderTime
+      ? `<div class="remainder-pill" id="note-pill-${note.id}">
+      <i class="ti ti-hourglass"></i> 
+         <span class="remainder-text" id="note-remainder-${note.id}">     ${getReminderText(note.remainderTime)}</span>
+       </div>`
+      : "";
+      let noteText = "";
+      if (!note) {
+noteText = "Inavlid Note";
+}
+      const isTooLong = note.content && note.content.length > 100;
+ const htmlRegex = /<\/?(br|b|strong|i|em|span|u|ins|ul|ol|li)(\s[^>]*)?\/?>/i;
+  const HTML = htmlRegex.test(note.content);
+ if (note.password) {
+noteText = "Locked Note";
+} else if (isTooLong) {
+noteText = "Content Too Large To Display";
+} else if (HTML) {
+  noteText = "Formatted note text cannot be displayed";
+} else {
+  noteText = note.content || "Empty Note";
+}
+
+
+
+
+    noteDiv.innerHTML = `
+      <div id="noteWrapper" class="note-wrapper" data-id="${note.id}">
+     
+      <input type="checkbox" id="selectBoxNote" onchange="selectNote('${note.id}')" class="select-box hidden">
+     
+ <div class="note" onclick="openNote('${note.id}')">
+ 
+ <span class="note-date">${formattedDate}</span>   
+ ${remainderElement}
+ 
+ <div class="note-header">
+    <h4>${note.title}</h4>
+   ${lockIndicator}
+  </div>
+<div class="note-text">${noteText}</div>
+  </div>
+  </div>
+    `;
+    container.appendChild(noteDiv);
+  });
+}
+
+//TOOLS CALLING FUNCTION 
+function createNote(title, content) {
+
 }

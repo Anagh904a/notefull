@@ -327,8 +327,8 @@ async function saveRemainder() {
     titleEl.textContent = `Update Reminder — ${note.title}`;
     modal.classList.add("hidden");
 
-    displayNotes();
-    displayLists();
+    renderItems();
+    renderItems();
     updateAllPillsDynamically();
 
     showToast("Reminder set! Save the note to keep it.");
@@ -356,7 +356,10 @@ async function removeRemainder() {
 
     // Only confirm if there was actually a reminder set
     if (note.remainderEnabled) {
-        if (!confirm("Cancel this reminder?")) return;
+        if (!await showConfirmToast({
+    title: 'Cancel Reminder?',
+    message: 'Do you want to cancel this reminder?'
+  })) return;
     }
 
 
@@ -482,8 +485,8 @@ async function saveRemainderList() {
     titleEl.textContent = `Update Reminder — ${list.title}`;
     modal.classList.add("hidden");
 
-    displayNotes();
-    displayLists();
+    renderItems();
+    renderItems();
     updateAllPillsDynamically();
 
     showToast("Reminder set! Save the list to keep it.");
@@ -510,7 +513,10 @@ async function removeRemainderList() {
     }
 
     if (list.remainderEnabled) {
-        if (!confirm("Cancel this reminder?")) return;
+        if (!await showConfirmToast({
+    title: 'Cancel reminder?',
+    message: 'Do you want to cancel this reminder?'
+  })) return;
     }
 
     if (list.notificationId) {

@@ -6,6 +6,11 @@ import android.os.Bundle;
 import android.webkit.WebSettings; // 1. Add this import
 import android.webkit.WebView; 
 import com.getcapacitor.BridgeActivity;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import app.notefull.com.AIPlugin;
 
 public class MainActivity extends BridgeActivity {
@@ -35,36 +40,27 @@ public class MainActivity extends BridgeActivity {
                 logToWebViewConsole("Native: WebView settings modified to unlock Cross-Origin & File Access.");
             }
         });
-        getWindow().getDecorView().setOnApplyWindowInsetsListener((view, insets) -> {
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                getWindow().getInsetsController().setSystemBarsAppearance(
-                        android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                        android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
-            } else {
-                getWindow().getDecorView().setSystemUiVisibility(
-                        android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                );
-            }
-            return view.onApplyWindowInsets(insets);
-        });
+    Window window = getWindow();
 
-        try {
-            getWindow().setStatusBarColor(Color.WHITE);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                getWindow().getInsetsController().setSystemBarsAppearance(
-                        android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                        android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
-            } else {
-                getWindow().getDecorView().setSystemUiVisibility(
-                        android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                );
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    WindowCompat.setDecorFitsSystemWindows(window, false);
+
+// Keep both system bars visible and transparent
+    window.setStatusBarColor(Color. TRANSPARENT);
+    window.setNavigationBarColor(Color.TRANSPARENT);
+
+// Disable automatic contrast scrims on Android 10+
+    if (android.os.Build.VERSION.SDK_INT >=
+            android.os.Build.VERSION_CODES.Q) {
+        window.setStatusBarContrastEnforced(false);
+        window.setNavigationBarContrastEnforced(false);
+    }
+
+// Set system bar icon colors
+    WindowInsetsControllerCompat controller =
+            WindowCompat.getInsetsController(window, window.getDecorView());
+
+    controller.setAppearanceLightStatusBars(false);
+    controller.setAppearanceLightNavigationBars(false);
 
         executeDelayedLifecycleChecks();
     }

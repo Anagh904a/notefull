@@ -29,8 +29,8 @@ function searchNotes() {
         
               showToastError('AI features have been temporarily disabled due to instablity');
 
-            if (typeof displayNotes === 'function') displayNotes();
-            if (typeof displayLists === 'function') displayLists();
+            if (typeof renderItems === 'function') renderItems();
+            if (typeof renderItems === 'function') renderItems();
         }
         clearTimeout(searchDebounceTimer);
         return;
@@ -118,19 +118,20 @@ if (!isUnlockedInStorage) {
         const thisRequestId = ++currentAiRequestId;
 
         // FIXED: Replaced legacy layout selectors with clean Gemma 4 turns
-const prompt = `<|im_start|>system
+const prompt = `
 You are Notefull AI, the built-in assistant for the Notefull notes and lists app. Answer the user's question naturally and concisely. If you do not know the answer, say so.
-<|im_end|>
-<|im_start|>user
 ${cleanQuery}
-<|im_end|>
-<|im_start|>assistant
 `;
 
-        window.Capacitor.Plugins.AIPlugin.ask({ prompt })
+        window.Capacitor.Plugins.AIPlugin.askAI({ prompt })
             .then(result => {
                 if (thisRequestId !== currentAiRequestId) return;
-                if (result?.answer) showAiResponse(result.answer);
+               if (result?.success && result?.response) {
+    showAiResponse(result.response);
+} else {
+    console.error('[AI QA] Invalid AI response:', result);
+    showAiResponse('AI could not generate a response.');
+}
             })
             .catch(console.error);
 
@@ -192,7 +193,7 @@ ${cleanQuery}
     if (!window.aiReady) return;
 
     // --- 4. OPTIMIZED GEMMA 4 RAG INSTRUCT TEMPLATE ---
-   const prompt = `<|im_start|>system
+   const prompt = `
 You are Notefull AI, the built-in assistant for the Notefull notes and lists app.
 
 Strict Rules:
@@ -200,20 +201,17 @@ Strict Rules:
 2. If the answer is completely missing from the notes and lists, state that you cannot find this information in a short, natural way. Do not invent details.
 3. Keep answers factual, direct, and conversational.
 4. Answer directly. Do not repeat the question back or output raw list contents — extract only what answers the question.
-<|im_end|>
-<|im_start|>user
+
 [DATA]
 ${contextText}
 [/DATA]
 
 Question: ${query}
-<|im_end|>
-<|im_start|>assistant
 `;
-    window.Capacitor.Plugins.AIPlugin.ask({ prompt }).then(result => {
+    window.Capacitor.Plugins.AIPlugin.askAI({ prompt }).then(result => {
         if (thisRequestId !== currentAiRequestId) return;
         if (result?.answer) {
-            showAiResponse(result.answer);
+            showAiResponse(result.response);
         } else {
             showAiResponse(`Found <strong>${title}</strong>.`);
         }

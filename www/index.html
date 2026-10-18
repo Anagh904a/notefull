@@ -5,51 +5,51 @@
     <meta charset="UTF-8" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width">
-    <meta name="description"
-        content="An Open-source notes-taking app built just for productivity. No ads, no distractions." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="An Open-source notes-taking app built just for productivity. No ads, no distractions." />
     <link rel="icon" href="notefull.png" type="image/x-icon">
-    <title>Notefull - Home</title>
+    <title>Notefull</title>
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="style.css">
-    <script src="libs/localforage/localforage.min.js"></script>
-    <!-- Add to your HTML head -->
-    <link rel="stylesheet" href="libs/iziToast/iziToast.min.css">
     <link rel="stylesheet" href="libs/tabler/tabler-icons.min.css">
-    <script src="libs/iziToast/iziToast.min.js"></script>
-    <script src="libs/compromise/compromise.js"></script>
-    <script type="module" src="libs/fuse/fuse.min.js"></script>
-    <script src="libs/qrcode/qrcode.min.js"></script>
-    <script type="module">
-  import Fuse from './libs/fuse/fuse.min.js';
-  window.Fuse = Fuse; 
-</script>
-<script type="module">
-import { joinRoom, selfId } from './libs/trystero/nostr.mjs';
-window.joinRoom = joinRoom;
-</script>
+    <link rel="preload" href="libs/iziToast/iziToast.min.css" as="style" onload="this.rel='stylesheet'">
+
+    <!-- 1. Capacitor Core MUST load first and synchronously so window.Capacitor is ready -->
+    <script src="js/capacitor.js"></script>
+
+    <!-- 2. Third-Party Vendor Libraries -->
+    <script src="libs/localforage/localforage.min.js"></script>
+    <script src="libs/iziToast/iziToast.min.js"r></script>
+    <script src="libs/qrcode/qrcode.min.js" defer></script>
+
+
+    <!-- 3. Notefull Connect Initiatlization-->
+
+
+ <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+
+    <!-- 4. Early Navigation & Initialization Guards -->
+    <script>
+        if (localStorage.getItem('notefullOnboarding') !== 'true') {
+            window.location.replace('onboarding.html');
+        } 
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("openAiDownloader") === "true") {
+                localStorage.removeItem("openAiDownloader");
+                if (typeof showDownloaderModal === "function") showDownloaderModal();
+                if (typeof startDownload === "function") startDownload();
+            }
+        });
+    </script>
 </head>
-<script>
-  if (localStorage.getItem('notefullOnboarding') !== 'true') {
-    window.location.replace('onboarding.html');
-} 
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-
-    if (localStorage.getItem("openAiDownloader") === "true") {
-        localStorage.removeItem("openAiDownloader");
-        showDownloaderModal();
-        startDownload();
-    }
-
-});
-
-
-</script>
 <body>
     <audio id="alertSound" src="sounds/t.mp3" preload="auto"></audio>
     <audio id="errorSound" src="sounds/e.mp3" preload="auto"></audio>
     <audio id="sucessSound" src="sounds/s.mp3" preload="auto"></audio>
+    <div class="bottom-container" id="bottomBar">
     <div class="nav-bar" id="navBar" role="navigation">
         <div class="nav-pill" id="pill"></div>
 
@@ -61,42 +61,26 @@ window.joinRoom = joinRoom;
                     <path d="M9 21v-8h6v8" />
                 </svg>
             </div>
-            <span class="nav-label">Home</span>
+            
         </button>
-
-        <button class="nav-item" onclick="setActive(this); showSection('trashSection')">
+<button class="nav-item" onclick="setActive(this); showSearchPage()">
             <div class="nav-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18" />
-                    <path d="M8 6V4h8v2" />
-                    <path d="M5 6l1 14h12l1-14" />
-                </svg>
+    stroke-linecap="round" stroke-linejoin="round">
+    <!-- Notepad outline -->
+    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" />
+    <!-- Top binder tabs -->
+    <path d="M8 2v3M12 2v3" />
+    <!-- Note text lines -->
+    <path d="M8 9h4M8 13h2" />
+    <!-- Corner AI Sparkle badge -->
+    <path d="M18 11c0 2.8-2.2 5-5 5 2.8 0 5 2.2 5 5 0-2.8 2.2-5 5-5-2.8 0-5-2.2-5-5z" />
+</svg>
+
             </div>
-            <span class="nav-label">Trash</span>
+           
         </button>
-
-        <div class="nav-center-wrap">
-
-            <button class="add-button" onclick="showAddOptions()">
-
-              <i class="ti ti-plus"></i>
-            </button>
-        </div>
-
-
-        <button class="nav-item" onclick="setActive(this); showSection('aiSection')">
-            <div class="nav-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2a10 10 0 1 1-10 10" />
-                    <path d="M12 2a10 10 0 0 1 10 10H12V2z" />
-                </svg>
-            </div>
-            <span class="nav-label">Analytics</span>
-        </button>
-
-        <button class="nav-item" onclick="setActive(this); showSection('settingsSection')">
+         <button class="nav-item" onclick="setActive(this); showSection('settingsSection')">
             <div class="nav-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -105,9 +89,15 @@ window.joinRoom = joinRoom;
                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
             </div>
-            <span class="nav-label">Settings</span>
+       
         </button>
     </div>
+    <div class="add-btn-container">
+    <button class="add-button" onclick="showAddOptions()" id="addBtn">
+        <i class="ti ti-plus"></i>
+    </button>
+</div>
+</div>
   
     <div id="privacyOverlay" class="hidden"></div>
     <div id="addOptionsModal" class="modal hidden">
@@ -120,67 +110,50 @@ window.joinRoom = joinRoom;
                 <button class="modal-btn" id="addListButton" onclick="showAddListSection()">
                     <i class="ti ti-checklist"></i> List
                 </button>
-               <!--- <button class="modal-btn" id="sharedListBtn" onclick="showSharedList()">
+             <button class="modal-btn" id="sharedListBtn" onclick="showSharedList()">
     <i class="ti ti-table-share"></i> Shared List
-                </button> -->
+                </button> 
             </div>
         </div>
     </div>
 
-    <div id="searchPage" class="search-page">
- 
-  <div class="header" id="header">
-     <div class="ai-svg"></div>
-    <i class="ti ti-search"></i>
-    <input type="text" id="searchInput" placeholder="Ask anything related to notes and lists..." oninput="searchNotes()">
-    <i class="ti ti-circle-x" onclick="clearSearch()" id="clearSearch"></i>
-  </div>
- <div id="aiSearchResponse" class="hidden">
-            <div class="ai-header">
-                <svg class="ai-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path class="sparkle sp-1"
-                        d="M4.5 1.5 L5.8 4.2 L8.5 5.5 L5.8 6.8 L4.5 9.5 L3.2 6.8 L0.5 5.5 L3.2 4.2 Z" />
-                    <path class="sparkle sp-2"
-                        d="M14 1 L16.5 6.5 L22 9 L16.5 11.5 L14 17 L11.5 11.5 L6 9 L11.5 6.5 Z" />
-                    <path class="sparkle sp-3"
-                        d="M19 12 L20.2 14.5 L22.7 15.7 L20.2 16.9 L19 19.4 L17.8 16.9 L15.3 15.7 L17.8 14.5 Z" />
-                </svg>
-                <span class="ai-title">AI Overview</span>
-                <span class="r-tag med">BETA</span>
-            </div>
-            <div id="aiResponseText"></div>
-            <p class="r-desc"><i class="ti ti-info-circle"></i> AI can make mistakes in responses</p>
-        </div>
-  <div id="src"></div> 
-   <div id="noResultsMessage" class="hidden">
-                    <i class="ti ti-zoom-question"></i>
-                    <p>No Matching Items were found</p>
-                    <span>Ensure you have entered your query correctly. Avoid typos </span>
-                </div>
-</div>
     <div id="combinedContainer" class="container hidden">
        <div class="top-bar-extreme" id="titleBar">
     <div class="top-bar-brand">
         <img src="notefull.png" alt="Notefull">
       
-        <h2 class="special-text">Notefull</h2>
-        
+        <h2>Notefull 9</h2>
+        <p class="r-tag sev">Beta</p>
         
     </div>
 
-    <div class="btn-group-right-home">
-           <button class="action-btn" id="searchIcon" onclick="showSearchPage()">
-    <span class="search-ring"></span>
-    <i class="ti ti-search"></i>
-</button>
-    <button class="action-btn" onclick="showSelectionMode()">
-       
-        <i class="ti ti-checks"></i>
-    </button>
+</div>
+<div class="greeting-card">
+    <span class="main-greeting" id="greeting-text">Good evening !</span>
+    <span class="secondaty-text id='subtitle-greet">What's on your mind?</span>
+</div>
 
-</div>
-</div>
-  
+  <div class="sort-container" id="sort">
+ <button class="sort-option active" onclick="setFilter('all')">
+All
+ </button>
+  <button class="sort-option" onclick="setFilter('notes')">
+      <i class="ti ti-note"></i>
+  <span class="active-text">Notes</span>
+ </button>
+<button class="sort-option" onclick="setFilter('lists')">
+      <i class="ti ti-list"></i>
+  <span class="active-text">Lists</span>
+ </button>
+  <button class="sort-option" onclick="setFilter('shared')">
+      <i class="ti ti-users"></i>
+    <span class="active-text">Shared</span>
+ </button>
+  <button class="sort-option" onclick="setFilter('trash')">
+    <i class="ti ti-trash"></i>
+    <span class="active-text">Trash</span>
+ </button>
+  </div>
 
         <div class="selection-toolbar" id="toolbar">
             <div class="toolbar-elements">
@@ -195,37 +168,17 @@ window.joinRoom = joinRoom;
 
 
 
-
-        <div id="items-container">
-            <div id="notesSection">
-                <div id="noteS-label" class="section-label">Notes</div>
-                <div id="notesContainer"></div>
-                <div id="noNotesMessage" class="hidden">
-                    <i class="ti ti-note-off"></i>
-                    <p>This space is lonely</p>
-                    <span>Tap + to add your first note</span>
+<div class="items" id="items-display">
+        <div id="itemsContainer"></div>
+          <div id="trashContainer" class="hidden"></div>
+            <div id="noItems" class="empty-msg hidden">
+<img src="/empty.png">
+                    <p>No items Yet! This feels lonely</p>
+                    <span>Tap + to start writting your ideas</span>
                 </div>
-            </div>
-            <div id="listsSection">
-                <div id="listS-label" class="section-label">Lists</div>
-                <div id="listsContainerContent"></div>
-                <div id="noListsMessage" class="hidden">
-                    <i class="ti ti-receipt-off"></i>
-                    <p>No lists yet</p>
-                    <span>Tap + to create your first list</span>
                 </div>
-            </div>
-                  <div id="sharedListSectio">
-                <div id="SL-label" class="section-label">Shared Lists</div>
-                <div id="Slcontainer"></div>
-                <div id="noSLMessage" class="hidden">
-                    <i class="ti ti-receipt-off"></i>
-                    <p>You don't own or participate in a shared list!</p>
-                    <span>Tap + to create a new shared list as owner</span>
-                </div>
-            </div>
         </div>
-    </div>
+    
 
     <div id="trashSection" class="container hidden">
         <div class="toolbar-trash" id="trash-toolbar">
@@ -247,7 +200,7 @@ window.joinRoom = joinRoom;
 
 
         <div class="section-label">Deleted Items</div>
-        <div id="trashContainer"></div>
+      
         <div id="noDeletedItemsMessage" class="hidden">
             <i class="ti ti-trash-off"></i>
             <p>Trash is empty</p>
@@ -255,43 +208,10 @@ window.joinRoom = joinRoom;
         </div>
 
     </div>
-    <div class="ai-thinking-modal" id="ai-thinking-modal">
-    <div class="ai-thinking-modal__backdrop"></div>
- 
-  <!-- Shared sparkle shape, defined once, reused by every particle below.
-       Path is stretched vertically (taller than wide) per the requested look. -->
-  <svg width="0" height="0" style="position:absolute">
-    <symbol id="ai-sparkle-shape" viewBox="0 0 24 24">
-      <path d="M12 3 C12.6 8.5 13.5 9.4 19 12 C13.5 14.6 12.6 15.5 12 21 C11.4 15.5 10.5 14.6 5 12 C10.5 9.4 11.4 8.5 12 3 Z"/>
-    </symbol>
-  </svg>
- 
-  <div class="ai-thinking-modal__card">
-    <div class="ai-thinking-modal__icon">
-      <div class="ai-thinking-modal__glow"></div>
- 
-      <!-- 3 particles continuously streaming bottom-right -> top-left -->
-      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--travel" style="--delay:0s"><use href="#ai-sparkle-shape"/></svg>
-      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--travel" style="--delay:0.8s"><use href="#ai-sparkle-shape"/></svg>
-      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--travel" style="--delay:1.6s"><use href="#ai-sparkle-shape"/></svg>
- 
-      <!-- 1 center particle — zooms in, holds, fades, repeats -->
-      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--center"><use href="#ai-sparkle-shape"/></svg>
- 
-      <!-- 2 fixed particles — stay in their corners, just twinkle -->
-      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--fixed-a"><use href="#ai-sparkle-shape"/></svg>
-      <svg class="ai-thinking-modal__sparkle ai-thinking-modal__sparkle--fixed-b"><use href="#ai-sparkle-shape"/></svg>
-    </div>
-    <div class="ai-thinking-modal__text" id="ai-thinking-text">Processing</div>
-  </div>
- 
-    <div class="ai-thinking-modal__shine">
-      <div class="ai-thinking-modal__shine-band"></div>
-    </div>
-  </div>
+   
     <div id="ai-result" class="modal hidden">
         <div class="modal-content">
-
+<div id="resultList"></div>
         </div>
     </div>
     <div id="summary" class="modal hidden">
@@ -318,7 +238,7 @@ window.joinRoom = joinRoom;
                 <button type="button" class="action-btn" onclick="showRemainderModal()"><i
                         class="ti ti-clock"></i></button>
 
-                <button type="button" class="action-btn" onclick="showMenu(this)">
+                <button type="button" class="action-btn" onclick="showMenu('menu-notes')">
                     <i class="ti ti-dots"></i>
                 </button>
             </div>
@@ -368,8 +288,23 @@ window.joinRoom = joinRoom;
         </div>
 
         <input type="text" class="note-title-input" id="noteTitle" placeholder="Title" />
+        <div class="ai-status-pill hidden" id="thinking-ai-notes">
+  <!-- Animated AI Sparkles Container -->
+  <span class="ai-sparkles" aria-hidden="true">
+    <!-- Primary Center Star -->
+    <svg class="sparkle sparkle-main" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/>
+    </svg>
+    <!-- Secondary Offset Star -->
+    <svg class="sparkle sparkle-sub" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/>
+    </svg>
+  </span>
+
+  <span class="ai-status-text">Thinking...</span>
+</div>
         <div class="note-content-input" id="noteContent" contenteditable="true"
-            data-placeholder="Enter your note here....">
+            data-placeholder="Enter your note here...." oninput="countChar()">
         </div>
         <div class="note-bottom-bar">
             <div class="row">
@@ -383,10 +318,10 @@ window.joinRoom = joinRoom;
 </div>
 <div class="divider-line-row"></div>
 <div class="format-menu">
-    <buttom class="row-button" onclick="showFormatMsg()"><i class="ti ti-bold"></i></buttom> <!--Make selected text bold-->
-    <button class="row-button" onclick="showFormatMsg()"><i class="ti ti-underline"></i></button> <!--Underline-->
-    <buttom class="row-button" onclick="showFormatMsg()"><i class="ti ti-italic"></i></buttom> <!--Italic-->
-    <button class="row-button" onclick="showFormatMsg()"><i class="ti ti-list"></i></button> <!--Bullet Point-->
+    <buttom class="row-button" onclick="formatSelection('b')" onmousedown="event.preventDefault()"><i class="ti ti-bold"></i></buttom> <!--Make selected text bold-->
+    <button class="row-button" onclick="formatSelection('u')" onmousedown="event.preventDefault()"><i class="ti ti-underline"></i></button> <!--Underline-->
+    <buttom class="row-button" onclick="formatSelection('i')" onmousedown="event.preventDefault()"><i class="ti ti-italic"></i></buttom> <!--Italic-->
+    <button class="row-button" onmousedown="event.preventDefault()" onclick="toggleBulletList()"><i class="ti ti-list"></i></button> <!--Bullet Point-->
     <button class="row-button" onclick="showFormatMsg()"><i class="ti ti-wheel"></i></button> <!--Text color needs color picker too-->
 </div>
             </div>
@@ -427,25 +362,50 @@ window.joinRoom = joinRoom;
                 <button type="button" class="action-btn" onclick="showListRemainderModal()"><i
                         class="ti ti-clock"></i></button>
 
-                <button type="button" class="action-btn" onclick="showList()">
-                    <i class="ti ti-key"></i>
+                <button type="button" class="action-btn" onclick="showMenu('menu-lists')">
+                    <i class="ti ti-dots"></i>
                 </button>
             </div>
         </div>
+<div class="menu hidden-animation" id="menu-lists">
+<button class="menu-button ai" onclick="suggestItems()">
+<i class="ti ti-text-spellcheck"></i>
+ Suggest Items
+</button>
 
+<button class="menu-button ai" onclick="showToastWarn('This is under development')">
+   <i class="ti ti-subtitles-ai"></i>
+  Text2Items Convert
+</button>
+            <button class="menu-button" onclick="showList()"><i class="ti ti-lock"></i> Lock List</button>
+            
+
+        </div>
 
 
         <input type="text" id="listTitle" class="note-title-input" placeholder="List Title" />
-        <button class="add-item-btn hidden" id="orignal-add-item-btn" onclick="addItem()">
-            <i class="ti ti-plus"></i> Add New Item
-        </button>
+                <div class="ai-status-pill hidden" id="thinking-ai-lists">
+  <!-- Animated AI Sparkles Container -->
+  <span class="ai-sparkles" aria-hidden="true">
+    <!-- Primary Center Star -->
+    <svg class="sparkle sparkle-main" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/>
+    </svg>
+    <!-- Secondary Offset Star -->
+    <svg class="sparkle sparkle-sub" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z"/>
+    </svg>
+  </span>
+
+  <span class="ai-status-text">Thinking...</span>
+</div>
         <div id="checklistContainer" class="checklist-items"></div>
         <div id="items-no" class="hidden">
             <i class="ti ti-exclamation-circle"></i>
             <p>No Items yet</p>
             <span>Tap + to create your first item</span>
         </div>
-        <button class="add-item-btn" onclick="addItem()">
+        <button class="add-item-btn" id="addItemBtn" onclick="addItem()">
             <i class="ti ti-plus"></i> Add New Item
         </button>
 
@@ -498,9 +458,9 @@ window.joinRoom = joinRoom;
 <div class="nf-statusbar__inner">
     <span class="nf-status-pill nf-status-pill--live" id="nfStatusPill" aria-hidden="true">
       <span class="nf-status-pill__dot"></span>
-      <span class="nf-status-pill__label" id="status">LIVE</span>
+      <span class="nf-status-pill__label" id="status">OFFLINE</span>
     </span>
-    <span class="nf-statusbar__text" id="nfStatusText">Only you are editing</span>
+ 
   </div>
 
 
@@ -704,6 +664,158 @@ window.joinRoom = joinRoom;
             <button onclick="closeModal('deletePasswordModal')">Close <i class="ti ti-x"></i></button>
         </div>
     </div>
+
+<div id="notefullAiPage" class="container hidden">
+  <div class="main-content">
+
+    <!-- LEFT SIDEBAR / MOBILE DRAWER -->
+    <aside class="sidebar" id="agentSidebar">
+      <div class="agent-brand">
+       
+         <img src="/notefull-ai.png">
+     
+        <div class="agent-brand-name">Notefull <span class="agent-brand-ai">AI </span></div>
+        
+      </div>
+
+      <button class="new-chat-btn" id="newChatBtn" onclick="createNewChat()">
+        <svg class="chat-icon sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        New chat
+      </button>
+
+      <!--<div class="sidebar-section">
+        <div class="ss-label">Workspace</div>
+        <button class="ss-btn active" id="agentChatNav" onclick="toggleAgentDrawer(false)">
+          <svg class="chat-icon sm" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+          <span>Active chat</span>
+        </button>
+        <button class="ss-btn" id="agentSearchNav" onclick="openAgentSearch()">
+          <svg class="chat-icon sm" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="M16 16l5 5"/></svg>
+          <span>Search chats</span>
+        </button>
+      </div> -->
+
+      <div class="sidebar-section" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="ss-label">Recent Chats</div>
+        <div class="recent-chat-list" id="recentChatsList">
+          <div class="noChatsMessage" id="noChatsMesage">No recent chats yet</div>
+        </div>
+      </div>
+
+      
+    </aside>
+
+    <!-- MOBILE DRAWER BACKDROP -->
+    <div class="sidebar-bg" id="bgClose" onclick="toggleAgentDrawer(false)"></div>
+
+
+    <main class="chat-ui">
+      
+      <!-- Top Action Bar -->
+      <div class="add-list-header">
+ <div class="btn-group-left">
+
+
+    <button class="action-btn" onclick="toggleAgentDrawer(true);">
+        <i class="ti ti-menu-2"></i>
+    </button>
+</div>
+
+<div class="btn-group-right">
+    <button type="button" class="action-btn" onclick="newChat()">
+        <i class="ti ti-message-plus"></i>
+    </button>
+
+    <button type="button" class="action-btn" onclick="deleteChat()">
+        <i class="ti ti-trash"></i>
+    </button>
+</div>
+        </div>
+
+      <!-- Scrollable Message Canvas -->
+      <section class="chat-section" id="scrollSection">
+      
+          
+         
+          <div class="welcome-msg" id="welcomeMsg">
+            <div class="msg-logo">
+             <i class="ti ti-sparkles"></i>
+            </div>
+            <h1 class="msg-title">What can I help with?</h1>
+            <p class="msg-desc">Chat with Notefull AI directly on your device. Search notes, organize tasks, edit lists, or start an open conversation.</p>
+            
+            <div class="msg-card-container">
+              <button class="msg-card" onclick="sendPrompt('What can you help me with?')">
+                <div class="card-icon">
+                  <svg class="chat-icon sm" viewBox="0 0 24 24"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/></svg>
+                </div>
+                <div>
+                  <div class="card-title">Explore capabilities</div>
+                  <div class="card-subtitle">See what Notefull AI can do</div>
+                </div>
+              </button>
+
+              <button class="msg-card" onclick="sendPrompt('Find my notes about meetings.')">
+                <div class="card-icon">
+                  <svg class="chat-icon sm" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="M16 16l5 5"/></svg>
+                </div>
+                <div>
+                  <div class="card-title">Search my notes</div>
+                  <div class="card-subtitle">Find and structure information</div>
+                </div>
+              </button>
+
+              <button class="msg-card" onclick="sendPrompt('Create a quick checklist for today.')">
+                <div class="card-icon">
+                  <svg class="chat-icon sm" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div>
+                  <div class="card-title">Create a checklist</div>
+                  <div class="card-subtitle">Quickly set up tasks and items</div>
+                </div>
+              </button>
+
+              <button class="msg-card" onclick="sendPrompt('Let\'s just chat.')">
+                <div class="card-icon">
+                  <svg class="chat-icon sm" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+                </div>
+                <div>
+                  <div class="card-title">General conversation</div>
+                  <div class="card-subtitle">Ask questions and brainstorm</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+      </section>
+
+      <div class="prompt-container">
+        <div class="prompt-box">
+          <textarea
+            id="agentPromptInput" 
+            rows="1" 
+            placeholder="Ask Notefull AI" 
+            autocomplete="off" 
+            autocorrect="on" 
+            spellcheck="true"
+            oninput="autoResizeAgentInput(this)"
+            onkeydown="handleAgentComposerKey(event)"></textarea>
+          
+          <div class="prompt-btns">
+            <button class="send-prompt-btn" id="thinkToggleBtn" onclick="toggleThinkMode(this)" title="Thinking mode (slower)">
+  <i class="ti ti-brain"></i>
+</button>
+            <button class="send-prompt-btn disabled" id="agentSendBtn" onclick="sendPrompt()" title="Send message">
+             <i class="ti ti-arrow-up"></i>
+            </button>
+          </div>
+        </div>
+        <div class="disclamer-txt">Notefull AI runs locally on your device. Responses are private and offline.</div>
+    </div>
+
+    </main>
+  </div>
+</div>
     <div class="settings-stack">
         <div id="settingsSection" class="container hidden">
             <div class="settings-group">
@@ -741,12 +853,21 @@ window.joinRoom = joinRoom;
                         <i class="ti ti-shield"></i>
                     </div>
                     <div class="text-box">
-                        <div class="title2">Analytics Updates</div>
+                        <div class="title2"> NDSP Updates</div>
                         <div class="subtitle">Engine Version  · Updates</div>
                     </div>
                 </div>
+                 <div class="card" onclick="showSection('general')">
+                    <div class="icon modes">
+                        <i class="ti ti-shield"></i>
+                    </div>
+                    <div class="text-box">
+                        <div class="title2">General Mangement</div>
+                        <div class="subtitle">Factory Reset · Restore </div>
+                    </div>
+                </div>
             </div>
-            <div class="card" onclick="showSection('devSection')">
+            <div class="card hidden" id="dev" onclick="showSection('devSection')">
                 <div class="icon wifi">
                 <i class="ti ti-adjustments-horizontal"></i>
                 </div>
@@ -768,12 +889,12 @@ window.joinRoom = joinRoom;
                 <div class="icon privacy">
                     <i class="ti ti-sparkles"></i>
                 </div>
-                <div class="text-box">
-                    <div class="title2">AI Manager</div>
-                    <div class="subtitle">AI Features · Download files</div>
+               <div class="text-box">
+                    <div class="title2">Files and AI</div>
+                    <div class="subtitle">Internel FIle Manager · Download AI</div>
                 </div>
-            </div>
-            <div class="card" onclick="openMembersSection()">
+            </div> 
+            <div class="card" onclick="etc.openMembersSection()">
                     <div class="icon modes">
                         <i class="ti ti-lock"></i>
                     </div>
@@ -852,11 +973,14 @@ window.joinRoom = joinRoom;
                 <div class="info-box">
                     <p>Notefull AI is powered by Qwen 2.5</p>
                 </div>
+                <div class="info-box">
+                    <p>We ensure your data security by our own-developed NDSP (Notefull Data Safety Protocol) </p>
+                </div>
             </div>
             <div class=" section-card">
                 <h2>About App</h2>
                 <div class="info-box"><img class="brand-t" src="notefull.png">
-                    <h4>App Version: 26.7.0</h4>
+                    <h4>App Version: 26.9.1beta</h4>
                 </div>
                 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&amp;hl=en">
                     <button>App Updates</button>
@@ -945,47 +1069,156 @@ window.joinRoom = joinRoom;
             </div>
 
         </div>
-        <div class="container hidden" id="files">
+        <div class="container hidden" id="general">
             <button class="modal-button" onclick="showSection('settingsSection')"> <i
                     class="ti ti-chevron-left"></i></button>
             <div class="section-card">
-                <h2>Manage AI features</h2>
-                <p>Installs Notefull AI for you</p>
-                 <div class="toggle-container">
-                    <span class="toggle-label">Enable Notefull AI</span>
+                <h2>General Management</h2>
+                <div class="section-card">
+                    <p>The below button WILL RESET NOTEFULL</p>
+                    <button class="delete-btn" onclick="resetNotefull()">Factory Reset</button>
+                    <p>Once excuted, your data WILL BE WIPED FOREVER</p>
+                </div>
+            </div>
+            <div class="section-card">
+                <p>You can choose a .backup file from colorNote</p>
+              
+<div class="import-container">
+  <input 
+    type="file" 
+    id="colornoteFileInput" 
+    accept=".backup,.doc" 
+    class="sr-only" 
+    style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;"
+  onchange="importColorNoteBackup()"
+    />
+  <label for="colornoteFileInput" class="import-btn">
+    Select ColorNote Backup (.backup)
+  </label>
+</div>
+            </div>
+            <div class="section-card">
+                <h2>Theme Switcher (NEW) </h2>
+                <div class="toggle-container">
+                    <span class="toggle-label">Dark Mode</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" checked disabled>
+                        <input type="checkbox" checked onchange="toggleTheme()">
 
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <p>Sorry, but very soon, you would be able to disable AI features because currently we are stablizing them first!</p>
-<div class="ai-compat-card" id="ai-compat-card">
-  <div class="ai-compat-icon" id="ai-compat-icon">
-    <svg id="ai-compat-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- tick or cross injected by JS -->
-    </svg>
-  </div>
-  <div class="ai-compat-text">
-    <strong id="ai-compat-title">Checking device...</strong>
-    <p id="ai-compat-desc">Please wait</p>
-    <p class="ai-compat-specs" id="ai-compat-specs"></p>
-   
-  </div>
-  
-</div>
- <button id="ai-button" onclick="showDownloaderModal()" class="hidden"><i class="ti ti-download"></i>Start Installation</button>
-
             </div>
 
         </div>
+        <!-- ==========================================================================
+     APP STORAGE & FILE MANAGER (Replaces legacy AI Manager)
+     ========================================================================== -->
+<div class="container hidden" id="files">
+  <div class="files-header-bar">
+    <button class="modal-button" onclick="showSection('settingsSection')">
+      <i class="ti ti-chevron-left"></i>
+    </button>
+    
+  </div>
+    <h2>App Storage & Files</h2>
+  <div class="section-card">
+
+    <div class="storage-summary-banner">
+      <div class="storage-meta">
+        <span class="storage-label">Internal App Files</span>
+        <h3 id="totalFilesSize">Calculating...</h3>
+      </div>
+      <button class="refresh-files-btn" onclick="refreshAppFilesList()" title="Refresh files">
+        <i class="ti ti-refresh"></i>
+      </button>
+    </div>
+
+    <!-- Live Files List -->
+    <div class="section-label" style="margin-top: 14px;">Stored Files</div>
+    <div id="appFilesList" class="app-files-list">
+      <div class="file-item-placeholder">Scanning internal directory...</div>
+    </div>
+  </div>
+
+ <!-- ==========================================================================
+     INSTALL AI ENGINE (3-Tier Card Selector)
+     ========================================================================== -->
+<div class="section-card hidden" id="aiInstallSection">
+  <div class="installer-heading">
+    <div class="installer-icon">
+      <i class="ti ti-sparkles"></i>
+    </div>
+    <div>
+      <h2 style="margin: 0; font-size: 17px; font-weight: 800;">Install AI Engine</h2>
+      <p style="margin: 3px 0 0; font-size: 12.5px; color: var(--muted, #64748b);">
+        Choose an on-device model to download. Models run 100% offline.
+      </p>
+    </div>
+  </div>
+
+  <div class="installer-tier-list">
+    <!-- Option 1: Lite Model -->
+    <div class="installer-card selected" id="tierCard-lite" onclick="selectInstallerTier('lite')">
+      <div class="installer-radio">
+        <div class="radio-dot"></div>
+      </div>
+      <div class="installer-details">
+        <div class="installer-header">
+          <span class="installer-title">Notefull AI Lite</span>
+          <span class="installer-badge badge-lite">~1.1 GB • Fast</span>
+        </div>
+        <p class="installer-desc">
+          Qwen Lite model optimized for quick note searches, checklist creation, and low memory usage. Recommended for devices with 4 GB+ RAM.
+        </p>
+      </div>
+    </div>
+
+    <!-- Option 2: Full / Advanced Model -->
+    <div class="installer-card" id="tierCard-full" onclick="selectInstallerTier('full')">
+      <div class="installer-radio">
+        <div class="radio-dot"></div>
+      </div>
+      <div class="installer-details">
+        <div class="installer-header">
+          <span class="installer-title">Notefull AI Advanced (Qwen3-4B)</span>
+          <span class="installer-badge badge-full">~2.4 GB • Deep Thinking</span>
+        </div>
+        <p class="installer-desc">
+          Flagship hybrid reasoning model with step-by-step thinking mode and multi-step tool execution. Requires 8 GB+ RAM.
+        </p>
+      </div>
+    </div>
+
+    <!-- Option 3: Disable AI -->
+    <div class="installer-card" id="tierCard-disable" onclick="selectInstallerTier('disbale-ai')">
+      <div class="installer-radio">
+        <div class="radio-dot"></div>
+      </div>
+      <div class="installer-details">
+        <div class="installer-header">
+          <span class="installer-title">Disable AI Features</span>
+          <span class="installer-badge badge-off">0 MB • Pure Notes</span>
+        </div>
+        <p class="installer-desc">
+          Keep Notefull completely manual, lightweight, and offline. Removes all AI action buttons and leaves 0 model files on storage.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <button id="startInstallBtn" class="installer-submit-btn" onclick="confirmAndDownloadFromFiles()">
+    <i class="ti ti-download"></i>
+    <span>Start Installation</span>
+  </button>
+</div>
+</div>
 <div id="membersSection" class="container hidden">
     <h2 id="mainHeading">Manage Devices</h2>
     <div class="tab-container" id="tabs">
-        <div id="membersTab" class="tab active" onclick="switchTab('tabs', 'membersTab', 'devices')">
+        <div id="membersTab" class="tab active" onclick="etc.switchTab('tabs', 'membersTab', 'devices')">
             <span class="tab-name">Devices</span>
         </div>
-        <div id="requestsTab" class="tab" onclick="switchTab('tabs', 'requestsTab', 'requests')">
+        <div id="requestsTab" class="tab" onclick="etc.switchTab('tabs', 'requestsTab', 'requests')">
             <span class="tab-name">Requests</span>
         </div>
     </div>
@@ -995,11 +1228,11 @@ window.joinRoom = joinRoom;
 <div id="deviceList"></div>
 <div id="noDevicesMessage">No devices yet! Click Add Device to add a device</div>
     </div>
-    <button class="members-btn" onclick="showAddDeviceSection()">Add Device</button>
+    <button class="members-btn" onclick="etc.showAddDeviceSection()">Add Device</button>
 </div>
 <div class="section-card hidden" id="addDevice">
     <h2>Add a device</h2>
-    <button class="modal-button" onclick="backtoDevices()"> <i
+    <button class="modal-button" onclick="etc.backtoDevices()"> <i
                     class="ti ti-chevron-left"></i></button>
     <div class="methods-container" id="method1">
     <div class="qr-code-container">
@@ -1014,7 +1247,7 @@ window.joinRoom = joinRoom;
 </div>
 <div class="methods-container hidden" id="method2">
     <div class="qr-code-container">
-        <button class="scan-qr" id="scanBtn" onclick="scanQr()">Scan a QR</button>
+        <button class="scan-qr" id="scanBtn" onclick="etc.scanMethod()">Scan a QR</button>
     </div>
 
 <div class="code-container">
@@ -1022,7 +1255,7 @@ window.joinRoom = joinRoom;
 </div>
 </div>
 <div class="method-switch">
-    <p class="switch-text" id="switchText" onclick="showConnectSection('method2')">Scan a QR code instead</p>
+    <p class="switch-text" id="switchText" onclick="etc.showConnectSection('method2')">Scan a QR code instead</p>
 </div>
 </div>
 <div class="devices-section hidden" id="requests">
@@ -1042,129 +1275,13 @@ window.joinRoom = joinRoom;
           <h2>Enter your display name</h2>
        <p>This will be visble to all devices you connect with</p>
         <input class="display-name" id="displayName" placeholder="Your Device Name">
-        <button onclick="setDisplayName()">Set Name</button>
+        <button onclick="NC.setDisplayName()">Set Name</button>
     </div>
 </div>
-    <!-- AI Assets Downloader Modal -->
-<div id="assetsDownloader" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="assetsDownloadStatus">
-  <div class="assets-modal-backdrop" onclick="closeAssetsModal()"></div>
   
-  <div class="assets-modal-card">
-    <!-- Close Button -->
-    <button class="assets-close-btn" onclick="closeAssetsModal()" aria-label="Close modal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-
-    <!-- Header Icon -->
-    <div class="assets-icon-badge" id="assetsModalIconBadge">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-      </svg>
-    </div>
-
-    <!-- Title & Subtitle -->
-    <h2 id="assetsDownloadStatus" class="assets-modal-title">Install Notefull AI</h2>
-    <p id="assetsDownloadDesc" class="assets-modal-desc">Download on-device AI models for private, fully offline smart notes and task analysis.</p>
-
-    <!-- VIEW 1: PRE-DOWNLOAD & TERMS -->
-    <div id="dlReadyState" class="assets-modal-state active">
-      <!-- Spec Chips -->
-      <div class="assets-spec-grid">
-        <div class="assets-spec-item">
-          <span class="assets-spec-label">Download Size</span>
-          <span class="assets-spec-value" id="sizeTracker">2.54 GB</span>
-        </div>
-        <div class="assets-spec-item">
-          <span class="assets-spec-label">Privacy</span>
-          <span class="assets-spec-value">100% Offline</span>
-        </div>
-      </div>
-
-      <!-- Gemma Model Terms Box -->
-      <div class="assets-terms-card">
-        <div class="assets-terms-header">
-          <span class="assets-terms-icon">⚖️</span>
-          <div>
-            <strong>Gemma Model Terms</strong>
-            <p>Gemma is provided under and subject to the Gemma Terms of Use found at <a href="https://ai.google.dev/gemma/terms" target="_blank" rel="noopener" class="assets-terms-link">ai.google.dev/gemma/terms</a>.</p>
-          </div>
-        </div>
-
-        <label class="assets-checkbox-label">
-          <input type="checkbox" id="assetsTermsCheck" onchange="handleTermsCheckbox(this.checked)">
-          <span class="assets-custom-checkbox"></span>
-          <span class="assets-checkbox-text">
-            I accept the Gemma Terms of Use and agree to use the AI in compliance with these terms. 
-            <a href="https://ai.google.dev/gemma/terms" target="_blank" rel="noopener" class="assets-terms-link">Learn more</a>
-          </span>
-        </label>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="assets-btn-row">
-        <button class="assets-btn assets-btn-secondary" onclick="closeAssetsModal()">Cancel</button>
-        <button class="assets-btn assets-btn-primary" id="startBtn" onclick="startDownload()" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="assets-btn-icon">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Start Download
-        </button>
-      </div>
-    </div>
-
-    <!-- VIEW 2: ACTIVE DOWNLOADING -->
-    <div id="dlActiveState" class="assets-modal-state">
-      <div class="assets-progress-wrapper">
-        <div class="assets-progress-track">
-          <div id="download-progress-fill" class="assets-progress-fill"></div>
-        </div>
-      </div>
-
-      <div class="assets-metric-row">
-        <span id="dlPercentText" class="assets-percent-text">0%</span>
-        <span id="etaTracker" class="assets-eta-pill">Estimating time…</span>
-      </div>
-
-      <div class="assets-stats-grid">
-        <div class="assets-stat-col">
-          <span class="assets-stat-val" id="dlProgressBytes">0 MB</span>
-          <span class="assets-stat-lbl">Downloaded</span>
-        </div>
-        <div class="assets-stat-col">
-          <span class="assets-stat-val" id="dlSpeedTracker">0 MB/s</span>
-          <span class="assets-stat-lbl">Speed</span>
-        </div>
-        <div class="assets-stat-col">
-          <span class="assets-stat-val" id="dlTotalSize">2.54 GB</span>
-          <span class="assets-stat-lbl">Total</span>
-        </div>
-      </div>
-
-      <div class="assets-btn-row">
-        <button class="assets-btn assets-btn-danger" id="cancelDlBtn" onclick="cancelDownload()">Cancel Download</button>
-      </div>
-    </div>
-
-    <!-- VIEW 3: COMPLETED SUCCESS -->
-    <div id="dlDoneState" class="assets-modal-state">
-      <div class="assets-success-chip">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-        Installation Complete
-      </div>
-      <div class="assets-btn-row">
-        <button class="assets-btn assets-btn-primary" onclick="closeAssetsModal()">Done</button>
-      </div>
-    </div>
-  </div>
+<div id="aiDownloadPill" class="pill hidden">
+  <div style="width: 14px; height: 14px; border: 2px solid #38bdf8; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+  <span id="aiDownloadPillText">Downloading AI: 0%</span>
 </div>
     <div id="aiSection" class="container hidden">
         <div class="outdated-banner hidden" id="updateWarn">
@@ -1176,14 +1293,14 @@ window.joinRoom = joinRoom;
                 </svg>
             </div>
             <div class="outdated-body">
-                <div class="outdated-title">Analytics Engine is outdated</div>
-                <div class="outdated-desc">A newer version is available with new detection. Update to get
-                    the best results. It takes a few seconds only!</div>
+                <div class="outdated-title">NDSP is outdated</div>
+                <div class="outdated-desc">A newer version is available with better security. PLease upgrade for your safety. It's free and takes a moment</div>
                 <div class="outdated-link" onclick="openAntithreat();">Update in Settings →</div>
             </div>
         </div>
+        <h2>Analysis (Powered by NDSP)</h2>
         <div class="section">
-            <div class="section-label">Analysis Score</div>
+            <div class="section-label">Analysis</div>
             <div class="score-card">
                 <div class="score-top-row">
                     <div class="score-num-wrap">
@@ -1235,7 +1352,7 @@ window.joinRoom = joinRoom;
         </div>
         <!-- Results -->
         <div class="section">
-            <div class="section-label">Analysis</div>
+            <div class="section-label">Analysis Result</div>
             <div class="results-card">
                 <div class="results-head">
                     <div class="results-head-left">
@@ -1279,20 +1396,24 @@ window.joinRoom = joinRoom;
             <button onclick="closeModal('deleteListPasswordModal')">Close <i class="ti ti-x"></i></button>
         </div>
     </div>
-    <script type="module" src="js/capacitor.js"></script>
     <script src="js/storage-confg.js"></script>
     <script src="js/script.js"></script>
     <script src="js/selectionManager.js"></script>
     <script src="js/notes.js"></script>
     <script src="js/lists.js"></script>
-    <script src="js/notefull-pair.js"></script>
-    <script src="js/connect.js"></script> 
+    <script src="js/colornote_merge.js"></script>
+     <script src="js/shared-lists.js"></script>
+    <script src="js/NotefullConnect/protocol.js"></script>
+    <script src="js/NotefullConnect/protocol-etc.js"></script>
+    <script src="js/NotefullConnect/shared-list-protocol.js"></script>
+    <script src="js/NotefullConnect/shared-list-helper.js"></script>
 <script src="js/reaminders.js"></script>
     <script src="js/page-load.js"></script>
     <script src="js/ai.js"></script>
+    <script src="js/ai-chat.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/settings.js"></script>
-
+<script src="js/ai-tools.js"></script>
 </body>
 
 </html>

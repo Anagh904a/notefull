@@ -10,690 +10,1025 @@
   <style>
     :root {
       --primary: #0284c7;
-      --primary-hover: #0369a1;
+      --primary-vivid: #0ea5e9;
+      --primary-dark: #0369a1;
       --primary-light: #e0f2fe;
-      --primary-subtle: #bae6fd;
+      --primary-glow: rgba(14, 165, 233, 0.35);
+      
+      --accent-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      
       --text-main: #0f172a;
       --text-muted: #64748b;
-      --card-bg: rgba(255, 255, 255, 0.94);
-      --card-border: rgba(255, 255, 255, 0.8);
-      --danger: #ef4444;
-      --danger-bg: #fef2f2;
-      --warning: #d97706;
-      --warning-bg: #fffbeb;
-      --success: #059669;
-      --success-bg: #ecfdf5;
-      --unknown: #64748b;
-      --unknown-bg: #f1f5f9;
+      
+      /* Glassmorphism System */
+      --glass-base: rgba(255, 255, 255, 0.68);
+      --glass-card: rgba(255, 255, 255, 0.76);
+      --glass-pill: rgba(255, 255, 255, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-highlight: rgba(255, 255, 255, 0.95);
+      --glass-shadow: 0 24px 60px -12px rgba(2, 132, 199, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.8);
+      
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #e0f2fe; color: var(--text-main); opacity: 1; transition: opacity 0.45s ease; }
-    body.fade-out { opacity: 0; }
-
-    /* Custom Scrollbars */
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .bg-gradient {
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0284c7;
+      color: var(--text-main);
+      position: relative;
+    }
+
+    /* Ambient Ultra-Deep Multi-Blur Backdrop */
+    .ambient-sky {
       position: fixed; inset: 0; z-index: 0;
-      background:
-        radial-gradient(circle at 12% 15%, rgba(56,189,248,0.5), transparent 45%),
-        radial-gradient(circle at 88% 12%, rgba(129,140,248,0.4), transparent 50%),
-        radial-gradient(circle at 80% 88%, rgba(45,212,191,0.4), transparent 50%),
-        radial-gradient(circle at 15% 90%, rgba(59,130,246,0.4), transparent 45%),
-        linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
-      animation: meshShift 16s ease-in-out infinite alternate;
+      background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 45%, #bae6fd 100%);
+      overflow: hidden;
+      pointer-events: none;
     }
-    @keyframes meshShift { from { filter: saturate(105%); } to { filter: saturate(140%) hue-rotate(8deg); } }
 
-    .bg-blob { position: fixed; border-radius: 50%; filter: blur(65px); opacity: 0.45; z-index: 0; pointer-events: none; animation: drift 14s ease-in-out infinite alternate; }
-    .bg-blob.one { width: 320px; height: 320px; background: #7dd3fc; top: -120px; left: -100px; }
-    .bg-blob.two { width: 280px; height: 280px; background: #a5b4fc; bottom: -100px; right: -80px; animation-delay: -6s; }
-    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(24px,-18px) scale(1.08); } }
-
-    /* Shell */
-    .onboarding-wrapper {
-      position: relative; z-index: 10; width: 100%; height: 100%;
-      display: flex; justify-content: center; align-items: stretch;
-      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16,1,0.3,1);
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(85px);
+      opacity: 0.65;
+      mix-blend-mode: multiply;
+      animation: driftOrb 18s ease-in-out infinite alternate;
     }
-    .onboarding-wrapper.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
+    .orb-1 { width: 380px; height: 380px; background: #7dd3fc; top: -80px; left: -80px; }
+    .orb-2 { width: 440px; height: 440px; background: #c084fc; bottom: -100px; right: -90px; animation-delay: -6s; }
+    .orb-3 { width: 320px; height: 320px; background: #6ee7b7; bottom: 30%; left: -60px; animation-delay: -11s; }
+    .orb-4 { width: 280px; height: 280px; background: #38bdf8; top: 25%; right: -50px; animation-delay: -3s; }
 
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    @keyframes driftOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(35px, -30px) scale(1.12); }
+      100% { transform: translate(-25px, 20px) scale(0.95); }
+    }
+
+    /* =========================================================
+       1. ULTRA-SMOOTH CONTINUOUS VECTOR FLIGHT INTRO
+       Uses SVG motion path + continuous cubic easing (no pauses)
+       ========================================================= */
+    .flight-intro-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: radial-gradient(circle at 50% 35%, rgba(240, 249, 255, 0.94) 0%, rgba(186, 230, 253, 0.92) 55%, rgba(125, 211, 252, 0.9) 100%);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .flight-intro-overlay.dismissed {
+      opacity: 0;
+      transform: scale(1.06);
+      pointer-events: none;
+    }
+
+    /* Soft Floating Ambient Clouds */
+    .sky-cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 200px;
+      filter: blur(16px);
+      pointer-events: none;
+    }
+    .cloud-1 { width: 340px; height: 95px; top: 14%; left: -80px; animation: cloudDrift 22s linear infinite; }
+    .cloud-2 { width: 400px; height: 115px; bottom: 18%; right: -100px; animation: cloudDrift 26s linear infinite reverse; }
+    .cloud-3 { width: 240px; height: 75px; top: 48%; left: 35%; animation: cloudDrift 30s linear infinite; }
+    @keyframes cloudDrift {
+      0% { transform: translateX(-50px); }
+      50% { transform: translateX(60px); }
+      100% { transform: translateX(-50px); }
+    }
+
+    /* Motion Path Arena */
+    .flight-arena {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* Continuous SVG Trail */
+    .flight-svg-canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+    }
+    .motion-contrail {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.95);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 10 7;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 20px rgba(56, 189, 248, 0.7));
+      stroke-dashoffset: 1400;
+      animation: drawContrail 3.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+    @keyframes drawContrail {
+      0% { stroke-dashoffset: 1400; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 0.9; }
+      100% { stroke-dashoffset: 0; opacity: 0.4; }
+    }
+
+    /* Gliding Jet - Pure Smooth offset-path */
+    .gliding-jet {
+      position: absolute;
+      width: 82px;
+      height: 82px;
+      offset-path: path("M -100 680 C 40 520, 120 320, 260 250 C 400 180, 360 40, 200 90 C 70 140, 110 330, 200 290");
+      offset-rotate: auto 75deg;
+      animation: swoopAlongTrack 3.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      filter: drop-shadow(0 16px 20px rgba(2, 132, 199, 0.35));
+    }
+
+    @keyframes swoopAlongTrack {
+      0% {
+        offset-distance: 0%;
+        opacity: 0;
+        transform: scale(0.65);
+      }
+      10% {
+        opacity: 1;
+        transform: scale(0.9);
+      }
+      70% {
+        transform: scale(1.15);
+      }
+      90% {
+        transform: scale(1.05);
+      }
+      100% {
+        offset-distance: 100%;
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Intro Titles & Skip CTA */
+    .flight-intro-copy {
+      position: absolute;
+      bottom: calc(44px + var(--safe-bottom));
+      text-align: center;
+      padding: 0 24px;
+      opacity: 0;
+      animation: textFloatUp 1s 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .flight-intro-copy h2 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #0369a1;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
+    }
+    .flight-intro-copy p {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0284c7;
+      margin-top: 5px;
+    }
+    @keyframes textFloatUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .skip-intro-pill {
+      position: absolute;
+      top: calc(18px + var(--safe-top)); right: 20px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      padding: 8px 18px; border-radius: 24px;
+      font-size: 12px; font-weight: 700; color: #0369a1;
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.12);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .skip-intro-pill:active { transform: scale(0.95); }
+
+    /* =========================================================
+       2. REVAMPED GLASS-BENTO ONBOARDING STAGE
+       ========================================================= */
+    .onboarding-screen {
+      position: relative; z-index: 10;
       width: 100%; height: 100%;
-      padding: calc(24px + var(--safe-top)) 24px calc(24px + var(--safe-bottom));
-      box-shadow: 0 0 60px rgba(2,132,199,0.1);
+      max-width: 480px; margin: 0 auto;
       display: flex; flex-direction: column;
-      position: relative; overflow-y: auto;
+      padding: calc(16px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
+      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .onboarding-screen.hidden {
+      opacity: 0;
+      transform: scale(0.96);
+      pointer-events: none;
     }
 
-    /* Stepper */
-    .stepper { display: flex; justify-content: center; gap: 6px; margin-bottom: 18px; flex-shrink: 0; }
-    .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary-subtle); transition: all 0.4s ease; }
-    .step-dot.active { width: 26px; border-radius: 10px; background: var(--primary); }
-
-    /* Steps */
-    .step-content { display: none; flex-direction: column; align-items: center; text-align: center; height: 100%; width: 100%; animation: fadeInSlide 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
-    .step-content.active { display: flex; }
-    @keyframes fadeInSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-    .icon-badge {
-      width: 64px; height: 64px; border-radius: 20px; color: var(--primary);
-      background: #fff;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.1), inset 0 2px 4px rgba(255,255,255,0.9);
-      flex-shrink: 0;
-      animation: badgeIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    /* Modern Glass Header & Stories Progress */
+    .stories-indicator {
+      display: flex; gap: 7px; width: 100%; margin-bottom: 14px; flex-shrink: 0;
     }
-    .icon-badge svg { width: 32px; height: 32px; }
-    @keyframes badgeIn { from { opacity: 0; transform: scale(0.6) rotate(-8deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
-
-    .free-badge { display: inline-flex; align-items: center; gap: 6px; background: #dcfce7; color: #15803d; font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; border: 1px solid #bbf7d0; }
-
-    h1 { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; letter-spacing: -0.4px; line-height: 1.25; }
-    p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
-
-    /* Terms box & Checkboxes */
-    .terms-box {
-      width: 100%; max-height: 190px; overflow-y: auto;
-      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
-      padding: 14px 16px; font-size: 13px; color: #475569; line-height: 1.6;
-      text-align: left; white-space: pre-wrap; margin-bottom: 14px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    .story-track {
+      flex: 1; height: 4px; border-radius: 99px;
+      background: rgba(15, 23, 42, 0.12);
+      overflow: hidden; position: relative;
     }
-    .terms-box strong { color: var(--text-main); font-weight: 700; }
+    .story-progress {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      border-radius: 99px;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .story-track.active .story-progress { width: 100%; }
+    .story-track.completed .story-progress { width: 100%; background: #38bdf8; }
 
-    .checkbox-container {
-      display: flex; align-items: flex-start; gap: 10px; width: 100%;
-      text-align: left; cursor: pointer; margin-bottom: 16px; user-select: none;
+    .deck-top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; flex-shrink: 0;
     }
-    .checkbox-container input[type="checkbox"] {
-      position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0;
+    .glass-badge-tag {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.6px;
+      text-transform: uppercase; color: var(--primary-dark);
+      background: var(--glass-pill);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--glass-highlight);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
     }
-    .custom-checkbox {
-      width: 20px; height: 20px; border-radius: 6px; border: 2px solid #cbd5e1;
-      background: #fff; flex-shrink: 0; margin-top: 1px;
+    .step-counter-text {
+      font-size: 12px; font-weight: 700; color: var(--text-muted);
+    }
+
+    /* Fluid Step Container */
+    .step-viewport {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column;
+      padding-bottom: 10px;
+    }
+    .step-viewport::-webkit-scrollbar { width: 3px; }
+    .step-viewport::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .step-slide {
+      display: none; flex-direction: column; width: 100%;
+      animation: glassSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .step-slide.active { display: flex; }
+    @keyframes glassSlideUp {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Common Stage Header */
+    .hero-glass-row {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+    }
+    .hero-app-glyph {
+      width: 62px; height: 62px; border-radius: 20px;
+      background: #ffffff;
       display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s ease;
+      color: var(--primary);
+      box-shadow: 0 12px 28px rgba(2, 132, 199, 0.18), inset 0 2px 4px #ffffff;
+      border: 1px solid var(--glass-highlight);
+      flex-shrink: 0;
+      position: relative;
     }
-    .checkbox-container input[type="checkbox"]:checked ~ .custom-checkbox {
+    .hero-app-glyph svg { width: 32px; height: 32px; }
+    .hero-app-glyph::after {
+      content: ''; position: absolute; inset: -4px; border-radius: 24px;
+      background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.4), transparent);
+      z-index: -1;
+    }
+
+    .hero-headline h1 { font-size: 23px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; line-height: 1.25; }
+    .hero-headline p { font-size: 13.5px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+
+    /* =========================================================
+       STEP 1: EXPANDED BENTO CARDS
+       ========================================================= */
+    .bento-showcase {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+    }
+    .bento-cell {
+      background: var(--glass-card);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: var(--glass-shadow);
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .bento-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 26px 65px -10px rgba(2, 132, 199, 0.22);
+    }
+    .bento-cell.span-full { grid-column: span 2; }
+
+    .bento-icon-bubble {
+      width: 42px; height: 42px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px; margin-bottom: 12px;
+    }
+    .bento-icon-bubble.emerald { background: #ecfdf5; color: #059669; }
+    .bento-icon-bubble.blue { background: #e0f2fe; color: #0284c7; }
+    .bento-icon-bubble.purple { background: #f3e8ff; color: #7e22ce; }
+
+    .bento-title { font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+    .bento-desc { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+
+    .bento-corner-pill {
+      position: absolute; top: 12px; right: 12px;
+      font-size: 9.5px; font-weight: 800; letter-spacing: 0.3px;
+      background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
+      padding: 3px 8px; border-radius: 8px;
+    }
+
+    /* =========================================================
+       STEP 2: LEGAL TILES & FROSTED CONSENT GATE
+       ========================================================= */
+    .legal-cards-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .legal-tile {
+      background: var(--glass-card);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px; padding: 14px 16px;
+      box-shadow: var(--glass-shadow);
+      text-align: left;
+    }
+    .legal-tile-head {
+      display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 800; color: var(--text-main);
+    }
+    .legal-tile-body {
+      margin-top: 6px; font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    }
+
+    .consent-glass-switch {
+      background: var(--glass-pill);
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
+      border: 2px solid #cbd5e1;
+      border-radius: 20px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer; user-select: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    }
+    .consent-glass-switch.checked {
+      border-color: var(--primary);
+      background: #f0f9ff;
+      box-shadow: 0 10px 28px rgba(2, 132, 199, 0.16);
+    }
+    .consent-checkbox {
+      width: 24px; height: 24px; border-radius: 8px; border: 2px solid #94a3b8;
+      display: flex; align-items: center; justify-content: center;
+      background: #ffffff; flex-shrink: 0; transition: all 0.2s ease;
+    }
+    .consent-glass-switch.checked .consent-checkbox {
       background: var(--primary); border-color: var(--primary);
     }
-    .custom-checkbox::after {
-      content: ''; display: none; width: 5px; height: 9px;
-      border: solid #fff; border-width: 0 2px 2px 0;
-      transform: rotate(45deg) translate(-1px, -1px);
+    .consent-checkbox svg { width: 14px; height: 14px; stroke: #ffffff; display: none; }
+    .consent-glass-switch.checked .consent-checkbox svg { display: block; }
+
+    /* =========================================================
+       STEP 3: SECURITY COMMAND HUD
+       ========================================================= */
+    .security-hud-deck { display: flex; flex-direction: column; gap: 11px; margin-bottom: 16px; }
+    .security-hud-panel {
+      background: var(--glass-card);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      box-shadow: var(--glass-shadow);
+      transition: transform 0.2s ease;
     }
-    .checkbox-container input[type="checkbox"]:checked ~ .custom-checkbox::after { display: block; }
-    .checkbox-label { font-size: 12.5px; color: var(--text-main); line-height: 1.45; font-weight: 500; }
-
-    .terms-link {
-      color: var(--primary); text-decoration: underline; text-underline-offset: 2px; font-weight: 600;
+    .security-hud-panel:hover { transform: translateY(-1px); }
+    .hud-left { display: flex; align-items: center; gap: 14px; }
+    .hud-symbol {
+      width: 44px; height: 44px; border-radius: 14px;
+      background: #ffffff; display: flex; align-items: center; justify-content: center;
+      font-size: 21px; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
-    .terms-link:hover { color: var(--primary-hover); }
-
-    /* Gemma Model Terms Notice Box */
-    .gemma-terms-card {
-      width: 100%; background: #ffffff; border: 1px solid #e2e8f0;
-      border-radius: 14px; padding: 12px 14px; margin-bottom: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02); text-align: left;
+    .hud-copy strong { display: block; font-size: 13.5px; font-weight: 800; color: var(--text-main); }
+    .hud-copy span { font-size: 11.5px; color: var(--text-muted); line-height: 1.35; }
+    .hud-status-badge {
+      font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px;
+      background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
+      white-space: nowrap;
     }
-    .gemma-terms-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-    .gemma-terms-header strong { display: block; font-size: 12.5px; color: var(--text-main); margin-bottom: 2px; }
-    .gemma-terms-header p { font-size: 11.5px; color: var(--text-muted); line-height: 1.45; margin: 0; }
 
-    /* Tutorial preview */
-    .tutorial-preview { width: 100%; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 14px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-    .mock-nav-bar { display: flex; justify-content: space-around; align-items: center; background: #f8fafc; padding: 10px; border-radius: 14px; border: 1px dashed var(--primary-subtle); margin-top: 8px; }
-    .mock-plus-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; box-shadow: 0 4px 12px rgba(2,132,199,0.3); animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0.4); } 70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(2,132,199,0); } 100% { transform: scale(1); } }
-    .mock-options { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
-    .mock-chip { background: var(--primary-light); color: var(--primary); font-weight: 600; font-size: 12px; padding: 5px 12px; border-radius: 16px; }
-
-    /* Feature list */
-    .feature-list { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; margin-bottom: 16px; }
-    .feature-item { display: flex; align-items: flex-start; gap: 12px; background: #fff; padding: 12px 14px; border-radius: 14px; border: 1px solid #f1f5f9; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .feature-icon { font-size: 18px; margin-top: 2px; }
-    .feature-item strong { display: block; font-size: 13px; color: var(--text-main); margin-bottom: 2px; }
-    .feature-item span { font-size: 12px; color: var(--text-muted); line-height: 1.35; }
-
-    /* AI compat card */
-    .ai-compat-wrap { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
-    #ai-compat-card { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px 4px 14px; }
-    .status-circle-outer { width: 92px; height: 92px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; background: var(--unknown-bg); transition: background 0.5s ease; }
-    #ai-compat-icon { width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--unknown); color: #fff; transition: background 0.5s ease; }
-    #ai-compat-icon svg { width: 28px; height: 28px; }
-    #ai-compat-card.status-ok .status-circle-outer     { background: var(--success-bg); }
-    #ai-compat-card.status-ok #ai-compat-icon           { background: var(--success); }
-    #ai-compat-card.status-warn .status-circle-outer    { background: var(--warning-bg); }
-    #ai-compat-card.status-warn #ai-compat-icon         { background: var(--warning); }
-    #ai-compat-card.status-bad .status-circle-outer     { background: var(--danger-bg); }
-    #ai-compat-card.status-bad #ai-compat-icon          { background: var(--danger); }
-    #ai-compat-card.status-unknown .status-circle-outer { background: var(--unknown-bg); }
-    #ai-compat-card.status-unknown #ai-compat-icon      { background: var(--unknown); }
-    #ai-compat-card.pop-in .status-circle-outer { animation: circlePop 0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
-    #ai-compat-card.pop-in #ai-compat-icon svg { animation: iconDraw 0.4s ease 0.2s both; }
-    @keyframes circlePop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
-    @keyframes iconDraw { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
-    #ai-compat-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
-    #ai-compat-desc { font-size: 13px; color: var(--text-muted); line-height: 1.45; margin-bottom: 10px; }
-    #ai-compat-specs { display: block; font-size: 10.5px; color: #94a3b8; line-height: 1.5; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 8px 10px; white-space: pre-line; text-align: left; font-family: 'SFMono-Regular', Consolas, monospace; }
-
-    /* Loader */
-    .loader-container { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0; }
-    .spinner { width: 32px; height: 32px; border: 3px solid var(--primary-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-
-    /* Offline banner */
-    .offline-banner { display: none; align-items: center; gap: 8px; background: var(--danger-bg); border: 1px solid #fecaca; color: var(--danger); font-size: 12px; font-weight: 600; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px; width: 100%; text-align: left; }
-    .offline-banner.active { display: flex; }
-
-    /* Buttons */
-    .btn-group-vertical { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: auto; }
-    .btn-group { display: flex; gap: 10px; width: 100%; margin-top: auto; flex-shrink: 0; }
-    .btn { flex: 1; padding: 13px 18px; border-radius: 16px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
-    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(2,132,199,0.25); }
-    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
-    .btn-primary:active:not(:disabled) { transform: scale(0.98); }
-    .btn-secondary { background: #f1f5f9; color: var(--text-muted); }
-    .btn-secondary:hover:not(:disabled) { background: #e2e8f0; color: var(--text-main); }
-    .btn-secondary:active:not(:disabled) { transform: scale(0.98); }
-    .btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; opacity: 0.7; }
-    .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
-    .btn-danger:hover { background: #fee2e2; }
-
-    /* Download UI */
-    #downloadUI { display: none; flex-direction: column; align-items: center; width: 100%; gap: 0; animation: fadeInSlide 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
-    #downloadUI.active { display: flex; }
-
-    .dl-icon-wrap {
-      width: 68px; height: 68px; border-radius: 20px;
-      background: var(--primary-light); color: var(--primary);
+    /* =========================================================
+       STEP 4: INTERACTIVE DOCK LAUNCHPAD
+       ========================================================= */
+    .dock-showcase-stage {
+      background: var(--glass-card);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px; padding: 22px 18px;
+      box-shadow: var(--glass-shadow);
+      display: flex; flex-direction: column; align-items: center;
+      margin-bottom: 16px; position: relative;
+    }
+    .interactive-dock-capsule {
+      display: flex; align-items: center; justify-content: space-around;
+      width: 100%; max-width: 270px;
+      background: rgba(255, 255, 255, 0.85); border: 2px dashed #bae6fd;
+      border-radius: 28px; padding: 10px 18px; margin: 18px 0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .dock-beacon-plus {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
-      box-shadow: 0 4px 16px rgba(2,132,199,0.15);
+      font-size: 28px; font-weight: 300;
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+      animation: beaconPulse 1.8s infinite;
+      cursor: pointer;
     }
-    .dl-icon-wrap svg { width: 32px; height: 32px; }
-
-    .dl-title { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; letter-spacing: -0.3px; }
-    .dl-subtitle { font-size: 12.5px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4; }
-
-    .dl-progress-track {
-      width: 100%; height: 10px; background: #e2e8f0;
-      border-radius: 99px; overflow: hidden; margin-bottom: 10px;
+    @keyframes beaconPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.6); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 16px rgba(14, 165, 233, 0); }
+      100% { transform: scale(1); }
     }
-    .dl-progress-fill {
-      height: 100%; width: 0%; border-radius: 99px;
-      background: linear-gradient(90deg, var(--primary), #38bdf8);
-      transition: width 0.4s ease;
-      position: relative; overflow: hidden;
+    .dock-option-pills { display: flex; gap: 8px; width: 100%; justify-content: center; }
+    .glass-option-chip {
+      background: #e0f2fe; color: #0369a1;
+      font-size: 12px; font-weight: 700; padding: 7px 16px; border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
     }
-    .dl-progress-fill::after {
-      content: '';
-      position: absolute; top: 0; left: -60%; width: 60%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      animation: shimmer 1.4s infinite;
+
+    /* =========================================================
+       STEP 5: AI HARDWARE METRICS & TIER SELECTION
+       ========================================================= */
+    .hardware-spec-meter {
+      background: var(--glass-card);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px; padding: 12px 16px; margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: var(--glass-shadow);
     }
-    @keyframes shimmer { to { left: 160%; } }
+    .meter-status { display: flex; align-items: center; gap: 10px; }
+    .meter-led {
+      width: 10px; height: 10px; border-radius: 50%; background: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
+    }
+    .meter-chips { display: flex; gap: 6px; }
+    .meter-pill { font-size: 10.5px; font-weight: 700; background: #ffffff; color: #475569; padding: 3px 8px; border-radius: 8px; border: 1px solid #e2e8f0; }
 
-    .dl-percent { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -1px; margin-bottom: 2px; }
-    .dl-status-text { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; min-height: 18px; }
-
-    .dl-stats { display: flex; justify-content: space-between; width: 100%; margin-bottom: 18px; }
-    .dl-stat { text-align: center; flex: 1; }
-    .dl-stat-value { font-size: 12.5px; font-weight: 700; color: var(--text-main); }
-    .dl-stat-label { font-size: 9.5px; color: #94a3b8; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
-
-    /* Done UI */
-    #doneUI { display: none; flex-direction: column; align-items: center; width: 100%; text-align: center; animation: fadeInSlide 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
-    #doneUI.active { display: flex; }
-
-    .done-circle {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: var(--success-bg);
+    .tier-cards-column { display: flex; flex-direction: column; gap: 11px; margin-bottom: 16px; }
+    .tier-card-item {
+      background: var(--glass-card);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 2px solid var(--glass-border);
+      border-radius: 20px; padding: 14px 16px;
+      display: flex; align-items: flex-start; gap: 14px;
+      cursor: pointer; user-select: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--glass-shadow);
+    }
+    .tier-card-item:active:not(.disabled) { transform: scale(0.985); }
+    .tier-card-item.selected {
+      border-color: var(--primary);
+      background: rgba(240, 249, 255, 0.92);
+      box-shadow: 0 10px 28px rgba(2, 132, 199, 0.2);
+    }
+    .tier-card-item.disabled {
+      opacity: 0.6; cursor: not-allowed; background: rgba(248, 250, 252, 0.8);
+    }
+    .tier-select-ring {
+      width: 22px; height: 22px; border-radius: 50%; border: 2px solid #cbd5e1;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px;
-      animation: circlePop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+      margin-top: 2px; flex-shrink: 0; transition: all 0.2s ease;
+      background: #ffffff;
     }
-    .done-circle svg { width: 38px; height: 38px; color: var(--success); }
-    .done-title { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
-    .done-sub { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px; }
-
-    .done-chips { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-bottom: 20px; }
-    .done-chip {
-      display: flex; align-items: center; gap: 10px;
-      background: #f0fdf4; border: 1px solid #bbf7d0;
-      border-radius: 12px; padding: 10px 14px;
-      font-size: 12px; font-weight: 600; color: #15803d;
+    .tier-card-item.selected .tier-select-ring { border-color: var(--primary); background: var(--primary); }
+    .tier-select-ring::after {
+      content: ''; width: 8px; height: 8px; border-radius: 50%; background: #ffffff;
+      opacity: 0; transform: scale(0.5); transition: all 0.2s ease;
     }
-    .done-chip svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .tier-card-item.selected .tier-select-ring::after { opacity: 1; transform: scale(1); }
 
-    /* Cancelled UI */
-    #cancelledUI { display: none; flex-direction: column; align-items: center; width: 100%; text-align: center; animation: fadeInSlide 0.4s ease forwards; }
-    #cancelledUI.active { display: flex; }
-
-    .cancelled-circle {
-      width: 72px; height: 72px; border-radius: 50%;
-      background: var(--unknown-bg);
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
+    .tier-details-block { flex: 1; }
+    .tier-headline-line {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;
     }
-    .cancelled-circle svg { width: 32px; height: 32px; color: var(--text-muted); }
+    .tier-title-text { font-size: 13.5px; font-weight: 800; color: var(--text-main); }
+    .tier-chip-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 12px; }
+    .tier-chip-badge.lite { background: #e0f2fe; color: #0369a1; }
+    .tier-chip-badge.full { background: #f3e8ff; color: #7e22ce; }
+    .tier-chip-badge.off  { background: #f1f5f9; color: #475569; }
+    .tier-summary { font-size: 11.5px; color: var(--text-muted); line-height: 1.4; margin: 0; }
 
-    /* iframe */
-    #appFrame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; opacity: 0; transition: opacity 0.8s ease; pointer-events: none; }
+    /* Button Bar */
+    .deck-action-footer {
+      display: flex; gap: 10px; width: 100%; margin-top: auto; padding-top: 8px; flex-shrink: 0;
+    }
+    .action-btn {
+      flex: 1; padding: 14px 18px; border-radius: 18px; font-size: 14px;
+      font-weight: 800; border: none; cursor: pointer; transition: all 0.25s ease;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .action-btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #fff; box-shadow: 0 6px 20px rgba(2, 132, 199, 0.32);
+    }
+    .action-btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(2, 132, 199, 0.4); }
+    .action-btn-primary:active:not(:disabled) { transform: scale(0.98); }
+    .action-btn-secondary {
+      background: var(--glass-pill);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: var(--text-muted);
+      border: 1px solid var(--glass-border);
+    }
+    .action-btn-secondary:active:not(:disabled) { transform: scale(0.98); }
+    .action-btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; opacity: 0.65; }
+
+    /* Embedded iframe & Guided Journey Overlay */
+    #appFrame { position: absolute; inset: 0; width: 100%; height: 100%; border: none; z-index: 1; opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
     #appFrame.visible { opacity: 1; pointer-events: all; }
 
-    /* Journey overlay */
-    .journey-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 99; background: rgba(15,23,42,0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: calc(90px + var(--safe-bottom)); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+    .journey-overlay {
+      position: absolute; inset: 0; width: 100%; height: 100%; z-index: 99;
+      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(10px);
+      display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+      padding-bottom: calc(90px + var(--safe-bottom)); opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    }
     .journey-overlay.active { opacity: 1; pointer-events: all; }
-    .tooltip-box { background: #fff; padding: 14px 22px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25); text-align: center; animation: bounce 2s infinite; margin-bottom: 12px; pointer-events: none; }
-    .tooltip-box h3 { font-size: 15px; font-weight: 800; color: var(--primary); }
-    .tooltip-box p { font-size: 11px; color: var(--text-muted); margin: 2px 0 0; }
-    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-    .arrow-down { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 14px solid #fff; margin-bottom: 12px; pointer-events: none; }
-    .bubbled-add-btn { width: 64px; height: 64px; border-radius: 50%; background: rgba(2,132,199,0.9); color: #fff; font-size: 32px; font-weight: 300; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 0 8px rgba(2,132,199,0.35), 0 10px 25px rgba(2,132,199,0.5); animation: glowPulse 1.8s infinite; border: 3px solid #fff; pointer-events: auto; }
-    @keyframes glowPulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0.5), 0 10px 25px rgba(2,132,199,0.5); } 70% { transform: scale(1.1); box-shadow: 0 0 0 14px rgba(2,132,199,0), 0 10px 25px rgba(2,132,199,0.5); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0), 0 10px 25px rgba(2,132,199,0.5); } }
+    .tooltip-box {
+      background: #fff; padding: 16px 24px; border-radius: 20px;
+      box-shadow: 0 20px 30px -5px rgba(0,0,0,0.3); text-align: center;
+      animation: floatHop 2s infinite ease-in-out; margin-bottom: 12px; pointer-events: none;
+    }
+    .tooltip-box h3 { font-size: 16px; font-weight: 800; color: var(--primary); }
+    .tooltip-box p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    @keyframes floatHop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .arrow-down { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 14px solid #fff; margin-bottom: 14px; pointer-events: none; }
+    .bubbled-add-btn {
+      width: 68px; height: 68px; border-radius: 50%; background: var(--primary);
+      color: #fff; font-size: 34px; font-weight: 300; display: flex;
+      align-items: center; justify-content: center; cursor: pointer;
+      box-shadow: 0 0 0 8px rgba(2,132,199,0.35), 0 10px 25px rgba(2,132,199,0.5);
+      animation: glowRadar 1.8s infinite; border: 3px solid #fff; pointer-events: auto;
+    }
+    @keyframes glowRadar {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2,132,199,0.6), 0 10px 25px rgba(2,132,199,0.5); }
+      70% { transform: scale(1.08); box-shadow: 0 0 0 16px rgba(2,132,199,0), 0 10px 25px rgba(2,132,199,0.5); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body>
 
-  <div class="bg-gradient"></div>
-  <div class="bg-blob one"></div>
-  <div class="bg-blob two"></div>
+  <!-- Deep Ambient Blur Background -->
+  <div class="ambient-sky">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="ambient-orb orb-4"></div>
+  </div>
 
-  <div class="onboarding-wrapper" id="onboardingCard">
-    <div class="card">
+  <!-- =========================================================
+       1. ULTRA-SMOOTH VECTOR FLIGHT INTRO (Continuous Motion)
+       ========================================================= -->
+  <div class="flight-intro-overlay" id="flightIntroScene">
+    <div class="sky-cloud cloud-1"></div>
+    <div class="sky-cloud cloud-2"></div>
+    <div class="sky-cloud cloud-3"></div>
 
-      <div class="stepper">
-        <div class="step-dot active"></div>
-        <div class="step-dot"></div>
-        <div class="step-dot"></div>
-        <div class="step-dot"></div>
-        <div class="step-dot"></div>
+    <button class="skip-intro-pill" onclick="dismissIntro()">Skip ➔</button>
+
+    <div class="flight-arena">
+      <!-- Continuous Single-Stroke Contrail Track -->
+      <svg class="flight-svg-canvas" viewBox="0 0 400 700" preserveAspectRatio="none">
+        <path class="motion-contrail" d="M -100 680 C 40 520, 120 320, 260 250 C 400 180, 360 40, 200 90 C 70 140, 110 330, 200 290" />
+      </svg>
+
+      <!-- Origami Jet gliding with continuous curve kinematics -->
+      <div class="gliding-jet" id="origamiJet">
+        <svg viewBox="0 0 120 120" fill="none">
+          <polygon points="60,10 10,95 60,78" fill="#ffffff" filter="drop-shadow(-2px 4px 6px rgba(2,132,199,0.25))" />
+          <polygon points="60,10 110,95 60,78" fill="#e0f2fe" />
+          <polygon points="60,10 40,82 60,78" fill="#bae6fd" />
+          <polygon points="60,10 60,102 60,78" fill="#0284c7" />
+          <polygon points="60,78 60,105 52,90" fill="#0369a1" />
+        </svg>
       </div>
+    </div>
 
-      <!-- STEP 1: Welcome -->
-      <div class="step-content active" id="step1">
-        <div class="free-badge">✨ 100% FREE · NO ADS · NO PREMIUM</div>
-        <div class="icon-badge">
-          <img src="notefull.png" style="width:52px;height:52px;object-fit:contain;" alt="Notefull" onerror="this.src='';this.alt='📝';">
-        </div>
-        <h1>Welcome to Notefull</h1>
-        <p>Your private note-taking hub. Full AI features, zero hidden costs or subscriptions — forever.</p>
-        <div class="feature-list">
-          <div class="feature-item">
-            <span class="feature-icon">🎁</span>
-            <div><strong>100% Free Forever</strong><span>No ads, no premium tiers, no locked features.</span></div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">📝</span>
-            <div><strong>Notes & Checklists</strong><span>Organise tasks with rich interactive checklists.</span></div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">🤖</span>
-            <div><strong>On-device AI</strong><span>Private AI that runs fully offline — no data leaves your phone.</span></div>
-          </div>
-        </div>
-        <div class="btn-group"><button class="btn btn-primary" onclick="nextStep(2)">Get Started →</button></div>
-      </div>
+    <div class="flight-intro-copy">
+      <h2>Welcome to Notefull</h2>
+      <p>Clean · Offline · Built Without Limits</p>
+    </div>
+  </div>
 
-      <!-- STEP 2: Notefull Terms & Conditions -->
-      <div class="step-content" id="step2">
-        <div class="icon-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-        </div>
-        <h1>Terms & Conditions</h1>
-        <p>Please review and accept our Terms of Service to continue using Notefull.</p>
-        
-        <div class="terms-box">
-Placeholder
+  <!-- =========================================================
+       2. REVAMPED MAIN ONBOARDING INTERFACE
+       ========================================================= -->
+  <div class="onboarding-screen" id="onboardingDeck">
+
+    <!-- Stories Style Progress Track -->
+    <div class="stories-indicator">
+      <div class="story-track active"><div class="story-progress"></div></div>
+      <div class="story-track"><div class="story-progress"></div></div>
+      <div class="story-track"><div class="story-progress"></div></div>
+      <div class="story-track"><div class="story-progress"></div></div>
+      <div class="story-track"><div class="story-progress"></div></div>
+    </div>
+
+    <!-- Header Stage Badge -->
+    <div class="deck-top-bar">
+      <span class="glass-badge-tag" id="stageTag">Welcome</span>
+      <span class="step-counter-text" id="stepCounterText">1 of 5</span>
+    </div>
+
+    <div class="step-viewport">
+
+      <!-- STEP 1: REVAMPED GLASS-BENTO WELCOME -->
+      <div class="step-slide active" id="slide1">
+        <div class="hero-glass-row">
+          <div class="hero-app-glyph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <div class="hero-headline">
+            <h1>Meet Notefull</h1>
+            <p>Your private, lightning-fast workspace</p>
+          </div>
         </div>
 
-        <label class="checkbox-container">
-          <input type="checkbox" id="notefullTermsCheck" onchange="toggleNotefullTerms(this.checked)">
-          <span class="custom-checkbox"></span>
-          <span class="checkbox-label">I have read and agree to the Notefull Terms and Conditions.</span>
-        </label>
+        <div class="bento-showcase">
+          <!-- Bento Item 1: Full-width Promise -->
+          <div class="bento-cell span-full">
+            <span class="bento-corner-pill">PROMISE</span>
+            <div class="bento-icon-bubble emerald">💎</div>
+            <strong class="bento-title">100% Free Forever</strong>
+            <p class="bento-desc">No ads, no subscriptions, and zero paywalls. Everything is stored on your device with complete sovereignty.</p>
+          </div>
 
-        <div class="btn-group">
-          <button class="btn btn-secondary" onclick="nextStep(1)">Back</button>
-          <button class="btn btn-primary" id="notefullTermsBtn" onclick="nextStep(3)" disabled>Agree & Continue</button>
-        </div>
-      </div>
+          <!-- Bento Item 2: Notes & Lists -->
+          <div class="bento-cell">
+            <div class="bento-icon-bubble blue">📝</div>
+            <strong class="bento-title">Notes & Lists</strong>
+            <p class="bento-desc">Rich markdown, checklists, and instant search.</p>
+          </div>
 
-      <!-- STEP 3: Privacy & Security -->
-      <div class="step-content" id="step3">
-        <div class="icon-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-        <h1>Privacy First</h1>
-        <p>Keep your ideas completely safe with deep built-in privacy controls.</p>
-        <div class="feature-list">
-          <div class="feature-item">
-            <span class="feature-icon">🔍</span>
-            <div><strong>Quick Scan Protection</strong><span>Scan for unprotected notes and secure them instantly with a password.</span></div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">🔒</span>
-            <div><strong>Password & App Lock</strong><span>Lock individual notes or lock the entire app with biometrics.</span></div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">🛡️</span>
-            <div><strong>Screenshot Protection</strong><span>Enable Privacy Shield to block unauthorised screenshots.</span></div>
+          <!-- Bento Item 3: Local AI -->
+          <div class="bento-cell">
+            <div class="bento-icon-bubble purple">⚡</div>
+            <strong class="bento-title">On-Device AI</strong>
+            <p class="bento-desc">Private reasoning models powered by local hardware.</p>
           </div>
         </div>
-        <div class="btn-group">
-          <button class="btn btn-secondary" onclick="nextStep(2)">Back</button>
-          <button class="btn btn-primary" onclick="nextStep(4)">Continue</button>
-        </div>
-      </div>
 
-      <!-- STEP 4: How to Start -->
-      <div class="step-content" id="step4">
-        <div class="icon-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </div>
-        <h1>How to Start</h1>
-        <p>Tap the <strong>+</strong> button in the bottom navigation bar to create a <strong>Note</strong> or a <strong>List</strong>.</p>
-        <div class="tutorial-preview">
-          <span style="font-size:11px;color:var(--text-muted);font-weight:700;">BOTTOM NAV BAR PREVIEW</span>
-          <div class="mock-nav-bar">
-            <div style="opacity:0.3">🏠</div>
-            <div class="mock-plus-btn">+</div>
-            <div style="opacity:0.3">⚙️</div>
-          </div>
-          <div class="mock-options">
-            <span class="mock-chip">📝 Note</span><span class="mock-chip">☑️ List</span>
-          </div>
-        </div>
-        <div class="btn-group">
-          <button class="btn btn-secondary" onclick="nextStep(3)">Back</button>
-          <button class="btn btn-primary" onclick="nextStep(5)">Got It!</button>
+        <div class="deck-action-footer">
+          <button class="action-btn action-btn-primary" onclick="goToStep(2)">Get Started →</button>
         </div>
       </div>
 
-      <!-- STEP 5: AI Check + Gemma Terms + Download -->
-      <div class="step-content" id="step5">
-        <div class="icon-badge" id="step5Icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-          </svg>
+      <!-- STEP 2: TRANSPARENT TERMS & CONSENT -->
+      <div class="step-slide" id="slide2">
+        <div class="hero-glass-row">
+          <div class="hero-app-glyph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <div class="hero-headline">
+            <h1>Terms & Ethics</h1>
+            <p>Built on mutual trust and transparency</p>
+          </div>
         </div>
 
-        <div class="offline-banner" id="offlineBanner">
-          ⚠️ <span>No internet connection. Download requires Wi-Fi or mobile data.</span>
+        <div class="legal-cards-group">
+          <div class="legal-tile">
+            <div class="legal-tile-head">🛡️ <span>1. Ethical Usage</span></div>
+            <div class="legal-tile-body">Notefull is built for productive, lawful personal note organization. It must never be used to facilitate illegal acts or produce abusive content.</div>
+          </div>
+          <div class="legal-tile">
+            <div class="legal-tile-head">⚡ <span>2. Local AI Reasoning</span></div>
+            <div class="legal-tile-body">Local AI models (including Qwen weights) process inferences on-device. Outputs are generated automatically; verify critical details independently.</div>
+          </div>
+          <div class="legal-tile">
+            <div class="legal-tile-head">🔒 <span>3. Total Data Sovereignty</span></div>
+            <div class="legal-tile-body">Your notes, checklists, and local prompts never leave your phone. Notefull operates with absolute offline privacy.</div>
+          </div>
         </div>
 
-        <!-- AI compat check view -->
-        <div id="compatView" style="width:100%;display:flex;flex-direction:column;align-items:center;flex:1;">
-          <h1 id="compatTitle">Offline AI Check</h1>
-          <p id="compatSubtitle">Checking your device for offline AI support…</p>
-
-          <div class="ai-compat-wrap">
-            <div id="aiLoader" class="loader-container">
-              <div class="spinner"></div>
-              <span class="loader-sub" id="loaderSub">Analysing hardware…</span>
-            </div>
-            <div id="ai-compat-card" class="status-unknown" style="display:none;">
-              <div class="status-circle-outer"><div id="ai-compat-icon"></div></div>
-              <div id="ai-compat-title"></div>
-              <p id="ai-compat-desc"></p>
-              <span id="ai-compat-specs"></span>
-            </div>
+        <div class="consent-glass-switch" id="consentSwitch" onclick="toggleAgreement()">
+          <div class="consent-checkbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
           </div>
-
-          <!-- Gemma Model Terms Notice & Checkbox -->
-          <div class="gemma-terms-card" id="gemmaTermsBox" style="display:none;">
-            <div class="gemma-terms-header">
-              <span style="font-size:16px;">⚖️</span>
-              <div>
-                <strong>Gemma Model Terms</strong>
-                <p>Gemma is provided under and subject to the Gemma Terms of Use found at <a href="https://ai.google.dev/gemma/terms" target="_blank" class="terms-link">ai.google.dev/gemma/terms</a>.</p>
-              </div>
-            </div>
-            <label class="checkbox-container" style="margin-bottom:0;">
-              <input type="checkbox" id="gemmaTermsCheck" onchange="toggleGemmaTerms(this.checked)">
-              <span class="custom-checkbox"></span>
-              <span class="checkbox-label">I accept the Gemma Terms of Use and agree to use the AI in compliance with these terms. <a href="https://ai.google.dev/gemma/terms" target="_blank" class="terms-link">Learn more</a></span>
-            </label>
+          <div style="font-size:12.5px; font-weight:700; color:var(--text-main); text-align:left;">
+            I have read and agree to the Notefull Terms and Conditions.
           </div>
-
-          <div class="btn-group-vertical" id="aiBtnGroup" style="display:none;"></div>
         </div>
 
-        <!-- Download progress view -->
-        <div id="downloadView" style="display:none;width:100%;flex-direction:column;align-items:center;flex:1;">
+        <div class="deck-action-footer">
+          <button class="action-btn action-btn-secondary" onclick="goToStep(1)">Back</button>
+          <button class="action-btn action-btn-primary" id="termsConfirmBtn" onclick="goToStep(3)" disabled>Agree & Continue →</button>
+        </div>
+      </div>
 
-          <!-- Active download UI -->
-          <div id="downloadUI" class="active">
-            <div class="dl-icon-wrap">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </div>
-            <div class="dl-title">Installing Notefull AI</div>
-            <div class="dl-subtitle" id="dlSubtitle">Please keep the app open during download.</div>
+      <!-- STEP 3: PRIVACY & DEFENSE HUD -->
+      <div class="step-slide" id="slide3">
+        <div class="hero-glass-row">
+          <div class="hero-app-glyph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div class="hero-headline">
+            <h1>Privacy Shields</h1>
+            <p>Active protection for your private records</p>
+          </div>
+        </div>
 
-            <div class="dl-progress-track">
-              <div class="dl-progress-fill" id="dlFill"></div>
-            </div>
-
-            <div class="dl-percent" id="dlPercent">0%</div>
-            <div class="dl-status-text" id="dlStatusText">Connecting…</div>
-
-            <div class="dl-stats">
-              <div class="dl-stat">
-                <div class="dl-stat-value" id="dlDownloaded">0 MB</div>
-                <div class="dl-stat-label">Downloaded</div>
-              </div>
-              <div class="dl-stat">
-                <div class="dl-stat-value" id="dlTotal">~2 GB</div>
-                <div class="dl-stat-label">Total size</div>
-              </div>
-              <div class="dl-stat">
-                <div class="dl-stat-value" id="dlEta">–</div>
-                <div class="dl-stat-label">Time left</div>
-              </div>
-              <div class="dl-stat">
-                <div class="dl-stat-value" id="dlSpeed">–</div>
-                <div class="dl-stat-label">Speed</div>
+        <div class="security-hud-deck">
+          <div class="security-hud-panel">
+            <div class="hud-left">
+              <div class="hud-symbol">🔍</div>
+              <div class="hud-copy">
+                <strong>NDSP</strong>
+                <span>Protects your data in Notefull</span>
               </div>
             </div>
+            <span class="hud-status-badge">WORKING</span>
+          </div>
 
-            <div class="btn-group-vertical">
-              <button class="btn btn-danger" id="cancelBtn" onclick="cancelDownload()">Cancel Download</button>
+          <div class="security-hud-panel">
+            <div class="hud-left">
+              <div class="hud-symbol">🔒</div>
+              <div class="hud-copy">
+                <strong>Biometric Protection</strong>
+                <span>Fingerprint, Face Unlock & custom PIN</span>
+              </div>
+            </div>
+            <span class="hud-status-badge">AVAILABLE</span>
+          </div>
+
+          <div class="security-hud-panel">
+            <div class="hud-left">
+              <div class="hud-symbol">🛡️</div>
+              <div class="hud-copy">
+                <strong>Screenshot Guard</strong>
+                <span>Blocks untrusted screen captures and snooping</span>
+              </div>
+            </div>
+            <span class="hud-status-badge">AVAILABLE</span>
+          </div>
+        </div>
+
+        <div class="deck-action-footer">
+          <button class="action-btn action-btn-secondary" onclick="goToStep(2)">Back</button>
+          <button class="action-btn action-btn-primary" onclick="goToStep(4)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: INTERACTIVE NAVIGATION LAUNCHPAD -->
+      <div class="step-slide" id="slide4">
+        <div class="hero-glass-row">
+          <div class="hero-app-glyph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </div>
+          <div class="hero-headline">
+            <h1>Action Dock</h1>
+            <p>Fast creation at your fingertips</p>
+          </div>
+        </div>
+
+        <div class="dock-showcase-stage">
+          <span style="font-size:11px; font-weight:800; color:var(--text-muted); letter-spacing:0.5px;">LIVE ACTION PREVIEW</span>
+
+          <div class="interactive-dock-capsule">
+            <span style="opacity:0.35; font-size:18px;">🏠</span>
+            
+            <span style="opacity:0.35; font-size:18px;">⚙️</span>
+            <div class="dock-beacon-plus">+</div>
+          </div>
+
+          <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">Tap the bottom-right floating <strong>+</strong> button at any time to open instant creation:</p>
+
+          <div class="dock-option-pills">
+            <span class="glass-option-chip">📝 New Note</span>
+            <span class="glass-option-chip">☑️ Checklist</span>
+          </div>
+        </div>
+
+        <div class="deck-action-footer">
+          <button class="action-btn action-btn-secondary" onclick="goToStep(3)">Back</button>
+          <button class="action-btn action-btn-primary" onclick="goToStep(5)">Configure AI →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: AI ENGINE & TIER SETUP -->
+      <div class="step-slide" id="slide5">
+        <div class="hero-glass-row">
+          <div class="hero-app-glyph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
+              <path d="M12 2a10 10 0 0 1 10 10"></path>
+              <path d="M12 12L2.5 7.5"></path>
+            </svg>
+          </div>
+          <div class="hero-headline">
+            <h1>AI Setup</h1>
+            <p>Choose your on-device performance tier</p>
+          </div>
+        </div>
+
+        <!-- Live Hardware Spec Bar -->
+        <div class="hardware-spec-meter">
+          <div class="meter-status">
+            <div class="meter-led" id="meterLed"></div>
+            <strong style="font-size:12px; color:var(--text-main);" id="meterTitle">Scanning Specs...</strong>
+          </div>
+          <div class="meter-chips">
+            <span class="meter-pill" id="specRam">RAM: --</span>
+            <span class="meter-pill" id="specCores">CPU: --</span>
+          </div>
+        </div>
+
+        <div class="tier-cards-column">
+          <!-- Tier 1: Lite (under dev) -->
+          <div class="tier-card-item disabled" data-tier="lite" onclick="alert('Lite Model is currently in training. Please pick Flagship or Pure Notes.')">
+            <div class="tier-select-ring"></div>
+            <div class="tier-details-block">
+              <div class="tier-headline-line">
+                <span class="tier-title-text">Notefull AI Lite</span>
+                <span class="tier-chip-badge lite">~1.6 GB • Fast</span>
+              </div>
+              <p class="tier-summary">Optimized LiteRT model for quick note-taking, semantic search, and checklist sorting (4 GB+ RAM).</p>
             </div>
           </div>
 
-          <!-- Done UI -->
-          <div id="doneUI">
-            <div class="done-circle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="done-title">You're all set! 🎉</div>
-            <div class="done-sub">Notefull AI is installed and verified. Everything is ready to go.</div>
-            <div class="done-chips">
-              <div class="done-chip">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                AI model downloaded
+          <!-- Tier 2: Advanced Flagship -->
+          <div class="tier-card-item" data-tier="full" onclick="selectTier('full')">
+            <div class="tier-select-ring"></div>
+            <div class="tier-details-block">
+              <div class="tier-headline-line">
+                <span class="tier-title-text">Advanced Reasoning</span>
+                <span class="tier-chip-badge full">~2.5 GB • Deep Thinking</span>
               </div>
-              <div class="done-chip">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                File integrity verified
-              </div>
-              <div class="done-chip">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Ready for offline use
-              </div>
-            </div>
-            <p style="font-size:12px;color:#94a3b8;margin-bottom:0;">Taking you to Notefull…</p>
-          </div>
-
-          <!-- Cancelled UI -->
-          <div id="cancelledUI">
-            <div class="cancelled-circle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="9"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
-            </div>
-            <h1 style="font-size:18px;margin-bottom:8px;">Download cancelled</h1>
-            <p>You can install AI features anytime from Settings inside the app.</p>
-            <div class="btn-group-vertical">
-              <button class="btn btn-primary" onclick="goToApp()">Continue to Notefull</button>
+              <p class="tier-summary">Flagship model supporting step-by-step reasoning, thinking mode, and multi-action tool execution. Recommended for 8 GB+ RAM.</p>
             </div>
           </div>
 
+          <!-- Tier 3: Disable AI -->
+          <div class="tier-card-item" data-tier="disbale-ai" onclick="selectTier('disbale-ai')">
+            <div class="tier-select-ring"></div>
+            <div class="tier-details-block">
+              <div class="tier-headline-line">
+                <span class="tier-title-text">Pure Notes (No AI)</span>
+                <span class="tier-chip-badge off">0 MB • Ultra Light</span>
+              </div>
+              <p class="tier-summary">I don't need AI features. Keeps Notefull completely manual, ultra lightweight, and disables AI prompts.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="deck-action-footer">
+          <button class="action-btn action-btn-secondary" onclick="goToStep(4)">Back</button>
+          <button class="action-btn action-btn-primary" id="confirmTierBtn" onclick="confirmSelection()" disabled>
+            Launch Notefull ➔
+          </button>
         </div>
       </div>
 
     </div>
   </div>
 
+  <!-- Background App Frame & Guided Journey Overlay -->
   <iframe id="appFrame" src="index.html"></iframe>
 
   <div class="journey-overlay" id="journeyOverlay">
     <div class="tooltip-box">
-      <h3>Click + to start your journey!</h3>
-      <p>Tap the button below to launch</p>
+      <h3>Tap + to start your journey!</h3>
+      <p>Create your very first note</p>
     </div>
     <div class="arrow-down"></div>
     <div class="bubbled-add-btn" onclick="handleAddButtonClick()">+</div>
   </div>
 
-  <!-- Capacitor core -->
   <script src="capacitor.js"></script>
 
   <script>
-    // ─────────────────────────────────────────────
-    // PLUGINS
-    // ─────────────────────────────────────────────
-    const Filesystem        = window.Capacitor?.Plugins?.Filesystem;
-    const AIPlugin          = window.Capacitor?.Plugins?.AIPlugin;
-    const LocalNotifications = window.Capacitor?.Plugins?.LocalNotifications;
+    let currentStep = 1;
+    let aiChecked = false;
+    let selectedTier = null;
+    let agreedToTerms = false;
+
+    const STAGE_TITLES = ['Welcome', 'Terms & Ethics', 'Security', 'Quick Start', 'AI Architecture'];
 
     // ─────────────────────────────────────────────
-    // CONSTANTS
+    // FLIGHT INTRO CONTROLLER (Smooth glide + auto-dismiss)
     // ─────────────────────────────────────────────
-    const MODEL_FILENAME = 'models/qwen2.5-3b-instruct-q3_k_m.gguf';
-    const MODEL_URL      = 'https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q3_k_m.gguf?download=true';
-    const MODEL_MIN_GB   = 1.6;
-    const REDIRECT_DELAY = 2000;
-
-    // ─────────────────────────────────────────────
-    // STATE
-    // ─────────────────────────────────────────────
-    let currentStep       = 1;
-    let aiChecked         = false;
-    let isDownloading     = false;
-    let dlListener        = null;
-    let dlSpeedSamples    = [];
-
-    // ─────────────────────────────────────────────
-    // NETWORK
-    // ─────────────────────────────────────────────
-    function checkNetworkStatus() {
-      document.getElementById('offlineBanner')
-        .classList.toggle('active', !navigator.onLine);
+    function dismissIntro() {
+      const intro = document.getElementById('flightIntroScene');
+      if (!intro) return;
+      intro.classList.add('dismissed');
+      setTimeout(() => { intro.style.display = 'none'; }, 800);
     }
-    window.addEventListener('online',  checkNetworkStatus);
-    window.addEventListener('offline', checkNetworkStatus);
-    window.addEventListener('DOMContentLoaded', checkNetworkStatus);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Allow the smooth 3.5s flight path to loop cleanly then dissolve
+      setTimeout(() => { dismissIntro(); }, 3600);
+    });
 
     // ─────────────────────────────────────────────
-    // STEPPER
+    // STEPPER NAVIGATION
     // ─────────────────────────────────────────────
-    function nextStep(n) {
-      document.getElementById(`step${currentStep}`).classList.remove('active');
-      document.querySelectorAll('.step-dot')[currentStep - 1].classList.remove('active');
-      currentStep = n;
-      document.getElementById(`step${currentStep}`).classList.add('active');
-      document.querySelectorAll('.step-dot')[currentStep - 1].classList.add('active');
-      if (currentStep === 5) {
-        checkNetworkStatus();
-        if (!aiChecked) runAiCompatibilityCheck();
+    function goToStep(stepNumber) {
+      document.getElementById(`slide${currentStep}`).classList.remove('active');
+      const tracks = document.querySelectorAll('.story-track');
+
+      currentStep = stepNumber;
+
+      const nextSlide = document.getElementById(`slide${currentStep}`);
+      nextSlide.classList.add('active');
+
+      tracks.forEach((track, idx) => {
+        track.classList.remove('active', 'completed');
+        if (idx < currentStep - 1) track.classList.add('completed');
+        else if (idx === currentStep - 1) track.classList.add('active');
+      });
+
+      document.getElementById('stageTag').textContent = STAGE_TITLES[currentStep - 1];
+      document.getElementById('stepCounterText').textContent = `${currentStep} of 5`;
+
+      if (currentStep === 5 && !aiChecked) {
+        runHardwareDiagnostics();
       }
     }
 
     // ─────────────────────────────────────────────
-    // TERMS HANDLERS
+    // TERMS & CONSENT TOGGLE
     // ─────────────────────────────────────────────
-    function toggleNotefullTerms(checked) {
-      const btn = document.getElementById('notefullTermsBtn');
-      if (btn) btn.disabled = !checked;
-    }
+    function toggleAgreement() {
+      agreedToTerms = !agreedToTerms;
+      const toggle = document.getElementById('consentSwitch');
+      const btn = document.getElementById('termsConfirmBtn');
 
-    function toggleGemmaTerms(checked) {
-      const dlBtn = document.getElementById('downloadAiBtn');
-      if (dlBtn) dlBtn.disabled = !checked;
-    }
-
-    // ─────────────────────────────────────────────
-    // FILE CHECK
-    // ─────────────────────────────────────────────
-    async function modelFileReady() {
-      try {
-        const info = await Filesystem.stat({ path: MODEL_FILENAME, directory: 'FILES' });
-        const gb   = info.size / (1024 * 1024 * 1024);
-        return gb >= MODEL_MIN_GB;
-      } catch { return false; }
+      toggle.classList.toggle('checked', agreedToTerms);
+      btn.disabled = !agreedToTerms;
     }
 
     // ─────────────────────────────────────────────
-    // AI COMPATIBILITY CHECK
+    // AI HARDWARE DIAGNOSTICS ENGINE
     // ─────────────────────────────────────────────
     const NotefullAI = (() => {
       const REQUIREMENTS = {
         minimum:     { cores: 4, ramGB: 4, androidVersion: 10, storageGB: 1.8 },
-        recommended: { cores: 4, ramGB: 6, androidVersion: 12, storageGB: 1.9, require64Bit: true },
+        recommended: { cores: 4, ramGB: 6, androidVersion: 12, storageGB: 2.0, require64Bit: true }
       };
-      const ICONS = {
-        ok:      `<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-        warn:    `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="13" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/><circle cx="12" cy="16.2" r="1.15" fill="currentColor"/></svg>`,
-        bad:     `<svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-        unknown: `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.3a2.5 2.5 0 1 1 3.7 2.2c-.9.5-1.2 1-1.2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="16.6" r="1.1" fill="currentColor"/></svg>`,
-      };
-      const TIMEOUT_MS = 20000;
 
       async function readDeviceInfo() {
         const plugin = window.Capacitor?.Plugins?.AIPlugin;
         if (!plugin?.getDeviceInfo) return { ok: false, reason: 'plugin-unavailable' };
-        const call    = plugin.getDeviceInfo()
+
+        const fetchCall = plugin.getDeviceInfo()
           .then(info => ({ ok: true, info }))
-          .catch(e   => ({ ok: false, reason: 'plugin-error', error: e }));
-        const timeout = new Promise(r => setTimeout(() => r({ ok: false, reason: 'timeout' }), TIMEOUT_MS));
-        return Promise.race([call, timeout]);
+          .catch(err => ({ ok: false, reason: 'plugin-error', error: err }));
+
+        const timeout = new Promise(r => setTimeout(() => r({ ok: false, reason: 'timeout' }), 8000));
+        return Promise.race([fetchCall, timeout]);
       }
 
       function evaluate(info) {
@@ -703,289 +1038,125 @@ Placeholder
         const arch           = info.arch || 'unknown';
         const is64Bit        = arch.includes('64');
         const freeGB         = typeof info.freeStorageGB === 'number' ? info.freeStorageGB : null;
-        const storageKnown   = freeGB !== null;
-        const min = REQUIREMENTS.minimum;
-        const rec = REQUIREMENTS.recommended;
-        const meetsMin = cores >= min.cores && ramGB >= min.ramGB && androidVersion >= min.androidVersion && (!storageKnown || (freeGB ?? 0) >= min.storageGB);
-        const meetsRec = meetsMin && ramGB >= rec.ramGB && is64Bit;
-        return { status: meetsRec ? 'ok' : meetsMin ? 'warn' : 'bad', cores, ramGB, androidVersion, arch, is64Bit, freeGB, storageKnown };
+
+        const meetsMin = cores >= REQUIREMENTS.minimum.cores && ramGB >= REQUIREMENTS.minimum.ramGB;
+        const meetsRec = meetsMin && ramGB >= REQUIREMENTS.recommended.ramGB && is64Bit;
+
+        let status = 'bad';
+        if (meetsRec) status = 'ok';
+        else if (meetsMin) status = 'warn';
+
+        return { status, supported: status === 'ok' || status === 'warn', cores, ramGB, androidVersion, arch, is64Bit, freeGB };
       }
 
-      function copyFor(result) {
-        const min = REQUIREMENTS.minimum; const rec = REQUIREMENTS.recommended;
-        const detected = `Detected: ${result.cores} cores · ${result.ramGB}GB RAM · Android ${result.androidVersion} · ${result.arch}` + (result.storageKnown ? ` · ${result.freeGB?.toFixed(1)}GB free` : ' · free space unknown');
-        const required = `Minimum: ${min.cores} cores / ${min.ramGB}GB RAM / Android ${min.androidVersion} / ${min.storageGB}GB free\nRecommended: ${rec.ramGB}GB RAM / 64-bit`;
-        switch (result.status) {
-          case 'ok':   return { title: 'Your device supports AI', desc: 'Everything checks out. Agree to model terms below to download.', specs: `${detected}\n${required}`, btn: 'Download AI now', btnSecondary: 'I\'ll download later' };
-          case 'warn': return { title: 'AI will run, but slowly', desc: 'Your device meets the minimum but not the recommended specs.', specs: `${detected}\n${required}`, btn: 'Download anyway', btnSecondary: 'Skip AI for now' };
-          case 'bad':  return { title: 'Device not supported', desc: 'Your device doesn\'t meet minimum requirements. You can still use everything else in Notefull.', specs: `${detected}\n${required}`, btn: null, btnSecondary: 'Continue without AI' };
-          default:     return { title: 'Couldn\'t check device', desc: 'Unable to read your device specs. You can try downloading or continue without AI.', specs: required, btn: 'Try downloading AI', btnSecondary: 'Continue without AI' };
-        }
-      }
-
-      function renderCard(status, copy) {
-        const card = document.getElementById('ai-compat-card');
-        card.className = '';
-        card.classList.add(`status-${status}`);
-        card.classList.remove('pop-in');
-        void card.offsetWidth;
-        card.classList.add('pop-in');
-        document.getElementById('ai-compat-icon').innerHTML  = ICONS[status] || ICONS.unknown;
-        document.getElementById('ai-compat-title').textContent = copy.title;
-        document.getElementById('ai-compat-desc').textContent  = copy.desc;
-        document.getElementById('ai-compat-specs').textContent = copy.specs;
-      }
-
-      async function checkCompatibility() {
-        const { ok, info, reason } = await readDeviceInfo();
-        if (!ok) {
-          const status = reason === 'timeout' ? 'bad' : 'unknown';
-          const copy = copyFor({ status, reason });
-          renderCard(status, copy);
-          return { status, reason, copy };
-        }
-        const result = evaluate(info);
-        const copy   = copyFor(result);
-        renderCard(result.status, copy);
-        return { ...result, copy };
-      }
-
-      return { checkCompatibility };
+      return { readDeviceInfo, evaluate };
     })();
 
-    async function runAiCompatibilityCheck() {
+    async function runHardwareDiagnostics() {
       aiChecked = true;
-      const loader     = document.getElementById('aiLoader');
-      const card       = document.getElementById('ai-compat-card');
-      const gemmaBox   = document.getElementById('gemmaTermsBox');
-      const btnGroup   = document.getElementById('aiBtnGroup');
+      const meterTitle = document.getElementById('meterTitle');
+      const meterLed = document.getElementById('meterLed');
 
-      const slowTimer = setTimeout(() => {
-        const sub = document.getElementById('loaderSub');
-        if (sub) sub.textContent = 'Still checking… up to 20s';
-      }, 6000);
+      const { ok, info } = await NotefullAI.readDeviceInfo();
+      let result;
 
-      const result = await NotefullAI.checkCompatibility();
-      clearTimeout(slowTimer);
-
-      loader.style.display = 'none';
-      card.style.display   = 'flex';
-      btnGroup.style.display = 'flex';
-
-      if (result.status === 'bad') {
-        gemmaBox.style.display = 'none';
-        btnGroup.innerHTML = `<button class="btn btn-primary" onclick="goToApp()">Continue without AI</button>`;
+      if (ok && info) {
+        result = NotefullAI.evaluate(info);
       } else {
-        gemmaBox.style.display = 'block';
-        btnGroup.innerHTML = `
-          <button class="btn btn-primary" id="downloadAiBtn" onclick="startDownloadFlow()" disabled>${result.copy.btn}</button>
-          <button class="btn btn-secondary" onclick="goToApp()">${result.copy.btnSecondary}</button>`;
-        
-        // Sync button state with current checkbox value
-        const isChecked = document.getElementById('gemmaTermsCheck').checked;
-        document.getElementById('downloadAiBtn').disabled = !isChecked;
-      }
-    }
-
-    // ─────────────────────────────────────────────
-    // DOWNLOAD FLOW
-    // ─────────────────────────────────────────────
-    async function startDownloadFlow() {
-      if (isDownloading) return;
-
-      const gemmaChecked = document.getElementById('gemmaTermsCheck')?.checked;
-      if (!gemmaChecked) return;
-
-      try {
-        if (LocalNotifications?.requestPermissions) {
-          await LocalNotifications.requestPermissions();
-        }
-      } catch (_) {}
-
-      document.getElementById('compatView').style.display  = 'none';
-      document.getElementById('downloadView').style.display = 'flex';
-      document.getElementById('downloadUI').classList.add('active');
-      document.getElementById('doneUI').classList.remove('active');
-      document.getElementById('cancelledUI').classList.remove('active');
-
-      isDownloading  = true;
-      dlSpeedSamples = [];
-
-      dlListener = AIPlugin.addListener('downloadProgress', handleProgress);
-
-      try {
-        const uri = await Filesystem.getUri({
-          directory: 'DATA',
-          path: MODEL_FILENAME
-        });
-
-        await window.Capacitor.Plugins.AIPlugin.downloadModel({
-          url: MODEL_URL,
-          path: uri.uri.replace("file://", "")
-        });
-      } catch (err) {
-        console.error('[Download] start failed:', err);
-        showError('Could not start download: ' + err.message);
-      }
-    }
-
-    // ─────────────────────────────────────────────
-    // PROGRESS HANDLER
-    // ─────────────────────────────────────────────
-    const STAGE_TEXT = {
-      connecting:      'Connecting to server…',
-      downloading:     'Downloading…',
-      paused:          'Download paused',
-      waiting_network: 'Waiting for network…',
-      done:            'Verifying file…',
-      error:           'Download failed',
-    };
-
-    function handleProgress(data) {
-      const { stage, downloaded, total } = data;
-
-      document.getElementById('dlStatusText').textContent = STAGE_TEXT[stage] || stage;
-
-      if (stage === 'downloading' && total > 0) {
-        const pct = Math.round((downloaded / total) * 100);
-
-        document.getElementById('dlFill').style.width = pct + '%';
-        document.getElementById('dlPercent').textContent = pct + '%';
-        document.getElementById('dlDownloaded').textContent = fmtBytes(downloaded);
-        document.getElementById('dlTotal').textContent      = fmtBytes(total);
-
-        const now = performance.now();
-        dlSpeedSamples.push({ t: now, bytes: downloaded });
-        dlSpeedSamples = dlSpeedSamples.filter(s => now - s.t < 5000);
-
-        if (dlSpeedSamples.length >= 2) {
-          const first       = dlSpeedSamples[0];
-          const bytesPerMs  = (downloaded - first.bytes) / (now - first.t);
-          const bytesPerSec = bytesPerMs * 1000;
-
-          document.getElementById('dlSpeed').textContent = fmtSpeed(bytesPerSec);
-
-          if (bytesPerMs > 0) {
-            const secsLeft = Math.max(0, Math.round((total - downloaded) / bytesPerMs / 1000));
-            document.getElementById('dlEta').textContent = fmtEta(secsLeft);
-          }
-        }
-
-        document.getElementById('dlSubtitle').textContent =
-          `${fmtBytes(downloaded)} of ${fmtBytes(total)} downloaded`;
+        result = {
+          status: 'ok',
+          supported: true,
+          cores: navigator.hardwareConcurrency || 8,
+          ramGB: 6,
+          androidVersion: 13,
+          arch: 'arm64-v8a',
+          is64Bit: true
+        };
       }
 
-      if (stage === 'done') {
-        document.getElementById('dlFill').style.width    = '100%';
-        document.getElementById('dlPercent').textContent = '100%';
-        document.getElementById('dlEta').textContent     = 'Done';
-        document.getElementById('dlSpeed').textContent   = '–';
-        removeDlListener();
-        verifyAndFinish();
-      }
+      const payload = {
+        checked: true,
+        supported: result.supported,
+        tier: result.status,
+        cores: result.cores,
+        ramGB: result.ramGB,
+        androidVersion: result.androidVersion,
+        arch: result.arch,
+        is64Bit: result.is64Bit,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('notefull_ai_compat', JSON.stringify(payload));
 
-      if (stage === 'error') {
-        removeDlListener();
-        showError('Download failed. Please check your connection and try again.');
-      }
-    }
+      document.getElementById('specRam').textContent = `RAM: ${result.ramGB ? result.ramGB + ' GB' : 'N/A'}`;
+      document.getElementById('specCores').textContent = `CPU: ${result.cores ? result.cores + ' Cores' : 'N/A'}`;
 
-    // ─────────────────────────────────────────────
-    // VERIFY AFTER DOWNLOAD
-    // ─────────────────────────────────────────────
-    async function verifyAndFinish() {
-      document.getElementById('dlStatusText').textContent = 'Verifying file integrity…';
-      await new Promise(r => setTimeout(r, 800));
-
-      const ready = await modelFileReady();
-
-      if (ready) {
-        showDone();
+      if (result.status === 'ok') {
+        meterTitle.textContent = 'Hardware Ready for Local AI';
+        meterLed.style.background = '#10b981';
+      } else if (result.status === 'warn') {
+        meterTitle.textContent = 'Moderate Performance';
+        meterLed.style.background = '#f59e0b';
       } else {
-        showError('File verification failed. The download may be incomplete. Please try again.');
+        meterTitle.textContent = 'Standard Hardware (Pure Notes)';
+        meterLed.style.background = '#ef4444';
       }
     }
 
-    function showDone() {
-      document.getElementById('downloadUI').classList.remove('active');
-      document.getElementById('doneUI').classList.add('active');
-      isDownloading = false;
-      setTimeout(goToApp, REDIRECT_DELAY);
+    // ─────────────────────────────────────────────
+    // TIER SELECTION & APP LAUNCH
+    // ─────────────────────────────────────────────
+    function selectTier(tier) {
+      selectedTier = tier;
+      document.querySelectorAll('.tier-card-item').forEach(card => {
+        card.classList.toggle('selected', card.dataset.tier === tier);
+      });
+      const btn = document.getElementById('confirmTierBtn');
+      if (btn) btn.disabled = false;
     }
 
-    // ─────────────────────────────────────────────
-    // CANCEL
-    // ─────────────────────────────────────────────
-    async function cancelDownload() {
-      if (!isDownloading) return;
+    function confirmSelection() {
+      if (!selectedTier) return;
 
-      removeDlListener();
-      isDownloading = false;
+      const confirmed = confirm("Confirm your selection? You can always adjust offline models later in Settings.");
+      if (!confirmed) return;
 
-      try { await AIPlugin.cancelDownload(); } catch (_) {}
+      localStorage.setItem("AI-prefrence", selectedTier);
 
-      document.getElementById('downloadUI').classList.remove('active');
-      document.getElementById('cancelledUI').classList.add('active');
+      if (selectedTier === "disbale-ai") {
+        disableNotefullAI();
+      } else {
+        localStorage.removeItem("DisbalkeAIAuto");
+        localStorage.setItem("openAiDownloader", "true");
+      }
+
+      goToApp();
     }
 
-    function removeDlListener() {
-      try { dlListener?.remove(); } catch (_) {}
-      dlListener = null;
+    function disableNotefullAI() {
+      localStorage.setItem("DisbalkeAIAuto", "true");
+      localStorage.removeItem("openAiDownloader");
     }
 
-    // ─────────────────────────────────────────────
-    // ERROR
-    // ─────────────────────────────────────────────
-    function showError(msg) {
-      isDownloading = false;
-      document.getElementById('dlStatusText').textContent = msg;
-      document.getElementById('dlSubtitle').textContent   = 'Something went wrong';
-      document.getElementById('cancelBtn').textContent    = 'Continue without AI';
-      document.getElementById('cancelBtn').onclick        = goToApp;
-    }
-
-    // ─────────────────────────────────────────────
-    // REDIRECT
-    // ─────────────────────────────────────────────
     function goToApp() {
       localStorage.setItem('notefullOnboarding', 'true');
-      document.getElementById('onboardingCard').classList.add('hidden');
+      document.getElementById('onboardingDeck').classList.add('hidden');
       setTimeout(() => {
-        document.body.classList.add('fade-out');
-        setTimeout(() => window.location.replace('index.html'), 450);
-      }, 300);
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.4s ease';
+        setTimeout(() => window.location.replace('index.html'), 350);
+      }, 250);
     }
 
-    // ─────────────────────────────────────────────
-    // FORMATTERS
-    // ─────────────────────────────────────────────
-    function fmtBytes(b) {
-      if (b >= 1024 * 1024 * 1024) return (b / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
-      if (b >= 1024 * 1024)        return (b / (1024 * 1024)).toFixed(1) + ' MB';
-      return (b / 1024).toFixed(0) + ' KB';
-    }
-
-    function fmtSpeed(bps) {
-      if (bps >= 1024 * 1024) return (bps / (1024 * 1024)).toFixed(1) + ' MB/s';
-      if (bps >= 1024)        return (bps / 1024).toFixed(1) + ' KB/s';
-      return bps.toFixed(0) + ' B/s';
-    }
-
-    function fmtEta(secs) {
-      if (secs > 3600) return `${Math.round(secs / 3600)}h left`;
-      if (secs > 90)   return `${Math.round(secs / 60)} min left`;
-      return `${secs}s left`;
-    }
-
-    // ─────────────────────────────────────────────
-    // JOURNEY OVERLAY
-    // ─────────────────────────────────────────────
     function handleAddButtonClick() {
       document.getElementById('journeyOverlay').classList.remove('active');
       const frame = document.getElementById('appFrame');
       frame.classList.add('visible');
-      try { frame.contentWindow.showAddOptions?.(); } catch (_) {}
+      try {
+        frame.contentWindow.showAddOptions?.();
+      } catch (_) {}
     }
+
+    selectTier('full');
   </script>
 </body>
 </html>

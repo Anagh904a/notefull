@@ -18,12 +18,13 @@ let selectedCount = 0;
 
 function showSelectionMode() {
     const toolbar = document.getElementById('toolbar');
-    const nav = document.getElementById('navBar');
+    const nav = document.getElementById('bottomBar');
     const sort = document.getElementById('titleBar');
+    const sortmain = document.getElementById('sort');
     toolbar.classList.add('active');
     nav.classList.add('hidden');
-document.getElementById('items-container').style.marginTop = "60px";
     sort.classList.add('hidden');
+    sortmain.classList.add('hidden');
     selectionMode = true;
    
 
@@ -59,12 +60,13 @@ deletedNotes.forEach(l => deletedNotesMap[l.id] = l);
 
 function closeSelectionMode() {
     const toolbar = document.getElementById('toolbar');
-    const nav = document.getElementById('navBar');
+    const nav = document.getElementById('bottomBar');
     const sort = document.getElementById('titleBar');
+    const sortmain = document.getElementById('sort');
     toolbar.classList.remove('active');
+    sortmain.classList.remove('hidden');
     nav.classList.remove('hidden');
     sort.classList.remove('hidden');
-    document.getElementById('items-container').style.marginTop = "0px";
     selectionMode = false;
     const noteWrapper = document.querySelectorAll('.note-wrapper');
     const listWrapper = document.querySelectorAll('.list-wrapper');
@@ -89,8 +91,8 @@ function closeSelectionMode() {
      const counter = document.getElementById('selected-count');
      counter.innerHTML = 0 + " Selected";
      selectedCount = 0;
-    displayNotes();
-    displayLists();
+    renderItems();
+    renderItems();
 }
 
 function selectNote(noteId) {
@@ -270,7 +272,7 @@ let trashCount = 0;
 
 function showTrashMode() {
     const toolbar = document.getElementById('trash-toolbar');
-    const nav = document.getElementById('navBar');
+    const nav = document.getElementById('bottomBar');
     const sort = document.getElementById('sort-trash');
 toolbar.classList.add('active');
     nav.classList.add('hidden');
@@ -299,7 +301,7 @@ toolbar.classList.add('active');
 }
 function closeTrashMode() {
     const toolbar = document.getElementById('trash-toolbar');
-    const nav = document.getElementById('navBar');
+    const nav = document.getElementById('bottomBar');
     const sort = document.getElementById('sort-trash');
     toolbar.classList.remove('active');
     nav.classList.remove('hidden');
@@ -329,8 +331,8 @@ function closeTrashMode() {
      const counter = document.getElementById('trash-count');
      counter.innerHTML = 0 + " Selected";
     trashCount = 0;
-    displayNotes();
-    displayLists();
+    renderItems();
+    renderItems();
     displayDeletedNotes();
     displayDeletedLists();
 }
@@ -413,7 +415,10 @@ deleteSelectedforever();
 async function deleteSelectedforever() {
     const mode = localStorage.getItem('mode'); 
 
-if (!confirm('Are you sure you want to delete selected items forever?')) {
+if (!await showConfirmToast({
+    title: 'Delete forever?',
+    message: 'Do you want to delete these items forever?'
+  })) {
     return;
 }
 deletedNotes = deletedNotes.filter(note => !note.selected);
@@ -439,7 +444,11 @@ notes.push(note);
 async function restoreSelected() {
     const mode = localStorage.getItem('mode'); 
 
-if (!confirm('Do you want to restore selected items?')) {
+if (!await showConfirmToast({
+  title: 'Restore selected items?',
+  message: 'Do you want to restore selected items?',
+  timeout: 5000 // Auto-cancels and returns false after 5 seconds
+})) {
     return;
 }
 deletedNotes.forEach((note) => {
@@ -477,7 +486,7 @@ rebuildLists();
 function displayDeletedNotes() {
   const container = document.getElementById("trashContainer");
   container.innerHTML = "";
-  const noNotesMessage = document.getElementById("noDeletedItemsMessage");
+  const noNotesMessage = document.getElementById("noItems");
   if (deletedNotes.length === 0 && deletedLists.length === 0) {
     noNotesMessage.classList.remove("hidden");
   } else {

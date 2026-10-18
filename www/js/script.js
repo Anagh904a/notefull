@@ -13,8 +13,8 @@ async function inlitlizeData() {
     });
 
   syncDataWithUpdates();
-    displayNotes();
-    displayLists();
+    renderItems();
+   
 updateAllPillsDynamically();
 
 }
@@ -25,10 +25,12 @@ function syncDataWithUpdates() {
   notes.forEach((note) => {
     if (note.remainderEnabled === undefined) {
       note.remainderEnabled = false;
-
-    } if (note.remainderTime === undefined) {
+        } if (note.remainderTime === undefined) {
       note.remainderTime = null;
-    } if (note.repeatType === undefined) {
+    }    if (note.type === undefined) {
+      note.type = "note";
+        }
+     if (note.repeatType === undefined) {
       note.repeatType = "once";
     } if (note.notificationId === undefined) {
       note.notificationId = null;
@@ -44,6 +46,9 @@ function syncDataWithUpdates() {
     if (list.remainderTime === undefined) {
       list.remainderTime = null;
     }
+    if (list.type === undefined) {
+      list.type = "list";
+        }
 
     if (list.repeatType === undefined) {
       list.repeatType = "once";
@@ -59,7 +64,7 @@ localStorage.setItem("syncState", "26.6.0");
 setTimeout(() => {
     const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
   if (keywords.length) {
-  showToast('Updated Notefull to v26.7!');
+  showToast('Updated Notefull to v26.9! ');
   }
 }, 1000);
 } 

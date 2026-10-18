@@ -8,13 +8,18 @@ android {
         applicationId "app.notefull.com"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 33
-        versionName "26.7.1Special"
+        versionCode 36
+        versionName "26.9beta"
 
         ndk {
             abiFilters 'arm64-v8a'
         }
     } // <-- Closed defaultConfig properly
+    packaging {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
 
     // CMake path belongs directly inside android { }// packaging / packagingOptions belongs directly inside android { }
 
@@ -39,7 +44,7 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
-    implementation("com.google.ai.edge.litertlm:litertlm-android:0.16.0")
+    implementation("com.google.ai.edge.litertlm:litertlm-android:0.17.1")
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
