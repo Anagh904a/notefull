@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="An Open-source notes-taking app built just for productivity. No ads, no distractions." />
     <link rel="icon" href="notefull.png" type="image/x-icon">
     <title>Notefull</title>
@@ -22,7 +22,7 @@
     <script src="libs/localforage/localforage.min.js"></script>
     <script src="libs/iziToast/iziToast.min.js"r></script>
     <script src="libs/qrcode/qrcode.min.js" defer></script>
-
+<script src="libs/Markdown/marked.min.js"></script>
 
     <!-- 3. Notefull Connect Initiatlization-->
 
@@ -122,15 +122,17 @@
     <div class="top-bar-brand">
         <img src="notefull.png" alt="Notefull">
       
-        <h2>Notefull 9</h2>
-        <p class="r-tag sev">Beta</p>
+        <h2>Notefull</h2>
+      
         
     </div>
-
+<button type="button" class="header-theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+        <i class="ti ti-sun-moon" id="themeHeaderIcon"></i>
+    </button>
 </div>
 <div class="greeting-card">
     <span class="main-greeting" id="greeting-text">Good evening !</span>
-    <span class="secondaty-text id='subtitle-greet">What's on your mind?</span>
+    <span class="secondaty-text" id="subtitle-greet">What's on your mind?</span>
 </div>
 
   <div class="sort-container" id="sort">
@@ -157,11 +159,23 @@ All
 
         <div class="selection-toolbar" id="toolbar">
             <div class="toolbar-elements">
-                <button onclick="closeSelectionMode()"><i class="ti ti-x"></i></button>
-                <div class="selected-count" id="selected-count">0 Selected</div>
-                <button onclick="selectAll()">Select All</button>
-                <button onclick="deleteSelected()"><i class="ti ti-trash"></i></button>
+                <div class="selection-element" onclick="closeSelectionMode()">
+                <div class="selection-icon"><i class="ti ti-x"></i></div>
+                <div class="selection-text">Close</div>
+                </div>
+                <div class="selection-element">
+                <div class="selection-icon" id="selected-count">0</div>
+                <div class="selection-text">Selected</div>
+                </div>
+                <div class="selection-element" onclick="selectAll()">
+                    <div class="selection-icon"><i class="ti ti-circle-check"></i> </div>
+                <div class="selection-text">Select All</div>
+                </div>
+                <div onclick="deleteSelected()" class="selection-element">
+                    <div class="selection-icon"><i class="ti ti-trash"></i></div>
+                    <div class="selection-text">Move</div>
             </div>
+        </div>
         </div>
 
 
@@ -170,18 +184,20 @@ All
 
 <div class="items" id="items-display">
         <div id="itemsContainer"></div>
-          <div id="trashContainer" class="hidden"></div>
+        <div id="trashDisplay" class="hidden">
+             <div id="trashBtn" class="filter-group">
+                <button class="filter-item" onclick="showTrashMode()"><i class="ti ti-checks"></i> Trash
+                    Selection Mode</button>
+            </div>
+        <div id="trashContainer"></div>
+        </div>
             <div id="noItems" class="empty-msg hidden">
 <img src="/empty.png">
                     <p>No items Yet! This feels lonely</p>
                     <span>Tap + to start writting your ideas</span>
                 </div>
                 </div>
-        </div>
-    
-
-    <div id="trashSection" class="container hidden">
-        <div class="toolbar-trash" id="trash-toolbar">
+                <div class="toolbar-trash" id="trash-toolbar">
             <div id="toolbar-elements" class="toolbar-elements">
                 <button onclick="closeTrashMode()"><i class="ti ti-x"></i></button>
                 <div class="selected-count" id="trash-count">0 Seleted</div>
@@ -191,23 +207,8 @@ All
             </div>
 
         </div>
-        <div class="custom-sort-wrapper" id="sort-trash">
-            <div id="trashBtn" class="filter-group">
-                <button class="filter-item" onclick="showTrashMode()"><i class="ti ti-checks"></i> Trash
-                    Selection Mode</button>
-            </div>
         </div>
 
-
-        <div class="section-label">Deleted Items</div>
-      
-        <div id="noDeletedItemsMessage" class="hidden">
-            <i class="ti ti-trash-off"></i>
-            <p>Trash is empty</p>
-            <span>Deleted notes and lists will appear here</span>
-        </div>
-
-    </div>
    
     <div id="ai-result" class="modal hidden">
         <div class="modal-content">
@@ -468,7 +469,7 @@ All
                 <button id="sharedListButton" type="button" class="action-btn" onclick="saveSharedList()">
                     <i class="ti ti-check"></i>
                 </button>
-               <button type="button" class="action-btn" onclick="showMembersModal()">
+               <button type="button" class="action-btn" onclick="EC.showMembersModal()">
  <i class="ti ti-user-cog"></i>
                </button>
             </div>
@@ -810,7 +811,7 @@ All
             </button>
           </div>
         </div>
-        <div class="disclamer-txt">Notefull AI runs locally on your device. Responses are private and offline.</div>
+        <div class="disclamer-txt">Notefull AI can make mistakes</div>
     </div>
 
     </main>
@@ -830,6 +831,15 @@ All
                         <div class="subtitle">Developer · Version</div>
                     </div>
                 </div>
+                 <div class="card" onclick="showSection('files')">
+                <div class="icon privacy">
+                    <i class="ti ti-sparkles"></i>
+                </div>
+               <div class="text-box">
+                    <div class="title3">Notefull AI</div>
+                    <div class="subtitle">Model Management · Download AI</div>
+                </div>
+            </div> 
                 <div class="card" onclick="showSection('privacySection')">
                     <div class="icon privacy">
                         <i class="ti ti-user-shield"></i>
@@ -859,17 +869,17 @@ All
                 </div>
                  <div class="card" onclick="showSection('general')">
                     <div class="icon modes">
-                        <i class="ti ti-shield"></i>
+   <i class="ti ti-adjustments-horizontal"></i>
                     </div>
                     <div class="text-box">
                         <div class="title2">General Mangement</div>
-                        <div class="subtitle">Factory Reset · Restore </div>
+                        <div class="subtitle">Factory Reset · Theme Settings </div>
                     </div>
                 </div>
-            </div>
+           
             <div class="card hidden" id="dev" onclick="showSection('devSection')">
                 <div class="icon wifi">
-                <i class="ti ti-adjustments-horizontal"></i>
+               
                 </div>
                 <div class="text-box">
                     <div class="title2">Developer Options</div>
@@ -885,15 +895,7 @@ All
                     <div class="subtitle">Grant Permission · Manage Reminders</div>
                 </div>
             </div>
-            <div class="card" onclick="showSection('files')">
-                <div class="icon privacy">
-                    <i class="ti ti-sparkles"></i>
-                </div>
-               <div class="text-box">
-                    <div class="title2">Files and AI</div>
-                    <div class="subtitle">Internel FIle Manager · Download AI</div>
-                </div>
-            </div> 
+           
             <div class="card" onclick="etc.openMembersSection()">
                     <div class="icon modes">
                         <i class="ti ti-lock"></i>
@@ -903,6 +905,7 @@ All
                         <div class="subtitle">Add/remove devices· Requets </div>
                     </div>
                 </div>
+        </div>
         </div>
 
 
@@ -922,8 +925,8 @@ All
 <i class="ti ti-chevron-left"></i>
             </button>
             <div class="section-card">
-                <h2>Analytics Engine Updater</h2>
-                <p>This updates the analytics engine by connecting to server. It only downloads latest patches from
+                <h2>NDSP Updater</h2>
+                <p>This updates the  engine by connecting to server. It only downloads latest patches from
                     server and cannot send data!</p>
                 <div class="info-box">
                     <h3>Release Code: <span id="lastUpdated"></span></h3>
@@ -971,7 +974,7 @@ All
                             Issues</a>
                 </div>
                 <div class="info-box">
-                    <p>Notefull AI is powered by Qwen 2.5</p>
+                    <p>Notefull AI is powered by Gemma 4 E2B</p>
                 </div>
                 <div class="info-box">
                     <p>We ensure your data security by our own-developed NDSP (Notefull Data Safety Protocol) </p>
@@ -980,7 +983,7 @@ All
             <div class=" section-card">
                 <h2>About App</h2>
                 <div class="info-box"><img class="brand-t" src="notefull.png">
-                    <h4>App Version: 26.9.1beta</h4>
+                    <h4>App Version: v26.9</h4>
                 </div>
                 <a href="https://play.google.com/store/apps/details?id=app.notefull.com&amp;hl=en">
                     <button>App Updates</button>
@@ -1080,7 +1083,7 @@ All
                     <p>Once excuted, your data WILL BE WIPED FOREVER</p>
                 </div>
             </div>
-            <div class="section-card">
+           <!--- <div class="section-card">
                 <p>You can choose a .backup file from colorNote</p>
               
 <div class="import-container">
@@ -1095,14 +1098,14 @@ All
   <label for="colornoteFileInput" class="import-btn">
     Select ColorNote Backup (.backup)
   </label>
-</div>
-            </div>
+</div> </div>-->
+   
             <div class="section-card">
-                <h2>Theme Switcher (NEW) </h2>
+                <h2>Theme (NEW) </h2>
                 <div class="toggle-container">
-                    <span class="toggle-label">Dark Mode</span>
+                    <span class="toggle-label">System default theme</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" checked onchange="toggleTheme()">
+                        <input type="checkbox" checked onchange="toggleSystemTheme()">
 
                         <span class="toggle-slider"></span>
                     </label>
@@ -1120,12 +1123,12 @@ All
     </button>
     
   </div>
-    <h2>App Storage & Files</h2>
+    <h2>Notefull AI Settings</h2>
   <div class="section-card">
 
     <div class="storage-summary-banner">
       <div class="storage-meta">
-        <span class="storage-label">Internal App Files</span>
+        <span class="storage-label">AI file Size</span>
         <h3 id="totalFilesSize">Calculating...</h3>
       </div>
       <button class="refresh-files-btn" onclick="refreshAppFilesList()" title="Refresh files">
@@ -1134,15 +1137,12 @@ All
     </div>
 
     <!-- Live Files List -->
-    <div class="section-label" style="margin-top: 14px;">Stored Files</div>
+    <div class="section-label" style="margin-top: 14px;">Stored Models</div>
     <div id="appFilesList" class="app-files-list">
       <div class="file-item-placeholder">Scanning internal directory...</div>
     </div>
   </div>
 
- <!-- ==========================================================================
-     INSTALL AI ENGINE (3-Tier Card Selector)
-     ========================================================================== -->
 <div class="section-card hidden" id="aiInstallSection">
   <div class="installer-heading">
     <div class="installer-icon">
@@ -1157,30 +1157,13 @@ All
   </div>
 
   <div class="installer-tier-list">
-    <!-- Option 1: Lite Model -->
-    <div class="installer-card selected" id="tierCard-lite" onclick="selectInstallerTier('lite')">
-      <div class="installer-radio">
+    <div class="installer-card selected" id="tierCard-full" onclick="selectInstallerTier('full')">
+              <div class="installer-radio">
         <div class="radio-dot"></div>
       </div>
       <div class="installer-details">
         <div class="installer-header">
-          <span class="installer-title">Notefull AI Lite</span>
-          <span class="installer-badge badge-lite">~1.1 GB • Fast</span>
-        </div>
-        <p class="installer-desc">
-          Qwen Lite model optimized for quick note searches, checklist creation, and low memory usage. Recommended for devices with 4 GB+ RAM.
-        </p>
-      </div>
-    </div>
-
-    <!-- Option 2: Full / Advanced Model -->
-    <div class="installer-card" id="tierCard-full" onclick="selectInstallerTier('full')">
-      <div class="installer-radio">
-        <div class="radio-dot"></div>
-      </div>
-      <div class="installer-details">
-        <div class="installer-header">
-          <span class="installer-title">Notefull AI Advanced (Qwen3-4B)</span>
+          <span class="installer-title">Notefull AI Advanced (Gemma 4 E2B)</span>
           <span class="installer-badge badge-full">~2.4 GB • Deep Thinking</span>
         </div>
         <p class="installer-desc">
@@ -1190,29 +1173,35 @@ All
     </div>
 
     <!-- Option 3: Disable AI -->
-    <div class="installer-card" id="tierCard-disable" onclick="selectInstallerTier('disbale-ai')">
-      <div class="installer-radio">
-        <div class="radio-dot"></div>
-      </div>
+    <div class="installer-card" id="tierCard-disable" disbaled">
+     
       <div class="installer-details">
         <div class="installer-header">
-          <span class="installer-title">Disable AI Features</span>
-          <span class="installer-badge badge-off">0 MB • Pure Notes</span>
+          <span class="installer-title">More Models Coming soon...</span>
+          <span class="installer-badge badge-off">Unavailable • In Developemnt</span>
         </div>
         <p class="installer-desc">
-          Keep Notefull completely manual, lightweight, and offline. Removes all AI action buttons and leaves 0 model files on storage.
+        You would be able to choose different versions of Notefull AI i.e different models
         </p>
       </div>
     </div>
   </div>
 
-  <button id="startInstallBtn" class="installer-submit-btn" onclick="confirmAndDownloadFromFiles()">
+  <button id="startInstallBtn" class="installer-submit-btn" onclick="confirmAndDownloadFromFiles('full')">
     <i class="ti ti-download"></i>
     <span>Start Installation</span>
   </button>
 </div>
+  <div class="section-card">
+    <h4>Danger Zone</h4>
+    <p>If you click button below. It will REMOVE ALL AI features from Notefull. To revert, you would need to re-download AI if you already had downloaded before</p>
+<button class="delete-btn" onclick="deleteAi()">Delete Notefull AI</button> 
+</div>
 </div>
 <div id="membersSection" class="container hidden">
+     <button class="modal-button" onclick="showSection('settingsSection')">
+      <i class="ti ti-chevron-left"></i>
+    </button>
     <h2 id="mainHeading">Manage Devices</h2>
     <div class="tab-container" id="tabs">
         <div id="membersTab" class="tab active" onclick="etc.switchTab('tabs', 'membersTab', 'devices')">
@@ -1255,7 +1244,7 @@ All
 </div>
 </div>
 <div class="method-switch">
-    <p class="switch-text" id="switchText" onclick="etc.showConnectSection('method2')">Scan a QR code instead</p>
+    <p class="switch-text" id="switchText" onclick="etc.showConnectSection('method2')">Scan a QR code or enter a Code instead</p>
 </div>
 </div>
 <div class="devices-section hidden" id="requests">
@@ -1264,10 +1253,11 @@ All
     <div id="noRequestsMessage">No requests yet!</div>
 </div>
     </div>
+    </div>
 <div class="connecting-modal hidden" id="connectingModal">
 <div class="main-content">
     <div class="spinner"></div>
-    <p class="main-content-text" id="connectingText">Connecting< to device...</p>
+    <p class="main-content-text" id="connectingText">Connecting to device...</p>
 </div>
 </div>
 <div class="modal hidden" id="displayNameModal">

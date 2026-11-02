@@ -21,7 +21,7 @@ updateAllPillsDynamically();
 inlitlizeData();
 function syncDataWithUpdates() {
   const synced = localStorage.getItem("syncState");
-  if (synced === "26.6.0") return;
+  if (synced === "26.9.0") return;
   notes.forEach((note) => {
     if (note.remainderEnabled === undefined) {
       note.remainderEnabled = false;
@@ -60,11 +60,17 @@ function syncDataWithUpdates() {
 
   });
 
-localStorage.setItem("syncState", "26.6.0");
+localStorage.setItem("syncState", "26.9.0");
 setTimeout(() => {
     const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
   if (keywords.length) {
-  showToast('Updated Notefull to v26.9! ');
+  showToast('Updated Notefull to v26.9 ');
   }
 }, 1000);
 } 
+
+async function deleteAi() {
+  showToastError('Unable to delete AI: UNDER DEVELOPMENT');
+await installAIModuleStage();
+showToast('AI componets installed successfully. Proceeding to stage 2...');
+}

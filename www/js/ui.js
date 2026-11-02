@@ -23,7 +23,9 @@ const aiFiles = await manageModels();
 
     const download = (await showConfirmToast({
     title: 'Download AI now?',
-    message: 'AI files are nto ready yet? Do you want to download it. DATA CHARGES MAY APPLY'
+    message: 'AI files are not fully downloaded yet? Do you want to download it. DATA CHARGES MAY APPLY',
+    btn1txt: 'Start Downloading AI',
+    btntxt2: "I will Download AI later"
   }));
 
     if (!download) return;
@@ -104,6 +106,53 @@ function setActive(el) {
         addBtn.classList.remove('hidden');
     }
 }
+
+function updateDynamicGreeting() {
+  const greetingEl = document.getElementById('greeting-text');
+  const subtitleEl = document.getElementById('subtitle-greet');
+  if (!greetingEl || !subtitleEl) return;
+
+  const hour = new Date().getHours();
+  let timeSalutation = "Good day!";
+
+  if (hour >= 5 && hour < 12) {
+    timeSalutation = "Good morning!";
+  } else if (hour >= 12 && hour < 17) {
+    timeSalutation = "Good afternoon!";
+  } else if (hour >= 17 && hour < 22) {
+    timeSalutation = "Good evening!";
+  } else {
+    timeSalutation = "Working late?";
+  }
+
+  // Pool of rotating, unique subtitle prompts
+  const prompts = [
+    "What's on your mind today?",
+    "Capture an idea before it slips away.",
+    "Ready to organize your day?",
+    "Small steps turn into big accomplishments.",
+    "Clear your thoughts onto paper.",
+    "What are we building today?",
+    "Keep your focus sharp and your notes sharper.",
+    "A quick note today saves hours tomorrow.",
+    "Start with one quick thought."
+  ];
+
+  // Avoid picking the exact same subtitle as last time
+  const lastIndex = parseInt(localStorage.getItem('lastGreetingIndex'), 10);
+  let nextIndex;
+  do {
+    nextIndex = Math.floor(Math.random() * prompts.length);
+  } while (prompts.length > 1 && nextIndex === lastIndex);
+
+  localStorage.setItem('lastGreetingIndex', nextIndex);
+
+  greetingEl.textContent = timeSalutation;
+  subtitleEl.textContent = prompts[nextIndex];
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', updateDynamicGreeting);
 
 window.addEventListener('load', () => {
   const active = document.querySelector('.nav-item.active');
@@ -240,7 +289,9 @@ window.showConfirmToast = function ({
   message = 'Are you sure?',
   position = 'center',
   overlay = true,
-  timeout = false, // Pass ms (e.g. 5000) to auto-close & return false, or false for no timeout
+  timeout = false,
+  btn1txt = 'Yes',
+btn2txt = 'Cancel', // Pass ms (e.g. 5000) to auto-close & return false, or false for no timeout
   actions = null
 } = {}) {
   return new Promise((resolve) => {
@@ -250,12 +301,12 @@ window.showConfirmToast = function ({
       ? actions
       : [
           {
-            text: 'Yes',
+            text: btn1txt,
             primary: true,
             onClick: () => resolve(true)
           },
           {
-            text: 'Cancel',
+            text: btn2txt,
             primary: false,
             onClick: () => resolve(false)
           }
@@ -383,7 +434,7 @@ let startY = 0;
 let lastTapTime = 0;
 let lastTapTarget = null;
 
-const LONG_PRESS_DURATION = 2000; // 2 seconds (2000ms)
+const LONG_PRESS_DURATION = 1500; // 2 seconds (2000ms)
 const DOUBLE_TAP_DELAY = 300;     // Max time between taps (300ms)
 const MOVE_THRESHOLD = 10;        // Max finger movement in px before canceling
 
@@ -670,7 +721,8 @@ async function resetNotefull() {
   try {
     const isConfirmed = await showConfirmToast({
       title: 'Factory Reset Notefull?',
-      message: 'Continuing will cause your data to be deleted permanently. It will be non-recoverable.'
+      message: 'Continuing will cause your data to be deleted permanently. It will be non-recoverable.',
+      btn1txt: "I know the consequences of the action. Proceed"
     });
 
     if (!isConfirmed) {
@@ -688,7 +740,9 @@ async function resetNotefull() {
 
     const isFinalConfirmed = await showConfirmToast({
       title: 'Are you really sure?',
-      message: 'This is the last confirmation. If you proceed, YOUR DATA AND PREFERENCES WILL BE DELETED!'
+      message: 'This is the last confirmation. If you proceed, YOUR DATA AND PREFERENCES WILL BE DELETED!',
+      btn2txt: "No, don't proceed!",
+      btn1txt: 'Yes, Proceed Anyway'
     });
 
     if (!isFinalConfirmed) {
@@ -712,57 +766,73 @@ showToast('You will need to setuo app again now!')
   }
 }
 
-function applyTheme(theme) {
-    if (!['light', 'dark'].includes(theme)) {
-        console.error('Invalid theme:', theme);
-        return;
-    }
-
-    document.documentElement.setAttribute('dataTheme', theme);
-    localStorage.setItem('theme', theme);
-}
-
-function toggleTheme() {
-    const currentTheme =
-        document.documentElement.getAttribute('dataTheme') || 'light';
-
-    applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
-}
-
-// Sync the checkbox state with existing/system theme on page load
-
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Global function to apply the theme to the DOM and native system bars
+ * @param {boolean} isDark 
+ */
+function applyTheme(isDark) {
     const root = document.documentElement;
-    const toggleInput = document.querySelector('.toggle-switch input');
 
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = savedTheme
-        ? savedTheme === 'dark'
-        : prefersDark;
-
-    function applyTheme(dark) {
-        if (dark) {
-            root.setAttribute('dataTheme', 'dark');
-        } else {
-            root.removeAttribute('dataTheme');
-        }
-
-        root.style.colorScheme = dark ? 'dark' : 'light';
-        localStorage.setItem('theme', dark ? 'dark' : 'light');
-
-        if (toggleInput) {
-            toggleInput.checked = dark;
-        }
+    if (isDark) {
+        root.setAttribute('dataTheme', 'dark');
+    } else {
+        root.removeAttribute('dataTheme');
     }
 
-    applyTheme(isDark);
+    root.style.colorScheme = isDark ? 'dark' : 'light';
 
-    if (toggleInput) {
-        toggleInput.addEventListener('change', () => {
-            applyTheme(toggleInput.checked);
-        });
+    // Sync Android native status & navigation bar icons
+    if (window.NativeTheme && typeof window.NativeTheme.setSystemBarIcons === 'function') {
+        window.NativeTheme.setSystemBarIcons(isDark);
     }
+
+    // Sync top bar icon if present
+    const headerIcon = document.getElementById('themeHeaderIcon');
+    if (headerIcon) {
+        headerIcon.className = isDark ? 'ti ti-moon' : 'ti ti-sun';
+    }
+
+    // Sync Dark Mode checkbox if present
+    const darkToggle = document.getElementById('darkModeToggle') || 
+                       document.querySelector('#general input[onchange*="toggleTheme"]');
+    if (darkToggle) {
+        darkToggle.checked = isDark;
+    }
+}
+
+/**
+ * Helper to get the current OS theme from Android bridge or browser fallback
+ */
+function getSystemDarkState() {
+    if (window.NativeTheme && typeof window.NativeTheme.isSystemDark === 'function') {
+        return window.NativeTheme.isSystemDark();
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+/**
+ * Manual toggle: Applies temporary override without breaking system default tracking
+ */
+function toggleTheme(el) {
+    const isCurrentlyDark = document.documentElement.getAttribute('dataTheme') === 'dark';
+    const targetState = (el && typeof el.checked === 'boolean') ? el.checked : !isCurrentlyDark;
+    
+    // Apply immediately. System default remains active in the background.
+    applyTheme(targetState);
+}
+
+/**
+ * Receives live updates from MainActivity when the Android system theme changes
+ */
+window.syncSystemTheme = function (isSystemDark) {
+    // Always sync with the system default when the system theme changes
+    applyTheme(isSystemDark);
+};
+
+// Initialize on app load: System Default is always ON by default
+document.addEventListener('DOMContentLoaded', () => {
+    // Fetch and apply accurate system theme directly from Android OS
+    applyTheme(getSystemDarkState());
 });
 
 

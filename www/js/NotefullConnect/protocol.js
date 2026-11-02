@@ -1,256 +1,185 @@
 /* ==========================================================================
-   Notefull Connect — Operates on Web RTC and Web Sockets technologies
+   Notefull Connect v2 — Protocol Core (Cloudflare Edge + WebRTC Wire)
    ========================================================================== */
-//Block 1   (Variables and constants)]
- const KEY_IDENTITY = 'nf_device_identity';
-  const KEY_PAIRED_DEVICES = 'nf_paired_devices';
-  const    KEY_NAME_SET = 'nf_name_set';
-    const PAIRING_PROTOCOL = 'notefull-connect';
-   const PAIRING_LIMIT = 10 * 60 * 1000;
-const firebaseConfig = {
-    apiKey: "AIzaSyBetuYa5d2jyX7iw7gSkR_qdIGUlZj0r_8",
-    authDomain: "notefull-17415.firebaseapp.com",
-    databaseURL: "https://notefull-17415-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "notefull-17415",
-    storageBucket: "notefull-17415.firebasestorage.app",
-    messagingSenderId: "202328382997",
-    appId: "1:202328382997:web:9aae6344c6fd03d284381c",
-  };
-    let activePairingSession = null;  
-    let activePairingRoom    = null;  
-    let qrInstance           = null;
-    // PROTOCOL
+
+const SIGNAL_URL = "wss://notefull-connect.mastiwithanagh.workers.dev";
+const KEY_IDENTITY = 'nf_device_identity';
+const KEY_PAIRED_DEVICES = 'nf_paired_devices';
+const KEY_NAME_SET = 'nf_name_set';
+const PAIRING_PROTOCOL = 'notefull-connect';
+const PAIRING_LIMIT = 10 * 60 * 1000;
+
+let activePairingSession = null;
+let activePairingSocket = null;
+let activePairingRoom = null;
+let qrInstance = null;
+
 const NC = {
-     peers: {},
-PROTOCOL_VERSION: '1.0',
-   
+    peers: {},
+    PROTOCOL_VERSION: '2.0',
+
     rtcConfig: {
         iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
             { urls: "stun:global.stun.twilio.com:3478" }
         ]
     },
-    nostrRelays: [
-        'wss://relay.damus.io',
-        'wss://nostr.mom',
-        'wss://nos.lol'
-    ],
-    relaySockets: [],
-    _nostrTools: null,
-    _nostrSk: null,
-//BLOCK 2   (UNCHANGED FUNCTIONS/HELPER)
-async getPairedDevices() {
-    return (await localforage.getItem(KEY_PAIRED_DEVICES)) || {};
-},
-async generateDeviceIdentity(name) {
-const existing = await localforage.getItem(KEY_IDENTITY);
-const id = {
-displayName: name,
-userSet: true,
-  deviceId: existing?.deviceId || crypto.randomUUID()
-};
-    showToast('Succesfully changed device name!')
-    await localforage.setItem(KEY_IDENTITY, id);
-    return id;
-},
 
-async getDeviceIdentity() {
-    return (await localforage.getItem(KEY_IDENTITY)) || {};
-},
+    // ── Helper & Storage Methods ──
+    async getPairedDevices() {
+        return (await localforage.getItem(KEY_PAIRED_DEVICES)) || {};
+    },
 
+    async generateDeviceIdentity(name) {
+        const existing = await localforage.getItem(KEY_IDENTITY);
+        const id = {
+            displayName: name,
+            userSet: true,
+            deviceId: existing?.deviceId || crypto.randomUUID()
+        };
+        if (typeof showToast === 'function') showToast('Successfully changed device name!');
+        await localforage.setItem(KEY_IDENTITY, id);
+        return id;
+    },
 
-    async setDisplayName() { 
-        const newName = document.getElementById('displayName').value.trim();
-        if (!newName || newName === "") {
-            showToastError('Please enter a valid name!')
+    // Guaranteed to always return a valid deviceId even before user sets a name
+    async getDeviceIdentity() {
+        let existing = await localforage.getItem(KEY_IDENTITY);
+        if (!existing || !existing.deviceId) {
+            existing = {
+                displayName: existing?.displayName || 'Device',
+                userSet: Boolean(existing?.userSet),
+                deviceId: crypto.randomUUID()
+            };
+            await localforage.setItem(KEY_IDENTITY, existing);
+        }
+        return existing;
+    },
+
+    async setDisplayName() {
+        const input = document.getElementById('displayName');
+        const newName = input ? input.value.trim() : '';
+        if (!newName) {
+            if (typeof showToastError === 'function') showToastError('Please enter a valid name!');
             return;
         }
 
-await this.generateDeviceIdentity(newName);
-document.getElementById('displayNameModal').classList.add('hidden');
-localStorage.setItem(KEY_NAME_SET, true);
-},
+        await this.generateDeviceIdentity(newName);
+        const modal = document.getElementById('displayNameModal');
+        if (modal) modal.classList.add('hidden');
+        localStorage.setItem(KEY_NAME_SET, true);
+    },
 
-async savePairedDevice(remote) {
-     if (!remote || !remote.deviceId) return;
+    async savePairedDevice(remote) {
+        if (!remote || !remote.deviceId) return;
         const map = await this.getPairedDevices();
         map[remote.deviceId] = {
-            deviceId:    remote.deviceId,
+            deviceId: remote.deviceId,
             displayName: remote.displayName || 'Remote Device'
-};
+        };
         await localforage.setItem(KEY_PAIRED_DEVICES, map);
-        await etc.renderDeviceList();
-       },
-       async forgetDevice(deviceId) {
-const map = await this.getPairedDevices();
-if (map[deviceId]) {
-    delete map[deviceId];
-    await localforage.setItem(KEY_PAIRED_DEVICES, map);
-    await etc.renderDeviceList();
-} else {
-    console.log('Inavild Device Id');
-    showToastError('Failed to remove device! Make sure device was paired');
-}
-       },
-
-     /* ==================================================================
-       BLOCK 3: NOSTR WEBSOCKET SIGNALING ENGINE (EPHEMERAL KIND 25001)
-       ================================================================== */
-
-/* ==================================================================
-       BLOCK 3: NOSTR WEBSOCKET SIGNALING ENGINE (FIXED & STABILIZED)
-       ================================================================== */
-
-    async getNostr() {
-        if (!this._nostrTools) {
-            this._nostrTools = await import('https://esm.sh/nostr-tools@2.7.2/pure');
+        if (typeof etc !== 'undefined' && typeof etc.renderDeviceList === 'function') {
+            await etc.renderDeviceList();
         }
-        return this._nostrTools;
     },
 
-    async getNostrKey() {
-        if (!this._nostrSk) {
-            const tools = await this.getNostr();
-            this._nostrSk = tools.generateSecretKey();
-        }
-        return this._nostrSk;
-    },
-
-    // Connects to public Nostr relays safely without overwriting in-flight sockets
-    connectSignaling() {
-        // Prevent reconnecting if sockets are already OPEN or CONNECTING
-        const hasActive = this.relaySockets.length > 0 && this.relaySockets.some(
-            ws => ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING
-        );
-        if (hasActive) return;
-
-        this.relaySockets = this.nostrRelays.map(url => {
-            const ws = new WebSocket(url);
-            ws.onopen = () => console.log(`%c[NC-Nostr] Relay connected: ${url}`, "color: #10b981;");
-            ws.onerror = () => console.warn(`[NC-Nostr] Relay unreachable: ${url}`);
-            return ws;
-        });
-    },
-
-    disconnectSignaling() {
-        this.relaySockets.forEach(ws => {
-            if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-                ws.close(1000, "NC Idle");
+    async forgetDevice(deviceId) {
+        const map = await this.getPairedDevices();
+        if (map[deviceId]) {
+            delete map[deviceId];
+            await localforage.setItem(KEY_PAIRED_DEVICES, map);
+            this.leaveConnection(deviceId);
+            if (typeof etc !== 'undefined' && typeof etc.renderDeviceList === 'function') {
+                await etc.renderDeviceList();
             }
-        });
-        this.relaySockets = [];
-    },
-
-    // Queues message until the WebSocket finishes its handshake
-    _sendToRelay(ws, payload) {
-        const msg = JSON.stringify(payload);
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send(msg);
-        } else if (ws.readyState === WebSocket.CONNECTING) {
-            ws.addEventListener('open', () => {
-                if (ws.readyState === WebSocket.OPEN) ws.send(msg);
-            }, { once: true });
+        } else {
+            console.log('Invalid Device Id');
+            if (typeof showToastError === 'function') {
+                showToastError('Failed to remove device! Make sure device was paired');
+            }
         }
     },
 
-    async sendSignal(roomId, recipientDeviceId, signalData) {
-        const tools = await this.getNostr();
-        const sk = await this.getNostrKey();
-        const myIdentity = await this.getDeviceIdentity();
-
-        const event = tools.finalizeEvent({
-            kind: 25001, // Ephemeral: relays broadcast to subscribers and never save to disk
-            created_at: Math.floor(Date.now() / 1000),
-            tags: [
-                ["t", roomId] // Pure deterministic room tag
-            ],
-            content: JSON.stringify({
-                sender: myIdentity.deviceId,
-                recipient: recipientDeviceId,
-                signal: signalData,
-                timestamp: Date.now()
-            })
-        }, sk);
-
-        console.log(`📤 [NC-Nostr] Sent signal (${signalData.type}) for room: ${roomId}`);
-        this.connectSignaling();
-        this.relaySockets.forEach(ws => this._sendToRelay(ws, ["EVENT", event]));
+    getDeterministicRoom(idA, idB) {
+        return 'room_' + [idA, idB].sort().join('--');
     },
 
-    listenSignals(roomId, myDeviceId, onSignal) {
-        const subId = "sub_" + Math.random().toString(36).slice(2, 9);
-        const seenEventIds = new Set();
-        this.connectSignaling();
+    //Reconnects all saved paired devices automatically
+    async connectAllPairedDevices() {
+        const paired = await this.getPairedDevices();
+        for (const deviceId of Object.keys(paired)) {
+            this.connectToDevice(deviceId);
+        }
+    },
 
-        const messageHandler = (e) => {
+    // ── Signaling Engine ──
+    openSignalSocket(roomId, myDeviceId, onSignal) {
+        const url = `${SIGNAL_URL}/room/${encodeURIComponent(roomId)}?deviceId=${encodeURIComponent(myDeviceId)}`;
+        const socket = new WebSocket(url);
+
+        socket.onopen = () => {
+            console.log(`⚡ [NC-v2] Connected to Cloudflare room: ${roomId}`);
+        };
+
+        socket.onmessage = (event) => {
+            if (!event.data || typeof event.data !== 'string') return;
             try {
-                const msg = JSON.parse(e.data);
-                // Nostr subscription response format: ["EVENT", subId, eventObject]
-                if (msg[0] !== "EVENT" || msg[1] !== subId) return;
-
-                const event = msg[2];
-                if (seenEventIds.has(event.id)) return; // Prevent duplicate relay echos
-                seenEventIds.add(event.id);
-
-                const data = JSON.parse(event.content);
-
-                // Ignore echoes from self
-                if (data.sender === myDeviceId) return;
-
-                // Ensure message is destined for this device or generic to room
-                if (data.recipient && data.recipient !== myDeviceId) return;
-
-                console.log(`📥 [NC-Nostr] Signal arrived (${data.signal?.type || 'candidate'}) from ${data.sender}`);
-
+                const data = JSON.parse(event.data);
+                if (data.type === 'ERROR') {
+                    console.error('[NC-v2] Signaling Error:', data.message);
+                    if (typeof etc !== 'undefined' && etc.showPairingFailure) {
+                        etc.showPairingFailure(data.message);
+                    }
+                    return;
+                }
+               
                 if (typeof onSignal === 'function') {
-                    onSignal(data.signal, data.sender);
+                    onSignal(data);
                 }
             } catch (err) {
-                console.error("[NC-Nostr] Signal parsing error:", err);
+                console.error('[NC-v2] Error parsing signal:', err);
             }
         };
 
-        // Attach listener & send REQ subscription filter to all relays
-        this.relaySockets.forEach(ws => {
-            ws.addEventListener('message', messageHandler);
-            this._sendToRelay(ws, [
-                "REQ",
-                subId,
-                {
-                    kinds: [25001],
-                    "#t": [roomId]
-                }
-            ]);
-        });
+        socket.onerror = (err) => console.error('[NC-v2] Socket error:', err);
 
-        // Return an inboxRef with .off() so Block 4 / leaveConnection cleanly detaches it
         return {
-            subId,
-            off: () => {
-                this.relaySockets.forEach(ws => {
-                    ws.removeEventListener('message', messageHandler);
-                    this._sendToRelay(ws, ["CLOSE", subId]);
-                });
+            socket,
+            send: (payload) => {
+                if (!payload || typeof payload !== 'object') return;
+                const serialized = JSON.stringify(payload);
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(serialized);
+                } else if (socket.readyState === WebSocket.CONNECTING) {
+                    socket.addEventListener('open', () => {
+                        if (socket.readyState === WebSocket.OPEN) {
+                            socket.send(serialized);
+                        }
+                    }, { once: true });
+                }
+            },
+            close: () => {
+                if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+                    socket.close(1000, "Done signaling");
+                }
             }
         };
     },
 
- 
-
-    //BLOCK 4   (CORE NOTEFULL CONNECT)
-
-getDeterministicRoom(idA, idB) {
-        return 'nf-room-' + [idA, idB].sort().join('--');
-    },
-
+    // ── WebRTC Direct Wire ──
     initDC(targetId, channel) {
         if (!this.peers[targetId]) return;
         this.peers[targetId].dc = channel;
 
         channel.onopen = () => {
-            console.log(`⚡ [NC] Direct P2P Wire OPEN with: ${targetId}`);
-            // Sever Firebase connection immediately once direct wire is up
-           
+            console.log(`⚡ [NC-v2] Direct P2P Wire OPEN with: ${targetId}`);
+            this.peers[targetId].isConnecting = false;
+
+            // Sever signaling socket once direct WebRTC wire is established
+            if (this.peers[targetId].signalRef) {
+                this.peers[targetId].signalRef.close();
+                this.peers[targetId].signalRef = null;
+            }
 
             if (typeof etc !== 'undefined' && typeof etc.renderDeviceList === 'function') {
                 etc.renderDeviceList();
@@ -260,39 +189,36 @@ getDeterministicRoom(idA, idB) {
         channel.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
-                console.log(`📥 [NC] Received from ${targetId}:`, message);
-
+                console.log(`📥 [NC-v2] Received from ${targetId}:`, message);
                 if (typeof this.messageHandler === 'function') {
                     this.messageHandler(message, targetId);
                 }
             } catch (err) {
-                console.error("[NC] Error parsing peer message:", err);
+                console.error("[NC-v2] Error parsing peer message:", err);
             }
         };
 
         channel.onclose = () => {
-            console.log(`🔌 [NC] Direct wire CLOSED for: ${targetId}`);
-            };
+            console.log(`🔌 [NC-v2] Direct wire CLOSED for: ${targetId}`);
+            this.connecToDevice(targetId);
+        };
 
         channel.onerror = (err) => {
-            console.error(`[NC] DC error on ${targetId}:`, err);
+            console.error(`[NC-v2] DC error on ${targetId}:`, err);
         };
     },
 
-   async connectToDevice(targetDeviceId) {
+    async connectToDevice(targetDeviceId) {
         const myIdentity = await this.getDeviceIdentity();
         const myId = myIdentity.deviceId;
         if (!myId || !targetDeviceId || myId === targetDeviceId) return;
 
-        // 1. Guard against duplicate calls or in-flight races
         const existing = this.peers[targetDeviceId];
         if (existing) {
             if (existing.dc && existing.dc.readyState === 'open') {
-                console.log(`[NC] Direct wire already open with ${targetDeviceId}`);
                 return;
             }
             if (existing.isConnecting) {
-                console.log(`[NC] Handshake already in progress with ${targetDeviceId}. Skipping duplicate.`);
                 return;
             }
         }
@@ -309,58 +235,57 @@ getDeterministicRoom(idA, idB) {
             ignoreOffer: false,
             roomId,
             isConnecting: true,
-            inboxRef: null,
-            candidateQueue: [] // Holds early ICE candidates
+            signalRef: null,
+            candidateQueue: []
         };
         this.peers[targetDeviceId] = peerEntry;
 
-        this.connectSignaling();
-
-        // 2. Exchange ICE Candidates
-        pc.onicecandidate = ({ candidate }) => {
-            if (candidate && pc.signalingState !== 'closed') {
-                this.sendSignal(roomId, targetDeviceId, {
-                    type: 'candidate',
-                    candidate: candidate.toJSON()
-                });
-            }
-        };
-
-        // 3. Perfect Negotiation Offer
-        pc.onnegotiationneeded = async () => {
+        // Helper to send Offer when both peers are in the room
+        const triggerOffer = async () => {
+            if (isPolite || !pc || pc.signalingState === 'closed') return;
             try {
-                if (pc.signalingState === 'closed') return;
                 peerEntry.makingOffer = true;
                 await pc.setLocalDescription();
-                await this.sendSignal(roomId, targetDeviceId, {
+                peerEntry.signalRef.send({
+                    senderDeviceId: myId,
+                    recipientDeviceId: targetDeviceId,
                     type: 'description',
                     description: pc.localDescription.toJSON()
                 });
             } catch (err) {
-                console.error("[NC] Negotiation error:", err);
+                console.error("[NC-v2] Offer creation error:", err);
             } finally {
                 peerEntry.makingOffer = false;
             }
         };
 
-        // 4. DataChannel Setup
         if (!isPolite) {
             const dc = pc.createDataChannel('notefull-wire', { ordered: true });
             this.initDC(targetDeviceId, dc);
         } else {
-            pc.ondatachannel = (event) => {
-                this.initDC(targetDeviceId, event.channel);
-            };
+            pc.ondatachannel = (e) => this.initDC(targetDeviceId, e.channel);
         }
 
-        // 5. Signal Listener with Safe Execution & Candidate Buffering
-        peerEntry.inboxRef = this.listenSignals(roomId, myId, async (signal, senderId) => {
-            if (senderId !== targetDeviceId) return;
+        peerEntry.signalRef = this.openSignalSocket(roomId, myId, async (msg) => {
             if (!pc || pc.signalingState === 'closed') return;
 
+            // Coordinate presence so Offer is never lost into an empty room
+            if (msg.type === 'ROOM_PEERS') {
+                if (Array.isArray(msg.peers) && msg.peers.includes(targetDeviceId)) {
+                    await triggerOffer();
+                }
+                return;
+            }
+            if (msg.type === 'PEER_JOINED' && msg.deviceId === targetDeviceId) {
+                await triggerOffer();
+                return;
+            }
+
+            if (msg.senderDeviceId && msg.senderDeviceId !== targetDeviceId) return;
+
             try {
-                if (signal.type === 'description') {
-                    const desc = signal.description;
+                if (msg.type === 'description') {
+                    const desc = msg.description;
                     const offerCollision = desc.type === 'offer' &&
                         (peerEntry.makingOffer || pc.signalingState !== 'stable');
 
@@ -369,42 +294,48 @@ getDeterministicRoom(idA, idB) {
 
                     await pc.setRemoteDescription(desc);
 
-                    // Remote description is set: safely flush buffered candidates
                     while (peerEntry.candidateQueue.length > 0) {
-                        const queuedCandidate = peerEntry.candidateQueue.shift();
-                        try {
-                            await pc.addIceCandidate(queuedCandidate);
-                        } catch (e) {
-                            console.warn("[NC] Queued candidate failed:", e);
-                        }
+                        const queued = peerEntry.candidateQueue.shift();
+                        try { await pc.addIceCandidate(queued); } catch (e) {}
                     }
 
                     if (desc.type === 'offer') {
                         if (pc.signalingState === 'closed') return;
                         await pc.setLocalDescription();
-                        await this.sendSignal(roomId, targetDeviceId, {
+                        peerEntry.signalRef.send({
+                            senderDeviceId: myId,
+                            recipientDeviceId: targetDeviceId,
                             type: 'description',
                             description: pc.localDescription.toJSON()
                         });
                     }
-                } else if (signal.type === 'candidate') {
-                    // Buffer candidate if remote SDP is not yet applied
+                } else if (msg.type === 'candidate') {
                     if (!pc.remoteDescription || !pc.remoteDescription.type) {
-                        peerEntry.candidateQueue.push(signal.candidate);
+                        peerEntry.candidateQueue.push(msg.candidate);
                     } else {
                         try {
-                            await pc.addIceCandidate(signal.candidate);
+                            await pc.addIceCandidate(msg.candidate);
                         } catch (err) {
                             if (!peerEntry.ignoreOffer) throw err;
                         }
                     }
                 }
             } catch (err) {
-                console.error("[NC] Signal processing error:", err);
+                console.error("[NC-v2] Signaling error:", err);
             }
         });
 
-        // 6. Lifecycle Monitoring
+        pc.onicecandidate = ({ candidate }) => {
+            if (candidate && pc.signalingState !== 'closed' && peerEntry.signalRef) {
+                peerEntry.signalRef.send({
+                    senderDeviceId: myId,
+                    recipientDeviceId: targetDeviceId,
+                    type: 'candidate',
+                    candidate: candidate.toJSON()
+                });
+            }
+        };
+
         pc.onconnectionstatechange = () => {
             if (pc.connectionState === 'connected') {
                 peerEntry.isConnecting = false;
@@ -414,17 +345,14 @@ getDeterministicRoom(idA, idB) {
         };
     },
 
-   leaveConnection(targetDeviceId) {
+    leaveConnection(targetDeviceId) {
         const peer = this.peers[targetDeviceId];
         if (!peer) return;
 
-        // Unhook Firebase signaling listener
-        if (peer.inboxRef) {
-            peer.inboxRef.off();
-            peer.inboxRef = null;
+        if (peer.signalRef) {
+            peer.signalRef.close();
+            peer.signalRef = null;
         }
-
-        // Close peer connection cleanly
         if (peer.dc) {
             peer.dc.onclose = null;
             peer.dc.onerror = null;
@@ -435,14 +363,8 @@ getDeterministicRoom(idA, idB) {
             peer.pc.close();
         }
 
-        this.getDeviceIdentity().then(id => {
-            if (id?.deviceId && peer.roomId) {
-                this.cleanupSignaling(peer.roomId, id.deviceId);
-            }
-        }).catch(() => {});
-
         delete this.peers[targetDeviceId];
-        console.log(`🔌 [NC] Wire severed with: ${targetDeviceId}`);
+        console.log(`🔌 [NC-v2] Wire severed with: ${targetDeviceId}`);
 
         if (typeof etc !== 'undefined' && typeof etc.renderDeviceList === 'function') {
             etc.renderDeviceList();
@@ -470,120 +392,81 @@ getDeterministicRoom(idA, idB) {
         return sent;
     },
 
-    //BLOCK 4   (Pairing)
-
-/* ==================================================================
-       BLOCK 5: PAIRING HANDSHAKE & UTILITIES (NATIVE ENGINE)
-       ================================================================== */
-
+    // ── Pairing Handshake Engine ──
     async startInitiatorListener(session) {
         const myIdentity = await this.getDeviceIdentity();
-        const code       = String(session.code);
-        const pairRef    = this.getDB().ref('nf_pairing/' + code);
-
+        const roomId = `pair_${session.code}`;
         activePairingSession = session;
-        this.connectSignaling();
 
-        let challengeA     = null;
+        if (activePairingSocket) activePairingSocket.close();
+
+        let challengeA = null;
         let pendingDeviceB = null;
 
-        // 1. Register the pairing session node in Firebase
-        await pairRef.set({
-            initiator: {
-                deviceId:    myIdentity.deviceId,
-                displayName: myIdentity.displayName || 'Device',
-                expiresAt:   session.expiresAt
-            }
-        });
-
-        const timeout = setTimeout(() => {
-            if (activePairingSession === session) {
-                pairRef.off();
-                pairRef.remove();
-               }
-        }, 30000);
-
-        // 2. Listen for Receiver's Handshake steps
-        pairRef.on('value', async (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-
-            // STEP 1: Incoming PAIR_REQUEST from Receiver
-            if (data.request && !challengeA) {
-                const req = data.request;
-
+        activePairingSocket = this.openSignalSocket(roomId, myIdentity.deviceId, async (msg) => {
+            if (msg.type === 'PAIR_REQUEST' && !challengeA) {
                 if (Date.now() > session.expiresAt) {
-                    await pairRef.child('response').set({ type: 'PAIR_ERROR', reason: 'Session expired.' });
+                    activePairingSocket.send({ type: 'PAIR_ERROR', reason: 'Session expired.' });
                     return;
                 }
-                if (req.senderDeviceId === myIdentity.deviceId) {
-                    await pairRef.child('response').set({ type: 'PAIR_ERROR', reason: 'Cannot pair with itself.' });
+                if (msg.senderDeviceId === myIdentity.deviceId) {
+                    activePairingSocket.send({ type: 'PAIR_ERROR', reason: 'Cannot pair with itself.' });
                     return;
                 }
 
                 if (typeof etc !== 'undefined' && etc.showConnectingModal) {
-                    etc.showConnectingModal('Incoming pairing request from ' + (req.senderDisplayName || 'Device') + '...');
+                    etc.showConnectingModal('Incoming pairing request from ' + (msg.senderDisplayName || 'Device') + '...');
                 }
 
-                // Confirm prompt with user
-                const userResponse = typeof etc !== 'undefined' && etc.confirmUser 
-                    ? await etc.confirmUser() 
-                    : confirm('Pair with ' + (req.senderDisplayName || 'Device') + '?');
+                const userResponse = typeof etc !== 'undefined' && etc.confirmUser
+                    ? await etc.confirmUser()
+                    : confirm('Pair with ' + (msg.senderDisplayName || 'Device') + '?');
 
                 if (!userResponse) {
-                    await pairRef.child('response').set({ type: 'PAIR_ERROR', reason: 'Pairing declined by user.' });
+                    activePairingSocket.send({ type: 'PAIR_ERROR', reason: 'Pairing declined by user.' });
                     if (typeof etc !== 'undefined' && etc.hideConnectingModal) etc.hideConnectingModal();
                     return;
                 }
 
                 challengeA = crypto.randomUUID();
                 pendingDeviceB = {
-                    deviceId:    req.senderDeviceId,
-                    displayName: req.senderDisplayName
+                    deviceId: msg.senderDeviceId,
+                    displayName: msg.senderDisplayName
                 };
 
-                // Send PAIR_RESPONSE to Receiver
-                await pairRef.child('response').set({
-                    type:              'PAIR_RESPONSE',
-                    echoChallengeB:    req.challengeB,
+                activePairingSocket.send({
+                    type: 'PAIR_RESPONSE',
+                    echoChallengeB: msg.challengeB,
                     challengeA,
-                    senderDeviceId:    myIdentity.deviceId,
+                    senderDeviceId: myIdentity.deviceId,
                     senderDisplayName: myIdentity.displayName || 'Device'
                 });
 
                 if (typeof etc !== 'undefined' && etc.updateConnectingModalText) {
                     etc.updateConnectingModalText('Verifying...');
                 }
-            }
-
-            // STEP 2: Incoming PAIR_CONFIRM from Receiver
-            else if (data.confirm && challengeA && pendingDeviceB) {
-                const conf = data.confirm;
-
-                if (conf.echoChallengeA === challengeA) {
-                    clearTimeout(timeout);
-                    pairRef.off();
-                    await pairRef.remove(); // Handshake complete, clear node
+            } else if (msg.type === 'PAIR_CONFIRM' && challengeA && pendingDeviceB) {
+                if (msg.echoChallengeA === challengeA) {
+                    activePairingSocket.close();
+                    activePairingSocket = null;
 
                     await this.savePairedDevice(pendingDeviceB);
-
-                    // Connect native WebRTC wire immediately
                     await this.connectToDevice(pendingDeviceB.deviceId);
 
-                    
-                       etc.updateConnectingModalText('Verified Succesfully! Connecting..');
-                       etc.playSound('sucessSound');
-                  
- setTimeout(() => {
-                      etc.updateConnectingModalText('Connected succesfully!');
-                    }, 3000);
-                    setTimeout(() => {
-                       etc.hideConnectingModal();
-                      etc.backtoDevices();
-                    }, 4000);
+                    if (typeof etc !== 'undefined') {
+                        etc.updateConnectingModalText('Verified Successfully! Connecting..');
+                        etc.playSound('sucessSound');
+                        setTimeout(() => {
+                            etc.updateConnectingModalText('Connected successfully!');
+                        }, 1500);
+                        setTimeout(() => {
+                            etc.hideConnectingModal();
+                            etc.backtoDevices();
+                        }, 2500);
+                    }
                 } else {
-                    clearTimeout(timeout);
-                    pairRef.off();
+                    activePairingSocket.close();
+                    activePairingSocket = null;
                     if (typeof etc !== 'undefined' && etc.showPairingFailure) {
                         etc.showPairingFailure('Security handshake failed.');
                     }
@@ -596,7 +479,7 @@ getDeterministicRoom(idA, idB) {
         const myIdentity = await this.getDeviceIdentity();
 
         if (!payload || payload.protocol !== PAIRING_PROTOCOL) {
-            if (typeof etc !== 'undefined' && etc.showPairingFailure) etc.showPairingFailure('Invalid pairing code structure.');
+            if (typeof etc !== 'undefined' && etc.showPairingFailure) etc.showPairingFailure('Invalid pairing protocol.');
             return;
         }
         if (!/^\d{6}$/.test(String(payload.code || ''))) {
@@ -608,111 +491,74 @@ getDeterministicRoom(idA, idB) {
             etc.showConnectingModal('Connecting to ' + (payload.initiatorDisplayName || 'Device') + '...');
         }
 
-        const code       = String(payload.code);
-        const pairRef    = this.getDB().ref('nf_pairing/' + code);
+        const code = String(payload.code).trim();
+        const roomId = `pair_${code}`;
         const challengeB = crypto.randomUUID();
-
-        this.connectSignaling();
+        let pairedHandled = false;
 
         const timeout = setTimeout(() => {
-            pairRef.off();
-            if (typeof etc !== 'undefined' && etc.showPairingFailure) {
-                etc.showPairingFailure('Connection timed out. Ensure both devices are online.');
-            }
-        }, 30000);
-
-        // Verify session existence in Firebase
-        const snap = await pairRef.get();
-        const sessionData = snap.val();
-
-        if (!sessionData || !sessionData.initiator) {
-            clearTimeout(timeout);
-            if (typeof etc !== 'undefined' && etc.showPairingFailure) {
-                etc.showPairingFailure('Invalid or expired pairing code.');
-            }
-            return;
-        }
-
-        if (Date.now() > sessionData.initiator.expiresAt) {
-            clearTimeout(timeout);
-            if (typeof etc !== 'undefined' && etc.showPairingFailure) {
-                etc.showPairingFailure('Pairing invitation has expired.');
-            }
-            return;
-        }
-
-        if (sessionData.initiator.deviceId === myIdentity.deviceId) {
-            clearTimeout(timeout);
-            if (typeof etc !== 'undefined' && etc.showPairingFailure) {
-                etc.showPairingFailure('Cannot pair a device with itself.');
-            }
-            return;
-        }
-
-        // 1. Send PAIR_REQUEST into Firebase
-        await pairRef.child('request').set({
-            challengeB,
-            senderDeviceId:    myIdentity.deviceId,
-            senderDisplayName: myIdentity.displayName || 'Device'
-        });
-
-        // 2. Listen for Initiator's PAIR_RESPONSE
-        pairRef.child('response').on('value', async (responseSnap) => {
-            const data = responseSnap.val();
-            if (!data) return;
-
-            if (data.type === 'PAIR_ERROR') {
-                clearTimeout(timeout);
-                pairRef.off();
+            if (!pairedHandled) {
+                receiverSocket.close();
                 if (typeof etc !== 'undefined' && etc.showPairingFailure) {
-                    etc.showPairingFailure(data.reason || 'Pairing rejected.');
+                    etc.showPairingFailure('Connection timed out. Make sure the pairing screen is open on the other device.');
+                }
+            }
+        }, 25000);
+
+        const receiverSocket = this.openSignalSocket(roomId, myIdentity.deviceId, async (msg) => {
+            if (msg.type === 'PAIR_ERROR') {
+                pairedHandled = true;
+                clearTimeout(timeout);
+                receiverSocket.close();
+                if (typeof etc !== 'undefined' && etc.showPairingFailure) {
+                    etc.showPairingFailure(msg.reason || 'Pairing rejected.');
                 }
                 return;
             }
 
-            if (data.type === 'PAIR_RESPONSE') {
-                if (data.echoChallengeB === challengeB) {
-                    if (typeof etc !== 'undefined' && etc.updateConnectingModalText) {
-                        etc.updateConnectingModalText('Verifying...');
-                    }
+            if (msg.type === 'PAIR_RESPONSE' && msg.echoChallengeB === challengeB) {
+                pairedHandled = true;
+                clearTimeout(timeout);
 
-                    // Send PAIR_CONFIRM back
-                    await pairRef.child('confirm').set({
-                        echoChallengeA: data.challengeA
-                    });
+                if (typeof etc !== 'undefined' && etc.updateConnectingModalText) {
+                    etc.updateConnectingModalText('Verifying...');
+                }
 
-                    clearTimeout(timeout);
-                    pairRef.off();
+                receiverSocket.send({
+                    type: 'PAIR_CONFIRM',
+                    echoChallengeA: msg.challengeA
+                });
 
-                    await this.savePairedDevice({
-                        deviceId:    data.senderDeviceId,
-                        displayName: data.senderDisplayName
-                    });
+                // Delay closing slightly so PAIR_CONFIRM flushes through the WebSocket cleanly
+                setTimeout(() => receiverSocket.close(), 400);
 
-                    // Connect native WebRTC wire immediately
-                    await this.connectToDevice(data.senderDeviceId);
+                await this.savePairedDevice({
+                    deviceId: msg.senderDeviceId,
+                    displayName: msg.senderDisplayName
+                });
 
-                   
-                      etc.updateConnectingModalText('Verifed Succesfully! Connecting to device..');
-                      etc.playSound('sucessSound');
-                    
-setTimeout(() => {
-                      etc.updateConnectingModalText('Connected Succesfully!');
-                      
-                    }, 3000);
+                await this.connectToDevice(msg.senderDeviceId);
+
+                if (typeof etc !== 'undefined') {
+                    etc.updateConnectingModalText('Verified Successfully! Connecting to device..');
+                    etc.playSound('sucessSound');
                     setTimeout(() => {
-                        if (typeof etc !== 'undefined' && etc.hideConnectingModal) etc.hideConnectingModal();
-                        if (typeof window.backtoDevices === 'function') window.backtoDevices();
-                    }, 4000);
-
-                } else {
-                    clearTimeout(timeout);
-                    pairRef.off();
-                    if (typeof etc !== 'undefined' && etc.showPairingFailure) {
-                        etc.showPairingFailure('Security verification failed.');
-                    }
+                        etc.updateConnectingModalText('Connected Successfully!');
+                    }, 1500);
+                    setTimeout(() => {
+                        if (typeof etc.hideConnectingModal === 'function') etc.hideConnectingModal();
+                        if (typeof etc.backtoDevices === 'function') etc.backtoDevices();
+                    }, 2500);
                 }
             }
+        });
+
+        // Broadcast initial pairing request to initiator in room
+        receiverSocket.send({
+            type: 'PAIR_REQUEST',
+            challengeB,
+            senderDeviceId: myIdentity.deviceId,
+            senderDisplayName: myIdentity.displayName || 'Device'
         });
     },
 
@@ -735,7 +581,7 @@ setTimeout(() => {
 
             return String(rawContent).trim();
         } catch (err) {
-            console.error('[NC] QR Scan error:', err);
+            console.error('[NC-v2] QR Scan error:', err);
             if (typeof etc !== 'undefined' && etc.showPairingFailure) {
                 etc.showPairingFailure('Scanning cancelled or failed.');
             }
@@ -754,25 +600,21 @@ setTimeout(() => {
         }
 
         const payload = {
-            protocol:             PAIRING_PROTOCOL,
-            pairingSessionId:     'sess_' + code,
-            initiatorDeviceId:    null,
-            initiatorDisplayName: "Device",
+            protocol: PAIRING_PROTOCOL,
             code,
-            expiresAt:            Date.now() + PAIRING_LIMIT
+            expiresAt: Date.now() + PAIRING_LIMIT
         };
 
         try {
             await this.executeReceiverPairing(payload);
         } catch (err) {
-            console.error('[NC] Code pairing failed:', err);
+            console.error('[NC-v2] Code pairing failed:', err);
             if (typeof etc !== 'undefined' && etc.showPairingFailure) {
                 etc.showPairingFailure('Could not connect using that code.');
             }
         }
     },
 
-    // Check if direct P2P wire is currently active with a device
     getConnectedPeerId(deviceId) {
         const peer = this.peers[deviceId];
         if (peer && peer.dc && peer.dc.readyState === 'open') {
@@ -780,6 +622,6 @@ setTimeout(() => {
         }
         return null;
     }
-
 };
+
 window.NC = NC;

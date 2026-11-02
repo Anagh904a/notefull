@@ -19,3 +19,20 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# readable release stack traces
+-keepattributes SourceFile,LineNumberTable,Signature,InnerClasses,EnclosingMethod,*Annotation*,RuntimeVisibleAnnotations
+-renamesourcefileattribute SourceFile
+
+# LiteRT-LM: native code finds these classes by name through JNI
+-keep class com.google.ai.edge.litertlm.** { *; }
+-keepclasseswithmembernames class * { native <methods>; }
+-dontwarn com.google.ai.edge.litertlm.**
+
+# bridge between base and the dynamic module
+-keep interface app.notefull.com.ILiteRTRuntime { *; }
+-keep interface app.notefull.com.ILiteRTRuntime$* { *; }
+-keep class app.notefull.com.ondevice_ai.** { *; }
+
+# Kotlin metadata used by reflection-based libraries
+-keep class kotlin.Metadata { *; }

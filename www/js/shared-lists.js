@@ -259,7 +259,7 @@ currentMembers = list.members;
     } else {
         document.getElementById("slTitle").value = "Untitled List";
         currentSharedItems = [];
-        const identity = await getDeviceIdentity();
+        const identity = await NC.getDeviceIdentity();
          currentOwnerId = identity;
 displaySlChecklist();
     }

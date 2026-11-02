@@ -89,7 +89,7 @@ showConnectSection(method) {
     if (method === 'method2') {
         method1.classList.add('hidden');
         method2.classList.remove('hidden');
-        text.innerText = 'See my QR code instead';
+        text.innerText = 'See my QR code or pairing code instead';
         text.onclick = function () {
             etc.showConnectSection('method1');
         };
@@ -195,26 +195,26 @@ openMembersSection() {
 
         await NC.startInitiatorListener(session);
     },
-
-   cleanupPairingSession() {
-        if (activePairingRoom) {
-            try { activePairingRoom.leave(); } catch (e) {}
-            activePairingRoom = null;
+cleanupPairingSession() {
+        if (activePairingSocket) {
+            try { activePairingSocket.close(); } catch (e) {}
+            activePairingSocket = null;
         }
         activePairingSession = null;
     },
      
-async confirmUser() {
-    if (await showConfirmToast({
-  title: 'Accept Pairing Request?',
-  message: 'A device has requested paring with your device. Proceed?',
-  timeout: 2000 // Auto-cancels and returns false after 5 seconds
-})){
-        return true;
-    } else {
-        return false;
-    }
-},
+    async confirmUser() {
+        if (await showConfirmToast({
+            title: 'Accept Pairing Request?',
+            message: 'A device has requested pairing with your device. Proceed?',
+            timeout: 15000 // 15 seconds so user actually has time to tap Accept!
+        })) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
 async scanMethod() {
     const result = await NC.scanQr();
   await NC.pairWithCode(result);
@@ -223,17 +223,16 @@ async scanMethod() {
       
 };
 window.etc = etc;
- document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Render device list and initiate background WebRTC connections to paired peers
+    await etc.renderDeviceList();
+    await NC.connectAllPairedDevices();
 
-        // Render device list immediately
-        await etc.renderDeviceList();
-       //replaced event lseds b adding functiosn directly to onlick, like qr code btn given new Id and onclick="scanQr()"
-
-        // Manual code entry — Enter key
-        const codeInput = document.getElementById('enteredCode');
-        if (codeInput) {
-            codeInput.addEventListener('keyup', e => {
-                if (e.key === 'Enter') NC.pairWithCode(codeInput.value);
-            });
-        }
-    });
+    // Manual code entry — Enter key
+    const codeInput = document.getElementById('enteredCode');
+    if (codeInput) {
+        codeInput.addEventListener('keyup', e => {
+            if (e.key === 'Enter') NC.pairWithCode(codeInput.value);
+        });
+    }
+});

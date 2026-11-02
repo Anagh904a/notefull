@@ -66,18 +66,21 @@ function renderMsg(m, live = false) {
     ? `<div class="msg-bubble">${chatEsc(m.content)}</div>`
     : `<div class="msg-bubble" data-mid="${m.id}">
          <div class="msg-tool hidden"></div>
-         <div class="msg-think-wrap hidden">
-           <button class="msg-think-head">✦ Thought process</button>
-           <div class="msg-think hidden"></div>
+         <div class="ai-thinking-pill-dot hidden">
+           <div class="thinking-dots">
+             <span></span><span></span><span></span>
+           </div>
+           <span class="thinking-pill-text">Thinking</span>
          </div>
          <div class="msg-text ${live ? 'typing' : ''}">${chatEsc(m.content)}</div>
+       <!-- Action Bar with Copy Button -->
+         <div class="msg-action-bar">
+           <button class="msg-action-btn" onclick="copyAiMessage(this, '${m.id}')">
+             <i class="ti ti-copy"></i> <span>Copy</span>
+           </button>
+         </div>
        </div>`;
   sec.appendChild(wrap);
-
-  wrap.querySelector('.msg-think-head')?.addEventListener('click', e =>
-    e.currentTarget.nextElementSibling.classList.toggle('hidden'));
-
-  if (m.role !== 'user' && m.thinking) updateThinking(m.id, m.thinking);
   scrollToBottom(true);
 }
 
@@ -88,29 +91,53 @@ function renderChat() {
   document.getElementById('welcomeMsg')?.classList.toggle('hidden', currentChat.messages.length > 0);
 }
 
-function updateBubble(id, text) {
-  const el = bubbleEl(id)?.querySelector('.msg-text');
-  if (!el) return;
-  el.innerHTML = chatEsc(text);
+function updateThinking(id, isThinking = true) {
+  const pill = bubbleEl(id)?.querySelector('.ai-thinking-pill-dot');
+  if (!pill) return;
+  pill.classList.toggle('hidden', !isThinking);
   scrollToBottom();
 }
 
-function updateThinking(id, text) {
+function updateBubble(id, text) {
   const b = bubbleEl(id);
-  if (!b || !text) return;
-  const wrap = b.querySelector('.msg-think-wrap');
-  const body = b.querySelector('.msg-think');
-  if (!wrap || !body) return;
-  wrap.classList.remove('hidden');
-  body.innerHTML = chatEsc(text);
+  if (!b) return;
+
+  // Auto-hide the thinking pill when the first response token arrives
+  if (text && text.trim().length > 0) {
+    b.querySelector('.ai-thinking-pill-dot')?.classList.add('hidden');
+  }
+
+  const el = b.querySelector('.msg-text');
+  if (!el) return;
+
+  // Parse markdown directly into formatted HTML
+  el.innerHTML = marked.parse(text);
+  
+  // Add the markdown styling class if not already added
+  if (!el.classList.contains('markdown-body')) {
+    el.classList.add('markdown-body');
+  }
+
+  scrollToBottom();
 }
 
 function updateTool(id, label, status) {
   const el = bubbleEl(id)?.querySelector('.msg-tool');
   if (!el) return;
-  el.classList.remove('hidden');
-  const icon = status === 'running' ? '⚙' : status === 'done' ? '✓' : '✗';
-  el.innerHTML = `${icon} ${chatEsc(label)}${status === 'running' ? '…' : ''}`;
+
+  el.classList.remove('hidden', 'is-running', 'is-done', 'is-error');
+
+  const stateClass = status === 'running' ? 'is-running'
+                   : status === 'done'    ? 'is-done'
+                   : 'is-error';
+  el.classList.add(stateClass);
+
+  const iconClass = status === 'running' ? 'ti-loader-2'
+                  : status === 'done'    ? 'ti- circle-check'
+                  : 'ti-alert-circle';
+
+  el.innerHTML = `<i class="ti ${iconClass}"></i> <span>${chatEsc(label)}${status === 'running' ? '…' : ''}</span>`;
+  scrollToBottom();
 }
 
 async function renderSidebar() {
@@ -156,25 +183,28 @@ async function sendPrompt(text) {
   await persistChat(chat);
   renderMsg(userMsg);
 
-  const aiMsg = { id: chatUid(), role: 'assistant', content: '', thinking: '', ts: Date.now() };
+const aiMsg = { id: chatUid(), role: 'assistant', content: '', ts: Date.now() };
   chat.messages.push(aiMsg);
   renderMsg(aiMsg, true);
+
+  // Show the 3-dot thinking pill immediately if Think Mode is active
+  if (think) updateThinking(aiMsg.id, true);
 
   isStreaming = true;
   setSendState(true, think);
 
   try {
-    // No history: each prompt is sent on its own
     const answer = await askAI(prompt, {
       stream: true,
       thinking: think,
       tools: agentTools || null,
       system: window.AI_SYSTEM_PROMPT || '',
       onToken: (_d, full) => { hideModal(); updateBubble(aiMsg.id, full); },
-      onThinking: (txt) => { hideModal(); aiMsg.thinking = txt; updateThinking(aiMsg.id, txt); },
+      onThinking: () => { hideModal(); updateThinking(aiMsg.id, true); },
       onStep: ({ label, status }) => { hideModal(); updateTool(aiMsg.id, label, status); }
     });
 
+    updateThinking(aiMsg.id, false); // Ensure pill is hidden once complete
     aiMsg.content = answer || 'No answer was generated. Try again, or turn off Thinking mode.';
     updateBubble(aiMsg.id, aiMsg.content);
     bubbleEl(aiMsg.id)?.querySelector('.msg-text')?.classList.remove('typing');

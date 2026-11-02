@@ -153,7 +153,11 @@ function cancelNote() {
   showSection("combinedContainer");
   document.getElementById("notePasswordModal").classList.add("hidden");
   document.getElementById("bottomBar").classList.remove("hidden");
-
+ const homeTab = document.querySelector('.nav-item[onclick*="combinedContainer"]');
+  if (homeTab) {
+    setActive(homeTab);
+    showSection('combinedContainer');
+  };
 }
 async function saveNote() {
   const title = document.getElementById('noteTitle').value.trim();
@@ -227,6 +231,11 @@ async function saveNote() {
 
   const bottomBar = document.getElementById("bottomBar");
   if (bottomBar) bottomBar.classList.remove("hidden");
+   const homeTab = document.querySelector('.nav-item[onclick*="combinedContainer"]');
+  if (homeTab) {
+    setActive(homeTab);
+    showSection('combinedContainer');
+  };
 }
 //This function basically handles autosaving a note, it also supports updating a note preventing data loss and also supports creating a note by passing title and content
 // Helper to cleanly write to localforage without DOM elements
@@ -401,7 +410,7 @@ ${content}
 
 async function summarizeNote() {
   if (!window.aiReady) {
-    showToast('Warming up AI engine...');
+
 
     const ready = await initAi();
 
@@ -515,7 +524,7 @@ ${content}
 
 
   showAiThinkingModal('Thinking...');
-  window.Capacitor.Plugins.AIPlugin.askAI({ prompt, shortAnswer: true }).then(result => {
+askAI({ prompt, shortAnswer: true }).then(result => {
 
    if (result?.success && result?.response) {
   closeAiThinkingModal();

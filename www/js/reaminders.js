@@ -568,5 +568,4 @@ async function rescheduleAllActiveReminders() {
         }
     }
 
-    console.log("All active reminders rescheduled on app open");
 }

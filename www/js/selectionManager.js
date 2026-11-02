@@ -89,10 +89,14 @@ function closeSelectionMode() {
         list.classList.remove('selected')
     });
      const counter = document.getElementById('selected-count');
-     counter.innerHTML = 0 + " Selected";
+     counter.innerHTML = 0;
      selectedCount = 0;
     renderItems();
-    renderItems();
+     const homeTab = document.querySelector('.nav-item[onclick*="combinedContainer"]');
+  if (homeTab) {
+    setActive(homeTab);
+    showSection('combinedContainer');
+  };
 }
 
 function selectNote(noteId) {
@@ -109,7 +113,7 @@ function selectNote(noteId) {
             selectedCount--
             noteEl.classList.remove('selected');
         }
-        counter.innerHTML = selectedCount + " Selected";
+        counter.innerHTML = selectedCount;
     }
 }
 
@@ -126,7 +130,7 @@ function selectList(listId) {
             selectedCount--
             listEl.classList.remove("selected");
         }
-        counter.innerHTML = selectedCount + " Selected";
+        counter.innerHTML = selectedCount;
     }
 }
 
@@ -136,7 +140,7 @@ function selectAll() {
     const counter = document.getElementById('selected-count');
    
 selectedCount = 0;
-counter.innerHTML = selectedCount + "Selected";
+counter.innerHTML = selectedCount;
 
 note.forEach(noteWrapper => {
 const noteId = noteWrapper.dataset.id;
@@ -167,7 +171,7 @@ const listObj = listsMap[listId];
 
 });
 
-counter.innerHTML = selectedCount + " Selected";
+counter.innerHTML = selectedCount;
 }
 
 let lockedCount = 0;
@@ -273,10 +277,10 @@ let trashCount = 0;
 function showTrashMode() {
     const toolbar = document.getElementById('trash-toolbar');
     const nav = document.getElementById('bottomBar');
-    const sort = document.getElementById('sort-trash');
+
 toolbar.classList.add('active');
     nav.classList.add('hidden');
-    sort.style.paddingTop = "80px";
+
     trashMode = true;
     document.getElementById('trashBtn').classList.add('hidden');
 
@@ -302,10 +306,10 @@ toolbar.classList.add('active');
 function closeTrashMode() {
     const toolbar = document.getElementById('trash-toolbar');
     const nav = document.getElementById('bottomBar');
-    const sort = document.getElementById('sort-trash');
+
     toolbar.classList.remove('active');
     nav.classList.remove('hidden');
-    sort.style.paddingTop = "0px";
+  
    trashMode = false;
     document.getElementById('trashBtn').classList.remove('hidden');
     const noteWrapper = document.querySelectorAll('.trash-note-wrapper');
@@ -512,9 +516,7 @@ function displayDeletedNotes() {
     <h4>${note.title}</h4>
    ${lockIndicator}
   </div>
-  <div class="note-text">
-  ${note.password ? "Protected Note: Cannot show content": note.content}
-  </div>
+
   </div>
   </div>
     `;
@@ -555,7 +557,7 @@ function displayDeletedLists() {
     <h4>${list.title}</h4>
     ${loclIndicator}
     </div>
-  ${progressHTML} 
+ 
   
   </div>
   </div>

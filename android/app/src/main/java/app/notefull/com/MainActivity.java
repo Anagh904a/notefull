@@ -1,68 +1,118 @@
 package app.notefull.com;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
-import android.webkit.WebSettings; // 1. Add this import
-import android.webkit.WebView; 
-import com.getcapacitor.BridgeActivity;
-import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import com.getcapacitor.BridgeActivity;
 import app.notefull.com.AIPlugin;
 
 public class MainActivity extends BridgeActivity {
 
-@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
-    registerPlugin(AIPlugin.class);
-    super.onCreate(savedInstanceState);
+        registerPlugin(AIPlugin.class);
+        super.onCreate(savedInstanceState);
 
-        // --- OVERRIDE WEBVIEW FOR CORAL & CROSS-ORIGIN ACCESS ---
-        // Post to the main thread loop to make sure the Capacitor Bridge has initiated the WebView instance
+        Window window = getWindow();
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+
+        // Apply transparent bars cleanly without deprecation warnings
+        setTransparentSystemBars(window);
+
+        // Disable automatic contrast scrims on Android 10+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
+
+        // Set initial status & navigation bar icon colors from OS theme
+        applySystemBarIcons(isSystemInDarkMode());
+
+        // Configure WebView & attach NativeTheme bridge
         new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
             if (getBridge() != null && getBridge().getWebView() != null) {
                 WebView webView = getBridge().getWebView();
                 WebSettings settings = webView.getSettings();
 
-                // Allow access to content and file URLs
                 settings.setAllowContentAccess(true);
                 settings.setAllowFileAccess(true);
-
-                // CRUCIAL: Allow cross-origin requests from local file/https schemes
                 settings.setAllowFileAccessFromFileURLs(true);
                 settings.setAllowUniversalAccessFromFileURLs(true);
 
-                
+                // Expose NativeTheme to JavaScript
+                webView.addJavascriptInterface(new Object() {
+                    @JavascriptInterface
+                    public boolean isSystemDark() {
+                        return isSystemInDarkMode();
+                    }
 
-                logToWebViewConsole("Native: WebView settings modified to unlock Cross-Origin & File Access.");
+                    @JavascriptInterface
+                    public void setSystemBarIcons(boolean darkThemeActive) {
+                        runOnUiThread(() -> applySystemBarIcons(darkThemeActive));
+                    }
+                }, "NativeTheme");
+
+                // Sync theme immediately once WebView is ready
+                boolean isDark = isSystemInDarkMode();
+                webView.evaluateJavascript(
+                        "if (window.syncSystemTheme) { window.syncSystemTheme(" + isDark + "); }",
+                        null
+                );
+
+                logToWebViewConsole("Native: WebView settings and NativeTheme bridge initialized.");
             }
         });
-    Window window = getWindow();
-
-    WindowCompat.setDecorFitsSystemWindows(window, false);
-
-// Keep both system bars visible and transparent
-    window.setStatusBarColor(Color. TRANSPARENT);
-    window.setNavigationBarColor(Color.TRANSPARENT);
-
-// Disable automatic contrast scrims on Android 10+
-    if (android.os.Build.VERSION.SDK_INT >=
-            android.os.Build.VERSION_CODES.Q) {
-        window.setStatusBarContrastEnforced(false);
-        window.setNavigationBarContrastEnforced(false);
-    }
-
-// Set system bar icon colors
-    WindowInsetsControllerCompat controller =
-            WindowCompat.getInsetsController(window, window.getDecorView());
-
-    controller.setAppearanceLightStatusBars(false);
-    controller.setAppearanceLightNavigationBars(false);
 
         executeDelayedLifecycleChecks();
+    }
+
+    @SuppressWarnings("deprecation")
+    private void setTransparentSystemBars(Window window) {
+        // Android 15 (API 35) and above handle transparency automatically via setDecorFitsSystemWindows
+        if (Build.VERSION.SDK_INT < 35) {
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+        }
+    }
+
+    private boolean isSystemInDarkMode() {
+        int nightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightMode == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    private void applySystemBarIcons(boolean isDarkTheme) {
+        Window window = getWindow();
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(window, window.getDecorView());
+
+        if (controller != null) {
+            // true = Dark icons (for Light/White theme)
+            // false = White icons (for Dark theme)
+            controller.setAppearanceLightStatusBars(!isDarkTheme);
+            controller.setAppearanceLightNavigationBars(!isDarkTheme);
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        boolean isDark = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        applySystemBarIcons(isDark);
+
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().evaluateJavascript(
+                    "if (window.syncSystemTheme) { window.syncSystemTheme(" + isDark + "); }",
+                    null
+            );
+        }
     }
 
     @Override
@@ -75,7 +125,6 @@ public class MainActivity extends BridgeActivity {
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             if (getBridge() != null && getBridge().getWebView() != null) {
                 logToWebViewConsole("Native: Bridge runtime confirmed ready.");
-                logToWebViewConsole("Native: Status bar forced to Light Mode (Dark Icons)");
                 handleNotificationPreferencesIntent(getIntent(), "Cold Boot");
             }
         }, 1500);
@@ -85,30 +134,16 @@ public class MainActivity extends BridgeActivity {
         logToWebViewConsole("Native: Checking intent via " + launchType);
 
         if (intent != null && Intent.ACTION_MAIN.equals(intent.getAction())) {
-            logToWebViewConsole("Native: Intent action matches ACTION_MAIN");
-
             if (intent.hasCategory("android.intent.category.NOTIFICATION_PREFERENCES")) {
-                logToWebViewConsole("Native SUCCESS: Detected NOTIFICATION_PREFERENCES category!");
-
                 new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                     if (getBridge() != null && getBridge().getWebView() != null) {
-                        logToWebViewConsole("Native: Executing JS showSection('notificationSection')");
                         getBridge().getWebView().evaluateJavascript(
-                                "if (typeof showSection === 'function') { " +
-                                        "    console.log('JS: showSection found, executing...'); " +
-                                        "    showSection('notificationSection'); " +
-                                        "} else { " +
-                                        "    console.error('JS ERROR: showSection is not defined globally'); " +
-                                        "}",
+                                "if (typeof showSection === 'function') { showSection('notificationSection'); }",
                                 null
                         );
                     }
                 }, 1000);
-            } else {
-                logToWebViewConsole("Native: Intent does not contain NOTIFICATION_PREFERENCES category.");
             }
-        } else {
-            logToWebViewConsole("Native: Intent context or action was invalid/absent.");
         }
     }
 

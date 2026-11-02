@@ -27,38 +27,8 @@ const agentTools = [
     },
     run: async ({ title, content }) => ({ ok: true, id: await NotefullTools.createNoteTool(title, content) }),
     
-  },
-  {
-    name: 'search_notes',
-    label: 'Searching your notes',
-    description: "Search the user's existing notes by keyword. Msy Return up to 3 matching notes with title, content and id. Use when the user asks to find, open or read a note.",
-    parameters: {
-      type: 'object',
-      properties: { query: { type: 'string', description: 'One keyword, e.g. "study"' } },
-      required: ['query']
-    },
-    run: async ({ query }) => await NotefullTools.searchNotesTool(query)
-    // no reply: the model has to read the results and decide the next step
-  },
-  {
-    name: 'create_list',
-    label: 'Creating list',
-    description: "Create a checklist. Take the items from the user's notes or request.",
-    parameters: {
-      type: 'object',
-      properties: {
-        title: { type: 'string' },
-        items: { type: 'array', items: { type: 'string' }, description: 'One short item per entry' }
-      },
-      required: ['title', 'items']
-    },
-    run: async ({ title, items }) => {
-      const list = Array.isArray(items) ? items : String(items).split(/\n|,/).map(s => s.trim()).filter(Boolean);
-      return { ok: true, id: await NotefullTools.createListTool(title, list) };
-    },
-   
   }
-];
+  ];
 
 // --- Helper Fallbacks to Prevent Fatal Halts ---
 function safeToast(msg) {
@@ -581,6 +551,7 @@ async function startDownload() {
   }
 
   isDownloading = true;
+  await installAIModuleStage();
   if (pill) pill.classList.remove('hidden');
   if (pillText) pillText.textContent = 'Downloading AI: 0%';
 
@@ -694,6 +665,90 @@ const preference = localStorage.getItem("AI-prefrence");
   }
 }
 
+
+async function installAIModuleStage() {
+  showToastWarn('Please do not close Notefull while AI is installing!')
+    const pill = document.getElementById('aiDownloadPill');
+    const pillText = document.getElementById('aiDownloadPillText');
+    const AIPlugin = window.Capacitor?.Plugins?.AIPlugin;
+
+    if (!pill || !pillText || !AIPlugin) {
+        throw new Error('AI download interface or plugin unavailable');
+    }
+
+    pill.classList.remove('hidden');
+    pillText.textContent = 'Preparing AI components...';
+
+    let listener;
+    let timeout;
+
+    try {
+        return await new Promise(async (resolve, reject) => {
+            let settled = false;
+
+            const finish = (error, value) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timeout);
+
+                if (error) reject(error);
+                else resolve(value);
+            };
+
+            listener = await AIPlugin.addListener(
+                'moduleDownloadProgress',
+                (data) => {
+                    if (data?.status === 'downloading') {
+                        const current = Number(data.downloaded) || 0;
+                        const total = Number(data.total) || 0;
+                        const percent = total > 0
+                            ? Math.min(100, Math.round(current / total * 100))
+                            : 0;
+
+                        pillText.textContent =
+                            `Downloading components: ${percent}%`;
+                    }
+
+                    if (data?.status === 'installing') {
+                        pillText.textContent = 'Installing AI components...';
+                    }
+
+                    if (data?.status === 'installed') {
+                        pillText.textContent = 'Stage 1 Complete ✓';
+                        finish(null, true);
+                    }
+
+                    if (data?.status === 'failed') {
+                        finish(new Error(
+                            `Module installation failed (${data.errorCode})`
+                        ));
+                    }
+                }
+            );
+
+            timeout = setTimeout(() => {
+                finish(new Error('AI module installation timed out'));
+            }, 180000);
+
+            try {
+                const result = await AIPlugin.installAIModule();
+
+                if (result?.status === 'already_installed') {
+                    pillText.textContent = 'Stage 1 Complete ✓';
+                    finish(null, true);
+                }
+            } catch (error) {
+                finish(error);
+            }
+        });
+    } finally {
+        if (listener) {
+            await listener.remove().catch(() => {});
+        }
+    }
+}
+
+
 // ============================================================
 // BENCHMARK MODAL & PERSISTENCE
 // ============================================================
@@ -769,11 +824,14 @@ async function initAi(backend) {
   const modal = document.getElementById('model-progress-modal');
 
   const filesReady = await manageModels();
-  if (!filesReady) return null;
-  if (!backend)
-showToast('Started loading Model! Please wait this might take a few moments');
+  if (!filesReady) { 
+    showToastError('AI not ready! Aborting... Please Download AI first'); 
+    return null;
+  } else { 
+
+showToast('Notefull AI initlizing.... It may take a few moments');
   if (modal) modal.classList.remove('hidden');
-  if (statusText) statusText.textContent = 'Loading on-device model…';
+  if (statusText) statusText.textContent = 'Warming up AI...';
 
   try {
     const AIPlugin = window.Capacitor?.Plugins?.AIPlugin;
@@ -788,18 +846,28 @@ showToast('Started loading Model! Please wait this might take a few moments');
       return;
     }
 
-    // Read stored benchmark backend
-const saved = (await localforage.getItem('notefull_ai_backend')) || {};
+
+const saved = await localforage.getItem('notefull_ai_backend');
 let choosenBackend = null;
-if (!backend) {
-   choosenBackend = saved.backend || 'gpu';
-} else if (backend === 'cpu') {
-  choosenBackend = 'cpu'
-} else if (backend === 'gpu') {
-  choosenBackend = 'gpu';
+if (!saved || !saved.backend) {
+  const userAsk = await showConfirmToast({
+    title: 'Benchmark Interrupted',
+    message: 'We have detected that the benchmark sequence was interrupted. AI may be slower on the default CPU backend.',
+    btn1txt: 'Proceed with CPU',
+    btn2txt: 'Switch to GPU'
+  });
+
+  choosenBackend = userAsk ? 'cpu' : 'gpu';
+
+} else if (backend === 'cpu' || backend === 'gpu') {
+  choosenBackend = backend;
+
+} else if (!backend) {
+  choosenBackend = saved.backend;
+
 } else {
   showToastError('Failed to load AI: Invalid backend');
-  return;
+  return null;
 }
 
     await AIPlugin.initAI({
@@ -819,6 +887,7 @@ if (!backend) {
     console.error('[AI] Init Error:', err);
     return null;
   }
+}
 }
 
 async function checkPermission() {

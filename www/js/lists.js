@@ -361,6 +361,11 @@ function cancelList() {
   renderItems();
   document.getElementById("listPasswordModalr").classList.add("hidden");
   document.getElementById("bottomBar").classList.remove("hidden");
+   const homeTab = document.querySelector('.nav-item[onclick*="combinedContainer"]');
+  if (homeTab) {
+    setActive(homeTab);
+    showSection('combinedContainer');
+  };
   }
 async function saveList() {
   const titleElem = document.getElementById("listTitle");
@@ -415,6 +420,11 @@ if (listsMap[id]) {
   const modal = document.getElementById("listPasswordModalr");
   if (modal) modal.classList.add("hidden");
 document.getElementById('bottomBar').classList.remove("hidden");
+ const homeTab = document.querySelector('.nav-item[onclick*="combinedContainer"]');
+  if (homeTab) {
+    setActive(homeTab);
+    showSection('combinedContainer');
+  };
 }
 function verifyListPassword() {
   const password = document.getElementById("listPasswordInput").value;

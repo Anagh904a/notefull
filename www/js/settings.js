@@ -53,6 +53,11 @@ await new Promise(r => setTimeout(r, 1000));
     setTimeout(() => {
       modal.classList.remove("active");
       document.getElementById("bottomBar").classList.remove("hidden");
+       const homeTab = document.querySelector('.nav-item[onclick*="combinedContainer"]');
+  if (homeTab) {
+    setActive(homeTab);
+    showSection('combinedContainer');
+  };
       updateProgress = 0;
     }, 2000);
   }
@@ -113,7 +118,7 @@ async function startAiScan() {
   // ── Keywords from localStorage only — no fallback ─────────────
   const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
   if (!keywords.length) {
-    showToast('Welcome to Notefull v26.9 BETA Please Rate us on Playstore');
+    showConfirmToast({title: 'Welcome', message: 'Welcome to Notefull v26.9 Please Rate us on Playstore.', btn1txt: 'Explore and start writting!', btn2txt: 'Continue'});
     startUpdate();
     document.getElementById('updateModal').classList.add('hidden');
     document.getElementById('updateWarn').classList.add('hidden');
@@ -638,13 +643,13 @@ function selectInstallerTier(tier) {
     if (tier === "disbale-ai") {
       installBtn.innerHTML = '<i class="ti ti-check"></i> Apply & Keep AI Disabled';
     } else {
-      installBtn.innerHTML = '<i class="ti ti-download"></i> Start Installation';
+      installBtn.innerHTML = '<i class="ti ti-download"></i> Yah! Wonderful selection! Continue?';
     }
   }
 }
 
 // 5. Confirm and Trigger Download
-async function confirmAndDownloadFromFiles() {
+async function confirmAndDownloadFromFiles(chosenInstallTier) {
   if (chosenInstallTier === "disbale-ai") {
     localStorage.setItem("AI-prefrence", "disbale-ai");
     localStorage.setItem("DisbalkeAIAuto", "true");
@@ -660,7 +665,7 @@ async function confirmAndDownloadFromFiles() {
     try {
       const info = await window.Capacitor?.Plugins?.AIPlugin?.getDeviceInfo();
       if ((info?.ramGB || 0) < 6.7) {
-        safeToastError(`Your device has ${info.ramGB}GB RAM. 8GB+ is required for the Advanced model to prevent memory crashes.`);
+        showToastWarn(`Your device has ${info.ramGB}GB RAM. 8GB+ is required for the Advanced model to prevent memory crashes.`);
         selectInstallerTier('lite');
         return;
       }
@@ -752,15 +757,14 @@ function setFilter(filterType) {
 if (filterType !== 'trash') {
 renderItems();
   renderItems(filterType);
-  const trash = document.getElementById('trashContainer');
+  const trash = document.getElementById('trashDisplay');
 trash.classList.add('hidden');
 } else {
 console.log('renderinjg trahs');
 const container = document.getElementById('itemsContainer');
 container.innerHTML = '';
-const trash = document.getElementById('trashContainer');
+const trash = document.getElementById('trashDisplay');
 trash.classList.remove('hidden');
-trash.innerHTML = '';
 displayDeletedNotes();
 displayDeletedLists();
 } 
