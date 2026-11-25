@@ -755,7 +755,7 @@ async function resetNotefull() {
 
     showToast('Notefull has been reset successfully! Restarting app...');
     await delay(400);
-showToast('You will need to setuo app again now!')
+showToast('You will need to setup app again now!')
     location.reload();
     
     return true;

@@ -697,7 +697,62 @@ noteText = "Content Too Large To Display";
   });
 }
 
-//TOOLS CALLING FUNCTION 
-function createNote(title, content) {
+function findNotesByKeyword(keyword) {
+  const q = String(keyword || '').toLowerCase().trim();
+  return notes
+    .filter(n => !n.password && (
+      String(n.title || '').toLowerCase().includes(q) ||
+      String(n.content || '').toLowerCase().includes(q)
+    ))
+    .slice(0, 5)
+    .map(n => ({
+      id: n.id,
+      title: n.title || 'Untitled Note',
+      content: String(n.content || '').slice(0, 300)
+    }));
+}
 
+async function editNoteStorage(noteIdOrTitle, newTitle, newContent) {
+  const query = String(noteIdOrTitle || '').trim();
+  const existing =
+    notesMap[query] ||
+    notes.find(n => String(n.title || '').toLowerCase() === query.toLowerCase()) ||
+    notes.find(n => String(n.title || '').toLowerCase().includes(query.toLowerCase()));
+
+  if (!existing) return { ok: false, error: `No note found matching "${query}"` };
+  if (existing.password) return { ok: false, error: 'Cannot edit a locked note' };
+
+  const cleanTitle = (typeof newTitle === 'string' && newTitle.trim() !== '')
+    ? newTitle.trim()
+    : existing.title;
+  const cleanContent = (typeof newContent === 'string' && newContent.trim() !== '')
+    ? newContent.trim()
+    : existing.content;
+
+  const titleChanged = cleanTitle !== existing.title;
+  const contentChanged = cleanContent !== existing.content;
+
+  if (!titleChanged && !contentChanged) {
+    return { ok: true, id: existing.id, title: existing.title, unchanged: true };
+  }
+
+  const updated = await saveNotesStorage(existing.id, {
+    title: titleChanged ? cleanTitle : existing.title,
+    content: contentChanged ? cleanContent : existing.content
+  });
+
+  if (currentNoteId === existing.id) {
+    if (titleChanged) document.getElementById('noteTitle').value = updated.title;
+    if (contentChanged) document.getElementById('noteContent').innerHTML = updated.content;
+  }
+
+  return {
+    ok: true,
+    id: updated.id,
+    title: updated.title,
+    updatedFields: [
+      ...(titleChanged ? ['title'] : []),
+      ...(contentChanged ? ['content'] : [])
+    ]
+  };
 }

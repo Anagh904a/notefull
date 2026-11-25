@@ -70,7 +70,7 @@ function completeUpdate() {
   updateProgress = 100;
   updateProgressUI();
   document.getElementById('heading').textContent = "Update Completed"
-  document.getElementById('stepInfo').textContent = "Step 5 of 5";
+  document.getElementById('stepInfo').textContent = "Step 2 of 2";
   setTimeout(() => {
     showToast("Analysis Engine updated succesfully!");
     const sound = document.getElementById("sucessSound");
@@ -118,7 +118,7 @@ async function startAiScan() {
   // ── Keywords from localStorage only — no fallback ─────────────
   const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
   if (!keywords.length) {
-    showConfirmToast({title: 'Welcome', message: 'Welcome to Notefull v26.9 Please Rate us on Playstore.', btn1txt: 'Explore and start writting!', btn2txt: 'Continue'});
+    showConfirmToast({title: 'Welcome', message: 'Welcome to Notefull v26.10 Please Rate us on Playstore.', btn1txt: 'Explore and start writting!', btn2txt: 'Continue'});
     startUpdate();
     document.getElementById('updateModal').classList.add('hidden');
     document.getElementById('updateWarn').classList.add('hidden');

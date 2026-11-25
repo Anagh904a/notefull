@@ -10,8 +10,8 @@ android {
         applicationId "app.notefull.com"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 41
-        versionName "26.9"
+        versionCode 42
+        versionName "26.10beta1"
         ndk {
             abiFilters 'arm64-v8a'
         }

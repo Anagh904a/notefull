@@ -1,13 +1,29 @@
 const NotefullTools = {
-    async createNoteTool(title, content) {
+  async createNoteTool(title, content) {
+    const created = await saveNotesStorage(null, { title, content });
+    return created?.id || null;
+  },
 
-saveNotesStorage(null, {title: title, content: content});
-displayNotes();
-},
+  async getNoteByKeywordTool(keyword) {
+    const matches = findNotesByKeyword(keyword);
+    return { count: matches.length, matches };
+  },
 
-    async createListTool(title, items) {
+  async editNoteTool(noteIdOrTitle, newTitle, newContent) {
+    return await editNoteStorage(noteIdOrTitle, newTitle, newContent);
+  },
 
-saveListsStorage(null, {title: title, items: items});
-displayLists();
-}
+  async createListTool(title, items = []) {
+    const created = await saveListsStorage(null, { title, items });
+    return created?.id || null;
+  },
+
+  async getListByKeywordTool(keyword) {
+    const matches = findListsByKeyword(keyword);
+    return { count: matches.length, matches };
+  },
+
+  async addItemToListTool(listKeyword, itemText) {
+    return await addItemToListStorage(listKeyword, itemText);
+  }
 };

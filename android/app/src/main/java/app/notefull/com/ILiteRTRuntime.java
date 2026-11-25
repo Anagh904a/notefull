@@ -2,7 +2,7 @@ package app.notefull.com;
 
 public interface ILiteRTRuntime {
     void initAI(String modelPath, String backend, int ctx, Callback<Boolean> callback);
-    void askAI(String prompt, boolean stream, boolean thinking, int maxTokens, int thinkBudget, StreamCallback callback);
+    void askAI(String prompt, String systemInstructions, boolean stream, boolean thinking, int maxTokens, int thinkBudget, StreamCallback callback);
     void stopAI();
     void releaseAI();
     boolean isInitialized();

@@ -14,7 +14,7 @@ import com.google.ai.edge.litertlm.EngineConfig;
 import com.google.ai.edge.litertlm.Message;
 import com.google.ai.edge.litertlm.MessageCallback;
 import com.google.ai.edge.litertlm.ThinkingConfig;
-
+import com.google.ai.edge.litertlm.Contents;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,19 +31,23 @@ public class LiteRTRuntimeImpl implements ILiteRTRuntime {
     private final ExecutorService aiExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r);
         t.setName("ai-inference");
-        t.setPriority(Thread.MIN_PRIORITY);
+        t.setPriority(Thread.NORM_PRIORITY);
         return t;
     });
     // Native teardown (cancel/close) runs here, never on the callback or main thread
     private final ExecutorService cleanupExecutor = Executors.newSingleThreadExecutor();
     private volatile boolean aiInitialized = false;
+    private int estimatedNativeTokens = 0;
     // Persistent multi-turn conversation and message history
     private volatile Conversation persistentConversation = null;
     private final java.util.List<Message> sessionHistory = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     // KV Cache Sliding Window Limits
-    private static final int MAX_TOKEN_THRESHOLD = 2350;
-    private static final int TARGET_TRIM_TOKENS = 1000;
+// Replace the two static final threshold constants with:
+    private volatile int maxCtx = 2048;
+    private volatile int maxTokenThreshold = 1500;
+    private volatile int targetTrimTokens = 1000;
+    private String activeSystemInstruction = null;
     private final AtomicBoolean isGenerating = new AtomicBoolean(false);
     private volatile Conversation activeConversation = null;
     private volatile Runnable activeFinish = null;
@@ -63,16 +67,20 @@ public class LiteRTRuntimeImpl implements ILiteRTRuntime {
 
     private ConversationConfig makeConfig(boolean thinking, int maxOut, int budget, java.util.List<Message> initialMessages) {
         ThinkingConfig tc = (thinking && budget > 0) ? new ThinkingConfig(true, budget) : null;
+        java.util.List<Message> msgs = initialMessages != null ? initialMessages : java.util.Collections.emptyList();
+        Contents sysContents = (activeSystemInstruction != null && !activeSystemInstruction.trim().isEmpty())
+                ? Contents.Companion.of(activeSystemInstruction)
+                : null;
         return new ConversationConfig(
-                null,                                   // systemInstruction
-                initialMessages != null ? initialMessages : java.util.Collections.emptyList(), // <-- Trimmed history goes here!
+                sysContents,                                   // systemInstruction
+                msgs,                                   // initialMessages
                 java.util.Collections.emptyList(),      // tools
                 null,                                   // samplerConfig
                 true,                                   // automaticToolCalling
                 null,                                   // channels (null = model default)
                 thinkingContext(thinking),              // extraContext
-                null,                                   // loraConfig
-                false,                                  // prefillPrefaceOnInit
+                null,                                   // loraConfig (must stay null!)
+                !msgs.isEmpty(),                        // prefillPrefaceOnInit
                 maxOut > 0 ? Integer.valueOf(maxOut) : null,
                 tc);
     }
@@ -102,7 +110,9 @@ public class LiteRTRuntimeImpl implements ILiteRTRuntime {
 
 @Override
     public void initAI(String modelPath, String requestedBackend, int ctx, Callback<Boolean> callback) {
-
+    this.maxCtx = ctx > 0 ? ctx : 2048;
+    this.maxTokenThreshold = Math.max(1024, this.maxCtx - 550);
+    this.targetTrimTokens = (int) (this.maxCtx * 0.55);
 
 
         if (modelPath == null || modelPath.trim().isEmpty()) {
@@ -182,21 +192,56 @@ callback.onSuccess(true);
     // INFERENCE PIPELINE
     // ─────────────────────────────────────────────────────────────
     @Override
-    public void askAI(String prompt, boolean stream, boolean thinking, int maxTokens, int thinkBudget, StreamCallback callback) {
+    public void askAI(String prompt, String systemInstructions, boolean stream, boolean thinking, int maxTokens, int thinkBudget, StreamCallback callback) {
         if (prompt == null || prompt.trim().isEmpty()) { callback.onError("Prompt is empty"); return; }
         if (!aiInitialized || aiEngine == null) { callback.onError("AI is not initialized"); return; }
         if (!isGenerating.compareAndSet(false, true)) { callback.onError("AI is already processing a request"); return; }
 
         aiExecutor.execute(() -> {
+            final Message userMessage = Message.Companion.user(prompt);
+
+            // ───────── 1. NON-STREAMING (Isolated so it NEVER closes persistentConversation) ─────────
+            if (!stream) {
+                Conversation tempConv = null;
+                try {
+                    tempConv = aiEngine.createConversation(
+                            makeConfig(thinking, maxTokens, thinkBudget, java.util.Collections.emptyList())
+                    );
+                    Message response = tempConv.sendMessage(userMessage);
+                    callback.onComplete(cleanText(textOf(response)), thoughtOf(response).trim());
+                } catch (Throwable e) {
+                    callback.onError("AI inference error: " + e.getMessage());
+                } finally {
+                    closeQuietly(tempConv);
+                    isGenerating.set(false);
+                }
+                return;
+            }
+
+            // ───────── 2. STREAMING (Persistent Multi-Turn KV Cache) ─────────
             try {
-                // Check if history is bloated (> 2350 tokens) and slide window if needed
+                if (systemInstructions != null && !systemInstructions.trim().isEmpty()) {
+                    activeSystemInstruction = systemInstructions;
+                }
                 checkAndSlideWindow(thinking, maxTokens, thinkBudget);
 
-                // Create persistent conversation if it doesn't exist yet
                 if (persistentConversation == null) {
+                    android.util.Log.d("AI_KV_CACHE", "Creating NEW persistentConversation");
                     persistentConversation = aiEngine.createConversation(
                             makeConfig(thinking, maxTokens, thinkBudget, new java.util.ArrayList<>(sessionHistory))
                     );
+                    if (activeSystemInstruction != null) {
+                        estimatedNativeTokens += estimateTokens(activeSystemInstruction) + 16;
+                    }
+                }
+
+                if (persistentConversation == null) {
+                    android.util.Log.d("AI_KV_CACHE", "Creating NEW persistentConversation");
+                    persistentConversation = aiEngine.createConversation(
+                            makeConfig(thinking, maxTokens, thinkBudget, new java.util.ArrayList<>(sessionHistory))
+                    );
+                } else {
+                    android.util.Log.d("AI_KV_CACHE", "Reusing EXISTING persistentConversation (KV Cache active)");
                 }
             } catch (Throwable t) {
                 isGenerating.set(false);
@@ -206,56 +251,52 @@ callback.onSuccess(true);
 
             final Conversation conversation = persistentConversation;
             activeConversation = conversation;
-            final Message userMessage = Message.Companion.of(prompt);
             sessionHistory.add(userMessage);
 
-            // ───────── NON-STREAMING ─────────
-            if (!stream) {
-                try {
-                    Message response = conversation.sendMessage(userMessage);
-                    callback.onComplete(cleanText(textOf(response)), thoughtOf(response).trim());
-
-                } catch (Throwable e) {
-                   callback.onError("AI inference error: " + e.getMessage());
-                } finally {
-                    try { conversation.close(); } catch (Throwable ignored) {}
-                    activeConversation = null;
-                    isGenerating.set(false);
-                }
-                return;
-            }
-
-            // ───────── STREAMING ─────────
             final AtomicBoolean completed = new AtomicBoolean(false);
+            final AtomicBoolean timedOutByWatchdog = new AtomicBoolean(false);
             final StringBuilder raw = new StringBuilder();
             final StringBuilder thinkRaw = new StringBuilder();
             final CountDownLatch nativeDone = new CountDownLatch(1);
             final int[] count = {0};
-            final int[] emptyRun = {0};
             final Runnable[] watchdog = new Runnable[1];
 
             final Runnable finish = () -> {
                 mainHandler.removeCallbacks(watchdog[0]);
                 if (!completed.compareAndSet(false, true)) return;
-                android.util.Log.d("AI_STREAM", "FINISH after " + count[0] + " callbacks");
+                android.util.Log.d("AI_STREAM", "FINISH after " + count[0] + " callbacks (watchdog=" + timedOutByWatchdog.get() + ")");
+
+                // ONLY cancelProcess if the 2.5s watchdog timed out!
+                // Never call cancelProcess when onDone() fires normally, or LiteRT-LM rolls back the turn's KV cache!
+                if (timedOutByWatchdog.get() && nativeDone.getCount() > 0) {
+                    cleanupExecutor.execute(() -> {
+                        try {
+                            conversation.cancelProcess();
+                        } catch (Throwable ignored) {}
+                    });
+                }
 
                 String out = cleanText(raw.toString());
                 String thoughtOut = thinkRaw.toString().trim();
 
-                // Save assistant reply into our Java session history
                 if (!out.isEmpty()) {
-                    sessionHistory.add(Message.Companion.of(out));
+                    sessionHistory.add(Message.Companion.model(out));
                 }
+                estimatedNativeTokens += estimateTokens(prompt) + estimateTokens(thoughtOut) + estimateTokens(out) + 24;
 
                 callback.onComplete(out, thoughtOut);
 
-                // IMPORTANT: We do NOT close the conversation here anymore!
-                // Only reset the flags so the KV cache stays alive for the next turn.
+                activeConversation = null;
                 activeFinish = null;
                 isGenerating.set(false);
             };
 
-            watchdog[0] = () -> { if (!completed.get() && raw.length() > 0) finish.run(); };
+            watchdog[0] = () -> {
+                if (!completed.get() && raw.length() > 0) {
+                    timedOutByWatchdog.set(true);
+                    finish.run();
+                }
+            };
             activeFinish = finish;
 
             try {
@@ -267,10 +308,7 @@ callback.onSuccess(true);
                         String chunk = textOf(message);
                         String thought = thoughtOf(message);
                         count[0]++;
-                        android.util.Log.d("AI_STREAM", "#" + count[0] + " text=" + chunk.length()
-                                + " thought=" + thought.length() + " [" + chunk.replace("\n", "\\n") + "]");
 
-                        boolean end = EOS_PATTERN.matcher(chunk).find();
                         String clean = EOS_PATTERN.matcher(chunk).replaceAll("");
                         boolean any = false;
 
@@ -283,17 +321,14 @@ callback.onSuccess(true);
                         }
 
                         if (any) {
-                            emptyRun[0] = 0;
-                           callback.onToken(chunk, raw.toString(), thinkRaw.toString());
-                        } else if (raw.length() > 0 && ++emptyRun[0] >= 3) {
-                            end = true;
+                            callback.onToken(clean, raw.toString(), thinkRaw.toString());
                         }
-
-                        if (end && raw.length() > 0) finish.run();
+                        // Do NOT call finish.run() here! Let onDone() fire naturally so C++ commits the KV cache.
                     }
 
                     @Override
                     public void onDone() {
+                        android.util.Log.d("AI_STREAM", "Native onDone() fired — KV cache turn committed!");
                         nativeDone.countDown();
                         finish.run();
                     }
@@ -311,12 +346,13 @@ callback.onSuccess(true);
 
                         cleanupExecutor.execute(() -> {
                             teardown(conversation, nativeDone);
+                            if (persistentConversation == conversation) persistentConversation = null;
                             if (activeConversation == conversation) activeConversation = null;
                             activeFinish = null;
                             isGenerating.set(false);
                         });
                     }
-                }, thinkingContext(thinking));   // per-message extra context (the old emptyMap)
+                }, thinkingContext(thinking));
 
             } catch (Throwable e) {
                 completed.set(true);
@@ -324,13 +360,13 @@ callback.onSuccess(true);
                 callback.onError("AI execution failed: " + e.getMessage());
                 cleanupExecutor.execute(() -> {
                     teardown(conversation, null);
+                    if (persistentConversation == conversation) persistentConversation = null;
                     activeConversation = null;
                     isGenerating.set(false);
                 });
             }
         });
     }
-
     // ─────────────────────────────────────────────────────────────
     // HELPERS
     // ─────────────────────────────────────────────────────────────
@@ -398,7 +434,7 @@ callback.onSuccess(true);
 
     private int estimateTokens(String text) {
         if (text == null || text.isEmpty()) return 0;
-        return (int) Math.ceil(text.length() / 4.0);
+        return (int) Math.ceil(text.length() / 3.0);
     }
 
     private int getTotalHistoryTokens() {
@@ -410,32 +446,29 @@ callback.onSuccess(true);
     }
 
     private void checkAndSlideWindow(boolean thinking, int maxTokens, int thinkBudget) {
-        int currentTokens = getTotalHistoryTokens();
-        android.util.Log.d("AI_KV_CACHE", "Current conversation tokens: " + currentTokens);
+        android.util.Log.d("AI_KV_CACHE", "Estimated native tokens: " + estimatedNativeTokens);
 
-        // If we cross the 2350 limit, trim back to 1000 tokens
-        if (currentTokens > MAX_TOKEN_THRESHOLD) {
-            android.util.Log.w("AI_KV_CACHE", "Token limit exceeded (" + currentTokens + " > " + MAX_TOKEN_THRESHOLD + "). Resetting KV cache...");
+        if (estimatedNativeTokens > maxTokenThreshold) {
+            android.util.Log.w("AI_KV_CACHE", "Token limit exceeded (" + estimatedNativeTokens + " > " + maxTokenThreshold + "). Resetting KV cache...");
 
-            // 1. Remove oldest messages from the front until we are under TARGET_TRIM_TOKENS
-            while (sessionHistory.size() > 2 && getTotalHistoryTokens() > TARGET_TRIM_TOKENS) {
-                sessionHistory.remove(0); // drops oldest turn
+            while (sessionHistory.size() > 2 && getTotalHistoryTokens() > targetTrimTokens) {
+                sessionHistory.remove(0); // drop oldest user turn
+                if (sessionHistory.size() > 2) {
+                    sessionHistory.remove(0); // drop its paired model reply
+                }
             }
 
-            // 2. Tear down old conversation to dump the bloated KV cache
             if (persistentConversation != null) {
-                try {
-                    persistentConversation.close();
-                } catch (Throwable ignored) {}
+                try { persistentConversation.close(); } catch (Throwable ignored) {}
                 persistentConversation = null;
             }
 
-            // 3. Recreate conversation pre-seeded with our trimmed 1000-token history
             try {
                 persistentConversation = aiEngine.createConversation(
                         makeConfig(thinking, maxTokens, thinkBudget, new java.util.ArrayList<>(sessionHistory))
                 );
-                android.util.Log.d("AI_KV_CACHE", "KV cache refreshed cleanly at " + getTotalHistoryTokens() + " tokens.");
+                estimatedNativeTokens = getTotalHistoryTokens();
+                android.util.Log.d("AI_KV_CACHE", "KV cache refreshed cleanly at " + estimatedNativeTokens + " tokens.");
             } catch (Throwable t) {
                 android.util.Log.e("AI_KV_CACHE", "Failed to recreate conversation: " + t.getMessage());
             }
@@ -584,6 +617,7 @@ callback.onSuccess(true);
                 } catch (Throwable ignored) {}
                 persistentConversation = null;
             }
+            estimatedNativeTokens = 0;
             sessionHistory.clear();
             android.util.Log.d("AI_KV_CACHE", "Conversation and KV cache reset for new chat.");
         });

@@ -246,6 +246,8 @@ sharedListsMap[list.id] =  listData;
 }
 
 async function showSharedList() {
+    showToastWarn('Shared Lists are not available yet!');
+    return;
     showSection("sharedListSection");
 
     if (currentSlId !== null) {

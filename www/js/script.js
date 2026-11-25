@@ -64,13 +64,26 @@ localStorage.setItem("syncState", "26.9.0");
 setTimeout(() => {
     const keywords = JSON.parse(localStorage.getItem("sensitiveKeywords") || "[]");
   if (keywords.length) {
-  showToast('Updated Notefull to v26.9 ');
+  showToast('Updated Notefull to v26.10 ');
   }
 }, 1000);
 } 
 
 async function deleteAi() {
-  showToastError('Unable to delete AI: UNDER DEVELOPMENT');
-await installAIModuleStage();
-showToast('AI componets installed successfully. Proceeding to stage 2...');
+ const isConfirmed = await showConfirmToast({
+      title: 'Delete AI?',
+      message: 'Continuing will cause AI-related assets to be deleted permanently. It will be non-recoverable.',
+      btn1txt: "I know the consequences of the action. Proceed"
+    });
+
+    if (!isConfirmed) {
+      showToast('Delete Action for Notefull AI has been terminated!');
+    return;
+    } else {
+showToastWarn('Deleting Notefull AI ');
+await cleanModelsDir();
+await delay(2000);
+showToast('Deleted Notefull AI successfully! Please restart the app to take effect!');
+    }
+
 }

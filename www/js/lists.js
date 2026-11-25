@@ -499,3 +499,78 @@ function displayLists() {
     });
 } 
 
+async function saveListsStorage(listId = null, list = null) {
+  if (!list) return null;
+
+  const id = listId || list.id || crypto.randomUUID();
+  const existing = listsMap[id];
+
+  const rawItems = list.items !== undefined ? list.items : (existing ? existing.items : []);
+  const normalizedItems = (Array.isArray(rawItems) ? rawItems : [])
+    .map(it => typeof it === 'string'
+      ? { id: crypto.randomUUID(), name: it.trim(), checked: false }
+      : { id: it.id || crypto.randomUUID(), name: String(it.name || '').trim(), checked: !!it.checked }
+    )
+    .filter(it => it.name !== '');
+
+  const updatedList = {
+    id,
+    title: (list.title || existing?.title || 'Untitled List').trim(),
+    type: 'list',
+    items: normalizedItems,
+    password: list.password !== undefined ? list.password : (existing?.password || ''),
+    remainderTime: list.remainderTime !== undefined ? list.remainderTime : (existing?.remainderTime || null),
+    repeatType: list.repeatType || existing?.repeatType || 'once',
+    remainderEnabled: list.remainderEnabled !== undefined ? list.remainderEnabled : (existing?.remainderEnabled || false),
+    notificationId: list.notificationId !== undefined ? list.notificationId : (existing?.notificationId || null),
+    date: Date.now()
+  };
+
+  const idx = lists.findIndex(l => l.id === id);
+  if (idx !== -1) lists[idx] = updatedList;
+  else lists.push(updatedList);
+
+  listsMap[id] = updatedList;
+  await localforage.setItem('lists', lists);
+  rebuildLists();
+  renderItems();
+
+  if (currentListId === id) {
+    currentItems = updatedList.items.slice();
+    displayChecklist();
+  }
+
+  return updatedList;
+}
+
+function findListsByKeyword(keyword) {
+  const q = String(keyword || '').toLowerCase().trim();
+  return lists
+    .filter(l => !l.password && (
+      String(l.title || '').toLowerCase().includes(q) ||
+      (Array.isArray(l.items) && l.items.some(it => String(it.name || '').toLowerCase().includes(q)))
+    ))
+    .slice(0, 5)
+    .map(l => ({
+      id: l.id,
+      title: l.title || 'Untitled List',
+      items: (l.items || []).slice(0, 15).map(it => ({ name: it.name, checked: !!it.checked }))
+    }));
+}
+
+async function addItemToListStorage(listIdOrTitle, itemText) {
+  const q = String(listIdOrTitle || '').toLowerCase().trim();
+  const text = String(itemText || '').trim();
+  if (!text) return { ok: false, error: 'Item text is empty' };
+
+  const existing =
+    listsMap[listIdOrTitle] ||
+    lists.find(l => !l.password && String(l.title || '').toLowerCase() === q) ||
+    lists.find(l => !l.password && String(l.title || '').toLowerCase().includes(q));
+
+  if (!existing) return { ok: false, error: `No unlocked list found matching "${listIdOrTitle}"` };
+
+  const nextItems = [...(existing.items || []), { id: crypto.randomUUID(), name: text, checked: false }];
+  const updated = await saveListsStorage(existing.id, { items: nextItems });
+  return { ok: true, listId: updated.id, listTitle: updated.title, added: text };
+}

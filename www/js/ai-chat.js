@@ -3,7 +3,10 @@ const chatStore = localforage.createInstance({ name: 'notefull', storeName: 'ai_
 const chatUid = () => 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const chatEsc = s => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
+window.AI_SYSTEM_PROMPT =
+  "You are Notefull AI, a helpful, concise offline assistant powered by Gemma 4 inside the Notefull notes and lists app. " +
+  "Be clear, natural, and conversational. " +
+  "Use your available tools whenever a user asks for something a tool can perform or look up, and answer directly without repeating instructions.";
 let currentChat = null;
 let isStreaming = false;
 
@@ -132,8 +135,8 @@ function updateTool(id, label, status) {
                    : 'is-error';
   el.classList.add(stateClass);
 
-  const iconClass = status === 'running' ? 'ti-loader-2'
-                  : status === 'done'    ? 'ti- circle-check'
+  const iconClass = status === 'running' ? 'ti-loader'
+                  : status === 'done'    ? 'ti-circle-check'
                   : 'ti-alert-circle';
 
   el.innerHTML = `<i class="ti ${iconClass}"></i> <span>${chatEsc(label)}${status === 'running' ? '…' : ''}</span>`;
@@ -160,6 +163,22 @@ function setSendState(busy, think = false) {
   const t = document.getElementById('ai-thinking-text');
   if (t && busy) t.textContent = think ? 'Thinking…' : 'Processing';
   document.getElementById('ai-thinking-modal')?.classList.toggle('hidden', !busy);
+}
+
+let _renderTimer = null;
+let _pendingRender = null;
+
+function scheduleBubbleUpdate(id, text) {
+  _pendingRender = { id, text };
+  if (_renderTimer) return;
+  _renderTimer = setTimeout(() => {
+    _renderTimer = null;
+    if (_pendingRender) {
+      const { id: targetId, text: targetText } = _pendingRender;
+      _pendingRender = null;
+      updateBubble(targetId, targetText);
+    }
+  }, 65);
 }
 
 // ── send ──
@@ -206,7 +225,7 @@ const aiMsg = { id: chatUid(), role: 'assistant', content: '', ts: Date.now() };
 
     updateThinking(aiMsg.id, false); // Ensure pill is hidden once complete
     aiMsg.content = answer || 'No answer was generated. Try again, or turn off Thinking mode.';
-    updateBubble(aiMsg.id, aiMsg.content);
+    scheduleBubbleUpdate(aiMsg.id, aiMsg.content);
     bubbleEl(aiMsg.id)?.querySelector('.msg-text')?.classList.remove('typing');
     await persistChat(chat);
   } catch (e) {

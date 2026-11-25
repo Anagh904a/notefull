@@ -187,10 +187,11 @@ public class AIPlugin extends Plugin {
         final boolean thinking = Boolean.TRUE.equals(call.getBoolean("thinking", false));
         final int maxOut = call.getInt("maxTokens", 0);
         final int budget = call.getInt("thinkBudget", 0);
+        final String systemInstructions = call.getString("system", "");
 
         try {
             ILiteRTRuntime runtime = getOrLoadRuntime();
-            runtime.askAI(prompt, stream, thinking, maxOut, budget, new ILiteRTRuntime.StreamCallback() {
+            runtime.askAI(prompt, systemInstructions, stream, thinking, maxOut, budget, new ILiteRTRuntime.StreamCallback() {
                 @Override
                 public void onToken(String token, String fullText, String thought) {
                     mainHandler.post(() -> {
